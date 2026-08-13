@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
+import math
 
 # --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่งสไตล์ Modern Dashboard ---
 st.set_page_config(page_title="ระบบพยากรณ์ยอดใช้ Holt-Winters", page_icon="📊", layout="wide")
@@ -32,8 +33,15 @@ st.markdown("""
         border-left: 5px solid #2563eb;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
+    .metric-highlight {
+        background-color: #f0fdf4;
+        padding: 20px;
+        border-radius: 12px;
+        border-left: 5px solid #16a34a;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
     .metric-title { font-size: 13px; color: #64748b; font-weight: 600; }
-    .metric-value { font-size: 26px; color: #0f172a; font-weight: 700; margin-top: 5px; }
+    .metric-value { font-size: 28px; color: #0f172a; font-weight: 800; margin-top: 5px; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -117,40 +125,50 @@ for tab, p_key in tabs_map:
         
         st.subheader(f"คำนวณและพยากรณ์: {p_info['name']}")
         
-        # กล่องรับข้อมูลยอดใช้จริงเดือนล่าสุด
+        # กล่องรับข้อมูลยอดใช้จริง
         c_input, c_param = st.columns([1, 2])
         
         with c_input:
-            st.markdown("### 📥 ป้อนข้อมูลล่าสุด")
+            st.markdown("### 📥 ป้อนข้อมูลยอดใช้จริง")
             new_val = st.number_input(
-                label="กรอกปริมาณการใช้จริงเดือนนี้ (ม.ค. 69) [ลิตร]:",
+                label="กรอกปริมาณการใช้จริงงวดปัจจุบัน [ลิตร]:",
                 min_value=0.0,
-                value=float(p_info["history"][-1]),
+                value=None,
+                placeholder="พิมพ์ตัวเลขที่นี่...",
                 step=1.0,
                 key=f"input_{p_key}"
             )
             st.info(f"⚙️ ค่าพารามิเตอร์ที่ใช้:  \n**α (Alpha)** = {p_info['alpha']}  \n**β (Beta)** = {p_info['beta']}  \n**γ (Gamma)** = {p_info['gamma']}")
 
-        # เตรียมข้อมูล + เติมค่าใหม่ลงไป
-        y_data = p_info["history"] + [new_val]
-        labels = base_labels + ["ม.ค. 69"]
-        
+        # จัดการข้อมูล: ถ้ามีการกรอกตัวเลข ให้ต่อท้ายเป็นงวดปัจจุบัน
+        if new_val is not None:
+            y_data = p_info["history"] + [new_val]
+            labels = base_labels + ["งวดปัจจุบัน"]
+            actual_disp = f"{new_val:.2f}"
+            actual_title = "ยอดใช้จริง (งวดปัจจุบัน)"
+        else:
+            y_data = p_info["history"]
+            labels = base_labels
+            actual_disp = f"{y_data[-1]:.2f}"
+            actual_title = f"ยอดใช้จริงล่าสุด ({base_labels[-1]})"
+
         # ประมวลผล Holt-Winters
         Level, Trend, Season, Forecast, next_f = run_holt_winters(
             y_data, p_info["alpha"], p_info["beta"], p_info["gamma"]
         )
 
+        # ยอดสั่งซื้อจริงเป็นเลขกลมๆ
+        order_qty = math.ceil(next_f)
+
         with c_param:
-            st.markdown("### 📌 สรุปผลการพยากรณ์")
+            st.markdown("### 📌 สรุปยอดพยากรณ์และการสั่งซื้อ")
             m1, m2, m3 = st.columns(3)
             with m1:
-                st.markdown(f'<div class="metric-card"><div class="metric-title">ยอดใช้จริง (ม.ค. 69)</div><div class="metric-value">{new_val:.2f} <small style="font-size:14px">ลิตร</small></div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card"><div class="metric-title">{actual_title}</div><div class="metric-value">{actual_disp} <small style="font-size:14px">ลิตร</small></div></div>', unsafe_allow_html=True)
             with m2:
-                st.markdown(f'<div class="metric-card" style="border-left-color:#16a34a;"><div class="metric-title">คาดการณ์งวดถัดไป (ก.พ. 69)</div><div class="metric-value" style="color:#16a34a;">{next_f:.2f} <small style="font-size:14px">ลิตร</small></div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card"><div class="metric-title">ค่าพยากรณ์ (งวดถัดไป)</div><div class="metric-value" style="color:#2563eb;">{next_f:.2f} <small style="font-size:14px">ลิตร</small></div></div>', unsafe_allow_html=True)
             with m3:
-                diff = next_f - new_val
-                color = "#dc2626" if diff < 0 else "#2563eb"
-                st.markdown(f'<div class="metric-card" style="border-left-color:{color};"><div class="metric-title">ส่วนต่างคาดการณ์</div><div class="metric-value" style="color:{color};">{diff:+.2f} <small style="font-size:14px">ลิตร</small></div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-highlight"><div class="metric-title" style="color:#15803d;">📦 ยอดแนะนำสั่งซื้อจริง (งวดถัดไป)</div><div class="metric-value" style="color:#16a34a;">{order_qty} <small style="font-size:16px; font-weight:bold;">ลิตร</small></div></div>', unsafe_allow_html=True)
 
         st.markdown("---")
 
@@ -176,18 +194,18 @@ for tab, p_key in tabs_map:
             marker=dict(size=5)
         ))
 
-        # จุดคาดการณ์อนาคต (ก.พ. 69)
+        # จุดคาดการณ์อนาคต
         fig.add_trace(go.Scatter(
-            x=["ก.พ. 69"], y=[next_f],
+            x=["งวดถัดไป"], y=[next_f],
             mode='markers+text',
-            name='พยากรณ์ ก.พ. 69',
-            marker=dict(color='#16a34a', size=12, symbol='star'),
-            text=[f"{next_f:.2f}"],
+            name=f'ยอดแนะนำสั่งซื้อ: {order_qty} ลิตร',
+            marker=dict(color='#16a34a', size=14, symbol='star'),
+            text=[f"{order_qty} ลิตร"],
             textposition="top center"
         ))
 
         fig.update_layout(
-            xaxis_title="เดือน/ปี",
+            xaxis_title="งวด/เดือน/ปี",
             yaxis_title="ปริมาณการใช้ (ลิตร)",
             hovermode="x unified",
             template="plotly_white",
@@ -199,7 +217,7 @@ for tab, p_key in tabs_map:
         # ตารางรายละเอียด
         st.subheader("📋 ตารางรายละเอียดคำนวณ (Level, Trend, Seasonality)")
         df = pd.DataFrame({
-            "เดือน/ปี": labels,
+            "งวด/เดือน/ปี": labels,
             "ยอดใช้จริง (Y)": [f"{v:.2f}" for v in y_data],
             "Level (L)": [f"{v:.2f}" if not np.isnan(v) else "-" for v in Level],
             "Trend (T)": [f"{v:.2f}" if not np.isnan(v) else "-" for v in Trend],
@@ -207,3 +225,4 @@ for tab, p_key in tabs_map:
             "HW-Forecast (F)": [f"{v:.2f}" if not np.isnan(v) else "-" for v in Forecast]
         })
         st.dataframe(df.style.highlight_max(axis=0, color='#e0f2fe'), use_container_width=True, height=300)
+        
