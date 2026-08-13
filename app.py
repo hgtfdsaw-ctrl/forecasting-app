@@ -157,8 +157,10 @@ for tab, p_key in tabs_map:
             y_data, p_info["alpha"], p_info["beta"], p_info["gamma"]
         )
 
-        # ยอดสั่งซื้อจริงเป็นเลขกลมๆ
-        order_qty = math.ceil(next_f)
+        # คำนวณความคลาดเคลื่อน 5% และยอดสั่งซื้อจริง
+        error_liters = next_f * 0.05               # ลิตรที่เผื่อคลาดเคลื่อน 5%
+        forecast_with_buffer = next_f + error_liters # ค่าพยากรณ์ + เผื่อ 5%
+        order_qty = math.ceil(forecast_with_buffer)   # ปัดเศษขึ้นเป็นเลขกลมๆ
 
         with c_param:
             st.markdown("### 📌 สรุปยอดพยากรณ์และการสั่งซื้อ")
@@ -166,9 +168,9 @@ for tab, p_key in tabs_map:
             with m1:
                 st.markdown(f'<div class="metric-card"><div class="metric-title">{actual_title}</div><div class="metric-value">{actual_disp} <small style="font-size:14px">ลิตร</small></div></div>', unsafe_allow_html=True)
             with m2:
-                st.markdown(f'<div class="metric-card"><div class="metric-title">ค่าพยากรณ์ (งวดถัดไป)</div><div class="metric-value" style="color:#2563eb;">{next_f:.2f} <small style="font-size:14px">ลิตร</small></div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card"><div class="metric-title">ค่าพยากรณ์ฐาน (งวดถัดไป)</div><div class="metric-value" style="color:#2563eb;">{next_f:.2f} <small style="font-size:14px">ลิตร</small></div><div style="font-size:12px; color:#d97706; font-weight:600; margin-top:4px;">⚠️ เผื่อคลาดเคลื่อน 5%: +{error_liters:.2f} ลิตร</div></div>', unsafe_allow_html=True)
             with m3:
-                st.markdown(f'<div class="metric-highlight"><div class="metric-title" style="color:#15803d;">📦 ยอดแนะนำสั่งซื้อจริง (งวดถัดไป)</div><div class="metric-value" style="color:#16a34a;">{order_qty} <small style="font-size:16px; font-weight:bold;">ลิตร</small></div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-highlight"><div class="metric-title" style="color:#15803d;">📦 ยอดแนะนำสั่งซื้อ (เผื่อคลาดเคลื่อน 5%)</div><div class="metric-value" style="color:#16a34a;">{order_qty} <small style="font-size:16px; font-weight:bold;">ลิตร</small></div><div style="font-size:12px; color:#16a34a; margin-top:4px;">({forecast_with_buffer:.2f} ลิตร $\\rightarrow$ ปัดขึ้นเลขกลมๆ)</div></div>', unsafe_allow_html=True)
 
         st.markdown("---")
 
@@ -196,9 +198,9 @@ for tab, p_key in tabs_map:
 
         # จุดคาดการณ์อนาคต
         fig.add_trace(go.Scatter(
-            x=["งวดถัดไป"], y=[next_f],
+            x=["งวดถัดไป"], y=[forecast_with_buffer],
             mode='markers+text',
-            name=f'ยอดแนะนำสั่งซื้อ: {order_qty} ลิตร',
+            name=f'ยอดแนะนำสั่งซื้อจริง: {order_qty} ลิตร (เผื่อ 5%)',
             marker=dict(color='#16a34a', size=14, symbol='star'),
             text=[f"{order_qty} ลิตร"],
             textposition="top center"
@@ -225,4 +227,3 @@ for tab, p_key in tabs_map:
             "HW-Forecast (F)": [f"{v:.2f}" if not np.isnan(v) else "-" for v in Forecast]
         })
         st.dataframe(df.style.highlight_max(axis=0, color='#e0f2fe'), use_container_width=True, height=300)
-        
