@@ -158,7 +158,7 @@ for tab, p_key in tabs_map:
         )
 
         # คำนวณความคลาดเคลื่อน 5% และยอดสั่งซื้อจริง
-        error_liters = next_f * 0.05               # ลิตรที่เผื่อคลาดเคลื่อน 5%
+        error_liters = next_f * 0.05                 # ลิตรที่เผื่อคลาดเคลื่อน 5%
         forecast_with_buffer = next_f + error_liters # ค่าพยากรณ์ + เผื่อ 5%
         order_qty = math.ceil(forecast_with_buffer)   # ปัดเศษขึ้นเป็นเลขกลมๆ
 
@@ -170,7 +170,7 @@ for tab, p_key in tabs_map:
             with m2:
                 st.markdown(f'<div class="metric-card"><div class="metric-title">ค่าพยากรณ์ฐาน (งวดถัดไป)</div><div class="metric-value" style="color:#2563eb;">{next_f:.2f} <small style="font-size:14px">ลิตร</small></div><div style="font-size:12px; color:#d97706; font-weight:600; margin-top:4px;">⚠️ เผื่อคลาดเคลื่อน 5%: +{error_liters:.2f} ลิตร</div></div>', unsafe_allow_html=True)
             with m3:
-                st.markdown(f'<div class="metric-highlight"><div class="metric-title" style="color:#15803d;">📦 ยอดแนะนำสั่งซื้อ (เผื่อคลาดเคลื่อน 5%)</div><div class="metric-value" style="color:#16a34a;">{order_qty} <small style="font-size:16px; font-weight:bold;">ลิตร</small></div><div style="font-size:12px; color:#16a34a; margin-top:4px;">({forecast_with_buffer:.2f} ลิตร $\\rightarrow$ ปัดขึ้นเลขกลมๆ)</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-highlight"><div class="metric-title" style="color:#15803d;">📦 ยอดแนะนำสั่งซื้อ (เผื่อคลาดเคลื่อน 5%)</div><div class="metric-value" style="color:#16a34a;">{order_qty} <small style="font-size:16px; font-weight:bold;">ลิตร</small></div><div style="font-size:12px; color:#16a34a; margin-top:4px;">({forecast_with_buffer:.2f} ลิตร → ปัดขึ้นเป็นเลขกลมๆ)</div></div>', unsafe_allow_html=True)
 
         st.markdown("---")
 
