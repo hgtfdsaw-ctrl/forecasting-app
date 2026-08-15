@@ -170,7 +170,7 @@ base_labels_35 = [f"{m} 66" for m in months_base] + \
 
 default_products = {
     "carwash": {
-        "name": "🚗 น้ำยาล้างรถ (22)",
+        "name": "🚗 น้ำยาล้างรถ",
         "alpha": 0.5, "beta": 0.01, "gamma": 0.99,
         "default_last": 40.00,
         "history": [20.00, 25.00, 40.00, 50.00, 45.00, 40.00, 20.00, 15.00, 5.00, 10.00, 10.00, 25.00,
@@ -179,7 +179,7 @@ default_products = {
         "labels": base_labels_35.copy()
     },
     "interior": {
-        "name": "✨ น้ำยาเคลือบภายใน (22)",
+        "name": "✨ น้ำยาเคลือบภายใน",
         "alpha": 0.5, "beta": 0.01, "gamma": 0.99,
         "default_last": 24.18,
         "history": [14.88, 13.44, 18.60, 19.80, 18.60, 16.20, 3.72, 1.86, 0.90, 2.76, 12.60, 16.74,
@@ -188,7 +188,7 @@ default_products = {
         "labels": base_labels_35.copy()
     },
     "glass": {
-        "name": "🪟 น้ำยาเช็ดกระจก (22)",
+        "name": "🪟 น้ำยาเช็ดกระจก",
         "alpha": 0.5, "beta": 0.01, "gamma": 0.99,
         "default_last": 16.12,
         "history": [9.92, 8.96, 12.40, 13.20, 12.40, 10.80, 2.48, 1.24, 0.60, 1.84, 8.40, 11.16,
@@ -197,7 +197,7 @@ default_products = {
         "labels": base_labels_35.copy()
     },
     "wheel": {
-        "name": "🛞 น้ำยาลงล้อ (22)",
+        "name": "🛞 น้ำยาลงล้อ",
         "alpha": 0.9, "beta": 0.99, "gamma": 0.99,
         "default_last": 8.06,
         "history": [4.96, 4.48, 6.20, 6.60, 6.20, 5.40, 1.24, 0.62, 0.30, 0.92, 4.20, 5.58,
