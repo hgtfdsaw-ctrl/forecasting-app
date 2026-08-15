@@ -271,7 +271,6 @@ def cb_save_data(p_key, usage_val, label_val):
 # --- 7. Sidebar จัดการรีเซ็ตแยกหมวดหมู่ ---
 with st.sidebar:
     st.header("⚙️ ระบบควบคุมแอป")
-    st.info("🔒 ระบบตั้งค่าการพยากรณ์ถูกล็อคไว้ ไม่สามารถแก้ไขโค้ดหรือพารามิเตอร์ได้")
     
     # --- หมวดที่ 1: ปริมาณใช้งาน ---
     st.markdown('<div class="reset-category-header">📊 ปริมาณใช้งาน</div>', unsafe_allow_html=True)
