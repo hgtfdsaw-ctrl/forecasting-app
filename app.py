@@ -12,15 +12,20 @@ st.markdown("""
     <style>
     .main { background-color: #f8fafc; }
     
-    /* จัดข้อความในปุ่มกดของ Sidebar ให้ชิดซ้ายทั้งหมด */
-    div[data-testid="stSidebar"] button {
+    /* บังคับไอคอนและข้อความในปุ่มกดของ Sidebar ทั้งหมดให้ชิดซ้าย 100% */
+    section[data-testid="stSidebar"] button {
+        display: flex !important;
         justify-content: flex-start !important;
+        align-items: center !important;
         text-align: left !important;
         padding-left: 16px !important;
     }
-    div[data-testid="stSidebar"] button p {
+    section[data-testid="stSidebar"] button div, 
+    section[data-testid="stSidebar"] button div p, 
+    section[data-testid="stSidebar"] button p {
+        justify-content: flex-start !important;
         text-align: left !important;
-        width: 100%;
+        width: 100% !important;
     }
 
     .stTabs [data-baseweb="tab-list"] { gap: 10px; }
@@ -202,58 +207,58 @@ default_products = {
 if "product_store" not in st.session_state:
     st.session_state.product_store = copy.deepcopy(default_products)
 
-# --- 5. เมนูควบคุมการรีเซ็ตข้อมูล (Sidebar แบบกดเปิด-ปิดได้) ---
+# --- 5. เมนูควบคุมการรีเซ็ตข้อมูล (Sidebar ชิดซ้าย ไม่มี Expander) ---
 with st.sidebar:
-    with st.expander("⚙️ เมนูรีเซ็ตข้อมูล", expanded=True):
-        st.caption("เลือกประเภทการรีเซ็ตที่ต้องการ:")
+    st.header("⚙️ เมนูรีเซ็ตข้อมูล")
+    st.markdown("เลือกประเภทการรีเซ็ตที่ต้องการ:")
 
-        if st.button("🔴 รีเซ็ตข้อมูลทั้งหมด", use_container_width=True):
-            st.session_state.product_store = copy.deepcopy(default_products)
-            for key in list(st.session_state.keys()):
-                if key.startswith("usage_") or key.startswith("stock_"):
-                    del st.session_state[key]
-            st.success("✅ รีเซ็ตข้อมูลทั้งหมดกลับค่าเริ่มต้นเรียบร้อยแล้ว!")
-            st.rerun()
+    if st.button("🔴 รีเซ็ตข้อมูลทั้งหมด", use_container_width=True):
+        st.session_state.product_store = copy.deepcopy(default_products)
+        for key in list(st.session_state.keys()):
+            if key.startswith("usage_") or key.startswith("stock_"):
+                del st.session_state[key]
+        st.success("✅ รีเซ็ตข้อมูลทั้งหมดกลับค่าเริ่มต้นเรียบร้อยแล้ว!")
+        st.rerun()
 
-        if st.button("📊 รีเซ็ตปริมาณการใช้งานทั้งหมด", use_container_width=True):
-            for p_key in st.session_state.product_store:
-                st.session_state.product_store[p_key]["history"] = copy.deepcopy(default_products[p_key]["history"])
-                st.session_state.product_store[p_key]["labels"] = copy.deepcopy(default_products[p_key]["labels"])
+    if st.button("📊 รีเซ็ตปริมาณการใช้งานทั้งหมด", use_container_width=True):
+        for p_key in st.session_state.product_store:
+            st.session_state.product_store[p_key]["history"] = copy.deepcopy(default_products[p_key]["history"])
+            st.session_state.product_store[p_key]["labels"] = copy.deepcopy(default_products[p_key]["labels"])
+        for key in list(st.session_state.keys()):
+            if key.startswith("usage_"):
+                del st.session_state[key]
+        st.success("✅ รีเซ็ตประวัติยอดใช้งานทั้งหมดเรียบร้อยแล้ว!")
+        st.rerun()
+
+    if st.button("↩️ รีเซ็ตการใช้งานของเดือนก่อน", use_container_width=True):
+        undo_success = False
+        for p_key in st.session_state.product_store:
+            if len(st.session_state.product_store[p_key]["history"]) > 35:
+                st.session_state.product_store[p_key]["history"].pop()
+                st.session_state.product_store[p_key]["labels"].pop()
+                undo_success = True
+        if undo_success:
             for key in list(st.session_state.keys()):
                 if key.startswith("usage_"):
                     del st.session_state[key]
-            st.success("✅ รีเซ็ตประวัติยอดใช้งานทั้งหมดเรียบร้อยแล้ว!")
+            st.success("✅ ย้อนกลับการบันทึกของเดือนก่อนเรียบร้อยแล้ว!")
             st.rerun()
+        else:
+            st.warning("⚠️ ไม่พบข้อมูลเดือนที่เพิ่มเข้ามา (อยู่ที่ประวัติเริ่มต้นแล้ว)")
 
-        if st.button("↩️ รีเซ็ตการใช้งานของเดือนก่อน", use_container_width=True):
-            undo_success = False
-            for p_key in st.session_state.product_store:
-                if len(st.session_state.product_store[p_key]["history"]) > 35:
-                    st.session_state.product_store[p_key]["history"].pop()
-                    st.session_state.product_store[p_key]["labels"].pop()
-                    undo_success = True
-            if undo_success:
-                for key in list(st.session_state.keys()):
-                    if key.startswith("usage_"):
-                        del st.session_state[key]
-                st.success("✅ ย้อนกลับการบันทึกของเดือนก่อนเรียบร้อยแล้ว!")
-                st.rerun()
-            else:
-                st.warning("⚠️ ไม่พบข้อมูลเดือนที่เพิ่มเข้ามา (อยู่ที่ประวัติเริ่มต้นแล้ว)")
+    if st.button("📦 รีเซ็ตยอดคงเหลือทั้งหมด", use_container_width=True):
+        for key in list(st.session_state.keys()):
+            if key.startswith("stock_"):
+                del st.session_state[key]
+        st.success("✅ ล้างยอดคงเหลือของทุกสินค้าเรียบร้อยแล้ว!")
+        st.rerun()
 
-        if st.button("📦 รีเซ็ตยอดคงเหลือทั้งหมด", use_container_width=True):
-            for key in list(st.session_state.keys()):
-                if key.startswith("stock_"):
-                    del st.session_state[key]
-            st.success("✅ ล้างยอดคงเหลือของทุกสินค้าเรียบร้อยแล้ว!")
-            st.rerun()
-
-        if st.button("⏪ รีเซ็ตยอดคงเหลือของเดือนก่อน", use_container_width=True):
-            for key in list(st.session_state.keys()):
-                if key.startswith("stock_"):
-                    del st.session_state[key]
-            st.success("✅ ล้างช่องยอดคงเหลือของงวดนี้เรียบร้อยแล้ว!")
-            st.rerun()
+    if st.button("⏪ รีเซ็ตยอดคงเหลือของเดือนก่อน", use_container_width=True):
+        for key in list(st.session_state.keys()):
+            if key.startswith("stock_"):
+                del st.session_state[key]
+        st.success("✅ ล้างช่องยอดคงเหลือของงวดนี้เรียบร้อยแล้ว!")
+        st.rerun()
 
 # --- 6. ฟังก์ชันคำนวณ Holt-Winters Multiplicative ---
 def run_holt_winters(y, alpha, beta, gamma, L=12):
@@ -528,3 +533,4 @@ for tab, p_key in zip(tabs, keys_list):
                         </div>
                     </div>
                 ''', unsafe_allow_html=True)
+        
