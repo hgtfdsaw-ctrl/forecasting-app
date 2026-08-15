@@ -47,7 +47,7 @@ st.markdown("""
         margin-bottom: 0;
     }
     
-    /* บังคับไอคอนและข้อความในปุ่มกดของ Sidebar ทั้งหมดให้ชิดซ้าย 100% */
+    /* บังคับไอคอนและข้อความในปุ่มกดของ Sidebar ทั้งหมดให้ชิดซ้าย */
     section[data-testid="stSidebar"] button {
         display: flex !important;
         justify-content: flex-start !important;
@@ -254,7 +254,15 @@ default_products = {
 if "product_store" not in st.session_state:
     st.session_state.product_store = copy.deepcopy(default_products)
 
-# --- 5. เมนูควบคุมการรีเซ็ตข้อมูล (Sidebar ชิดซ้าย) ---
+# --- 5. Callback Function สำหรับกดบันทึกโดยไม่ติด Error ---
+def cb_save_data(p_key, usage_val, label_val):
+    st.session_state.product_store[p_key]["history"].append(usage_val)
+    st.session_state.product_store[p_key]["labels"].append(label_val)
+    st.session_state[f"usage_{p_key}"] = None
+    st.session_state[f"stock_{p_key}"] = None
+    st.session_state[f"success_msg_{p_key}"] = f"✅ บันทึกยอดใช้จริงของเดือน {label_val} เรียบร้อยแล้ว! ระบบร่นไปงวดถัดไปแล้วครับ"
+
+# --- 6. เมนูควบคุมการรีเซ็ตข้อมูล (Sidebar ชิดซ้าย) ---
 with st.sidebar:
     st.header("⚙️ เมนูรีเซ็ตข้อมูล")
     st.markdown("เลือกประเภทการรีเซ็ตที่ต้องการ:")
@@ -301,7 +309,7 @@ with st.sidebar:
         st.success("✅ ล้างช่องยอดคงเหลือของงวดนี้เรียบร้อยแล้ว!")
         st.rerun()
 
-# --- 6. ฟังก์ชันคำนวณ Holt-Winters Multiplicative ---
+# --- 7. ฟังก์ชันคำนวณ Holt-Winters Multiplicative ---
 def run_holt_winters(y, alpha, beta, gamma, L=12):
     n = len(y)
     Level = [np.nan] * n
@@ -327,7 +335,7 @@ def run_holt_winters(y, alpha, beta, gamma, L=12):
     next_forecast = (Level[-1] + Trend[-1]) * Season[n - 12]
     return Level, Trend, Season[:n], Forecast, next_forecast
 
-# --- 7. ฟังก์ชันคำนวณแยกประเภทถัง ---
+# --- 8. ฟังก์ชันคำนวณแยกประเภทถัง ---
 def get_tank_rows(product_key, order_qty):
     if order_qty <= 0:
         return []
@@ -374,7 +382,7 @@ def get_tank_rows(product_key, order_qty):
             rows.append(("ถัง 10 ลิตร", f"{t10} ถัง"))
         return rows
 
-# --- 8. สร้าง UI หน้าต่างหลัก ---
+# --- 9. สร้าง UI หน้าต่างหลัก ---
 tabs = st.tabs([p["name"] for p in st.session_state.product_store.values()])
 keys_list = list(st.session_state.product_store.keys())
 
@@ -388,6 +396,11 @@ for tab, p_key in zip(tabs, keys_list):
 
         st.markdown(f'<div class="product-header">📦 ผลิตภัณฑ์: {p_info["name"]}</div>', unsafe_allow_html=True)
         
+        # แสดงแจ้งเตือนความสำเร็จเมื่อบันทึกข้อมูลแล้ว (ถ้ามี)
+        if f"success_msg_{p_key}" in st.session_state:
+            st.success(st.session_state[f"success_msg_{p_key}"])
+            del st.session_state[f"success_msg_{p_key}"]
+
         c_input, c_results = st.columns([1.1, 1.9])
         
         with c_input:
@@ -456,17 +469,15 @@ for tab, p_key in zip(tabs, keys_list):
                     st.markdown(f'<div class="card-base"><div class="card-title">4. ค่าความคลาดเคลื่อน</div><div style="font-size: 17px; font-weight: 800; color: #16a34a; margin-top: 4px;">คลาดเคลื่อน (+): +{error_val:.2f} ลิตร</div><div style="font-size: 17px; font-weight: 800; color: #dc2626; margin-top: 2px;">คลาดเคลื่อน (-): -{error_val:.2f} ลิตร</div></div>', unsafe_allow_html=True)
 
                 st.markdown("---")
-                if st.button(f"🟢 บันทึกยอด {input_month_label} และร่นไปคำนวณเดือน {forecast_month_label} ➔", key=f"btn_save_{p_key}", type="primary", use_container_width=True):
-                    # บันทึกประวัติ
-                    st.session_state.product_store[p_key]["history"].append(last_usage)
-                    st.session_state.product_store[p_key]["labels"].append(input_month_label)
-                    
-                    # ล้างค่าในช่องกรอกตัวเลข
-                    st.session_state[f"usage_{p_key}"] = None
-                    st.session_state[f"stock_{p_key}"] = None
-
-                    st.success(f"✅ บันทึกยอดใช้จริงของเดือน {input_month_label} เรียบร้อยแล้ว! ระบบร่นไปงวดถัดไปแล้วครับ")
-                    st.rerun()
+                # ปุ่มใช้ Callback เพื่อล้างค่าและบันทึกโดยไม่เกิด StreamlitAPIException
+                st.button(
+                    f"🟢 บันทึกยอด {input_month_label} และร่นไปคำนวณเดือน {forecast_month_label} ➔", 
+                    key=f"btn_save_{p_key}", 
+                    type="primary", 
+                    use_container_width=True,
+                    on_click=cb_save_data,
+                    args=(p_key, last_usage, input_month_label)
+                )
 
         st.markdown("---")
 
