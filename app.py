@@ -280,8 +280,8 @@ for tab, p_key in tabs_map:
             y_data, p_info["alpha"], p_info["beta"], p_info["gamma"]
         )
 
-        # กำหนดค่าความคลาดเคลื่อน 4% ตามข้อกำหนด
-        error_pct = 4.0
+        # กำหนดค่าความคลาดเคลื่อน 1% ตามข้อกำหนดใหม่
+        error_pct = 1.0
         error_liters = next_f * (error_pct / 100.0)
         total_demand = next_f + error_liters
         net_needed = max(0.0, total_demand - stock_qty)
@@ -308,10 +308,11 @@ for tab, p_key in tabs_map:
                     </div>
                 ''', unsafe_allow_html=True)
             with r2:
+                # แสดงเฉพาะค่าความคลาดเคลื่อนตัวเลข +/- ลิตร (คำนวณจาก 1%)
                 st.markdown(f'''
                     <div class="card-base">
-                        <div class="card-title">2. ค่าความคลาดเคลื่อนที่กำหนด</div>
-                        <div class="card-value" style="color:#d97706;">{error_pct:.0f}% <small style="font-size:16px">(+{error_liters:.2f} ลิตร)</small></div>
+                        <div class="card-title">2. ค่าความคลาดเคลื่อน</div>
+                        <div class="card-value" style="color:#d97706;">±{error_liters:.2f} <small style="font-size:16px">ลิตร</small></div>
                     </div>
                 ''', unsafe_allow_html=True)
 
