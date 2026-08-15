@@ -133,41 +133,48 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("📊 ระบบพยากรณ์และบริหารการสั่งซื้อวัสดุ (Holt-Winters Model)")
-st.caption("คำนวณตามสูตร Holt-Winters Multiplicative Seasonal Smoothing (ฤดูกาล 12 เดือน)")
+st.caption("คำนวณตามสูตร Holt-Winters Multiplicative Seasonal Smoothing (พยากรณ์ประจำเดือน ม.ค. 69)")
 
-# --- 2. ข้อมูลย้อนหลัง 36 เดือน (ปี 2566 - 2568) ---
+# --- 2. ข้อมูลย้อนหลัง 35 เดือน (ม.ค. 66 - พ.ย. 68) เพื่อรับเดือนที่ 36 (ธ.ค. 68) จากผู้ใช้งาน ---
 months_base = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."]
-years_base = ["66", "67", "68"]
-base_labels = [f"{m} {y}" for y in years_base for m in months_base]
+
+# สร้าง Label 35 เดือนแรก (ม.ค. 66 - พ.ย. 68)
+base_labels_35 = [f"{m} 66" for m in months_base] + \
+                 [f"{m} 67" for m in months_base] + \
+                 [f"{m} 68" for m in months_base[:11]]
 
 products_data = {
     "carwash": {
         "name": "🚗 น้ำยาล้างรถ (22)",
         "alpha": 0.5, "beta": 0.01, "gamma": 0.99,
+        "default_last": 40.00,
         "history": [20.00, 25.00, 40.00, 50.00, 45.00, 40.00, 20.00, 15.00, 5.00, 10.00, 10.00, 25.00,
                     25.00, 30.00, 50.00, 65.00, 55.00, 50.00, 25.00, 15.00, 8.00, 12.00, 15.00, 30.00,
-                    35.00, 40.00, 60.00, 80.00, 70.00, 65.00, 30.00, 20.00, 10.00, 15.00, 15.00, 40.00]
+                    35.00, 40.00, 60.00, 80.00, 70.00, 65.00, 30.00, 20.00, 10.00, 15.00, 15.00]
     },
     "interior": {
         "name": "✨ น้ำยาเคลือบภายใน (22)",
         "alpha": 0.5, "beta": 0.01, "gamma": 0.99,
+        "default_last": 24.18,
         "history": [14.88, 13.44, 18.60, 19.80, 18.60, 16.20, 3.72, 1.86, 0.90, 2.76, 12.60, 16.74,
                     18.60, 16.80, 22.32, 23.40, 22.32, 19.80, 5.58, 2.76, 1.32, 3.72, 16.20, 20.46,
-                    22.32, 20.16, 26.04, 27.00, 26.04, 23.40, 7.44, 3.72, 1.80, 5.58, 19.80, 24.18]
+                    22.32, 20.16, 26.04, 27.00, 26.04, 23.40, 7.44, 3.72, 1.80, 5.58, 19.80]
     },
     "glass": {
         "name": "🪟 น้ำยาเช็ดกระจก (22)",
         "alpha": 0.5, "beta": 0.01, "gamma": 0.99,
+        "default_last": 16.12,
         "history": [9.92, 8.96, 12.40, 13.20, 12.40, 10.80, 2.48, 1.24, 0.60, 1.84, 8.40, 11.16,
                     12.40, 11.20, 14.88, 15.60, 14.88, 13.20, 3.72, 1.84, 0.88, 2.48, 10.80, 13.64,
-                    14.88, 13.44, 17.36, 18.00, 17.36, 15.60, 4.96, 2.48, 1.20, 3.72, 13.20, 16.12]
+                    14.88, 13.44, 17.36, 18.00, 17.36, 15.60, 4.96, 2.48, 1.20, 3.72, 13.20]
     },
     "wheel": {
         "name": "🛞 น้ำยาลงล้อ (22)",
         "alpha": 0.9, "beta": 0.99, "gamma": 0.99,
+        "default_last": 8.06,
         "history": [4.96, 4.48, 6.20, 6.60, 6.20, 5.40, 1.24, 0.62, 0.30, 0.92, 4.20, 5.58,
                     6.20, 5.60, 7.44, 7.80, 7.44, 6.60, 1.86, 0.92, 0.44, 1.24, 5.40, 6.82,
-                    7.44, 6.72, 8.68, 9.00, 8.68, 7.80, 2.48, 1.24, 0.60, 1.86, 6.60, 8.06]
+                    7.44, 6.72, 8.68, 9.00, 8.68, 7.80, 2.48, 1.24, 0.60, 1.86, 6.60]
     }
 }
 
@@ -269,13 +276,13 @@ for tab, p_key in tabs_map:
         c_input, c_results = st.columns([1, 2])
         
         with c_input:
-            st.markdown('<div class="large-label">1. ปริมาณการใช้ของเดือนล่าสุด (ลิตร):</div>', unsafe_allow_html=True)
+            st.markdown('<div class="large-label">1. ปริมาณการใช้ของเดือนล่าสุด (ธ.ค. 68) (ลิตร):</div>', unsafe_allow_html=True)
             last_usage = st.number_input(
                 label="ปริมาณการใช้เดือนล่าสุด",
                 label_visibility="collapsed",
                 min_value=0.0,
                 value=None,
-                placeholder="กรอกตัวเลข...",
+                placeholder=f"ตัวอย่าง: {p_info['default_last']}",
                 step=1.0,
                 key=f"usage_{p_key}"
             )
@@ -286,7 +293,7 @@ for tab, p_key in tabs_map:
                 label_visibility="collapsed",
                 min_value=0.0,
                 value=None,
-                placeholder="กรอกตัวเลข...",
+                placeholder="กรอกตัวเลขยอดคงเหลือ...",
                 step=1.0,
                 key=f"stock_{p_key}"
             )
@@ -296,9 +303,9 @@ for tab, p_key in tabs_map:
         # --- ตรวจสอบเงื่อนไข: ต้องกรอกครบทั้ง 2 ช่องก่อน จึงจะคำนวณและแสดงผล ---
         if last_usage is not None and stock_qty_input is not None:
             
-            # 1. ประมวลผลข้อมูล Holt-Winters
+            # 1. นำ 35 เดือนย้อนหลัง + เดือนที่ 36 (ธ.ค. 68) มาคำนวณหา ม.ค. 69
             y_data = p_info["history"] + [last_usage]
-            labels = base_labels + ["เดือนล่าสุด"]
+            labels = base_labels_35 + ["ธ.ค. 68"]
 
             Level, Trend, Season, Forecast, next_f = run_holt_winters(
                 y_data, p_info["alpha"], p_info["beta"], p_info["gamma"]
@@ -340,13 +347,13 @@ for tab, p_key in tabs_map:
 
             # แสดงผลช่องการแสดงผล (ฝั่งขวา)
             with c_results:
-                st.markdown('<div class="large-label">📌 สรุปผลการคำนวณและการสั่งซื้อ</div>', unsafe_allow_html=True)
+                st.markdown('<div class="large-label">📌 สรุปผลการคำนวณและการสั่งซื้อ (ประจำเดือน ม.ค. 69)</div>', unsafe_allow_html=True)
                 
                 r1, r2 = st.columns(2)
                 with r1:
                     st.markdown(f'''
                         <div class="card-base">
-                            <div class="card-title">1. ผลการพยากรณ์ (Forecast)</div>
+                            <div class="card-title">1. ผลการพยากรณ์ (Forecast ม.ค. 69)</div>
                             <div class="card-value" style="color:#2563eb;">{next_f:.2f} <small style="font-size:16px">ลิตร</small></div>
                         </div>
                     ''', unsafe_allow_html=True)
@@ -380,10 +387,11 @@ for tab, p_key in tabs_map:
                         </div>
                     ''', unsafe_allow_html=True)
 
-            st.markdown("---")
+        st.markdown("---")
 
+        if last_usage is not None and stock_qty_input is not None:
             # กราฟแสดงแนวโน้ม
-            st.subheader("📈 กราฟแสดงแนวโน้มการใช้งานย้อนหลังและการพยากรณ์")
+            st.subheader("📈 กราฟแสดงแนวโน้มการใช้งานย้อนหลังและการพยากรณ์ (ม.ค. 69)")
             fig = go.Figure()
             
             fig.add_trace(go.Scatter(
@@ -403,11 +411,11 @@ for tab, p_key in tabs_map:
             ))
 
             fig.add_trace(go.Scatter(
-                x=["งวดถัดไป"], y=[recommended_qty],
+                x=["ม.ค. 69"], y=[next_f],
                 mode='markers+text',
-                name=f'ยอดแนะนำสั่งซื้อ: {recommended_qty} ลิตร',
+                name=f'พยากรณ์ ม.ค. 69: {next_f:.2f} ลิตร',
                 marker=dict(color='#16a34a', size=14, symbol='star'),
-                text=[f"{recommended_qty} ลิตร"],
+                text=[f"{next_f:.2f} ลิตร"],
                 textposition="top center"
             ))
 
@@ -432,18 +440,17 @@ for tab, p_key in tabs_map:
                     "HW-Forecast (F)": [f"{v:.2f}" if not np.isnan(v) else "-" for v in Forecast]
                 })
                 st.dataframe(df, use_container_width=True, height=250)
-
         else:
-            # หากยังกรอกข้อมูลไม่ครบทั้ง 2 ช่อง จะขึ้นกล่องแจ้งเตือนนี้แทน
+            # หากยังกรอกข้อมูลไม่ครบทั้ง 2 ช่อง
             with c_results:
-                st.markdown('''
+                st.markdown(f'''
                     <div style="background-color: #fefce8; border: 2px dashed #eab308; border-radius: 14px; padding: 35px 20px; text-align: center; margin-top: 10px;">
                         <div style="font-size: 45px; margin-bottom: 10px;">📝</div>
                         <div style="font-size: 24px; font-weight: 800; color: #854d0e;">กรุณากรอกข้อมูลให้ครบทั้ง 2 ช่อง</div>
                         <div style="font-size: 19px; color: #a16207; margin-top: 10px; line-height: 1.6;">
-                            1. ปริมาณการใช้ของเดือนล่าสุด<br>
+                            1. ปริมาณการใช้ของเดือนล่าสุด (ธ.ค. 68) <em>[ตัวอย่าง: {p_info['default_last']}]</em><br>
                             2. ปริมาณยอดคงเหลือ<br><br>
-                            <strong style="color: #854d0e;">⚡ ระบบจะคำนวณและแสดงผลลัพธ์ทันทีเมื่อกรอกข้อมูลครบถ้วนครับ</strong>
+                            <strong style="color: #854d0e;">⚡ เมื่อกรอกครบแล้ว ระบบจะแสดงผลพยากรณ์ ม.ค. 69 เป็น ({p_info['default_last']} ➔ ผลตรงเป๊ะ) ทันทีครับ</strong>
                         </div>
                     </div>
                 ''', unsafe_allow_html=True)
