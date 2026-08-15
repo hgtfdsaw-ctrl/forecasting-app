@@ -75,11 +75,12 @@ st.markdown("""
         border: 2px solid #e2e8f0;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         margin-bottom: 10px;
+        min-height: 140px;
     }
     .card-title { font-size: 16px; color: #475569; font-weight: 700; }
     .card-value { font-size: 28px; color: #0f172a; font-weight: 800; margin-top: 4px; }
     
-    /* กล่องเน้นพิเศษ ปริมาณแนะนำสั่งซื้อ & จำนวนถัง (ขนาดใหญ่ชัดเจน) */
+    /* กล่องเน้นพิเศษ ปริมาณแนะนำสั่งซื้อ & จำนวนถัง */
     .card-recommend {
         background-color: #f0fdf4;
         padding: 20px;
@@ -87,20 +88,47 @@ st.markdown("""
         border: 3px solid #16a34a;
         box-shadow: 0 4px 10px rgba(22, 163, 74, 0.15);
         margin-bottom: 10px;
+        min-height: 160px;
     }
     .card-recommend-title { font-size: 18px; color: #15803d; font-weight: 800; }
     .card-recommend-value { font-size: 34px; color: #15803d; font-weight: 900; margin-top: 5px; }
 
     .card-tanks {
         background-color: #eff6ff;
-        padding: 20px;
+        padding: 18px;
         border-radius: 14px;
         border: 3px solid #2563eb;
         box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
         margin-bottom: 10px;
+        min-height: 160px;
     }
-    .card-tanks-title { font-size: 18px; color: #1d4ed8; font-weight: 800; }
-    .card-tanks-value { font-size: 26px; color: #1e40af; font-weight: 800; margin-top: 5px; line-height: 1.4; }
+    .card-tanks-title { font-size: 18px; color: #1d4ed8; font-weight: 800; margin-bottom: 6px; }
+
+    /* ตารางย่อยสำหรับแยกช่องจำนวนถัง */
+    .tank-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 5px;
+    }
+    .tank-table th {
+        border-bottom: 2px solid #93c5fd;
+        padding: 4px 8px;
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e40af;
+        text-align: left;
+    }
+    .tank-table td {
+        padding: 6px 8px;
+        font-size: 20px;
+        font-weight: 800;
+        color: #1e3a8a;
+    }
+    .tank-table td.qty-col {
+        text-align: right;
+        color: #2563eb;
+        font-size: 22px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -169,17 +197,16 @@ def run_holt_winters(y, alpha, beta, gamma, L=12):
     next_forecast = (Level[-1] + Trend[-1]) * Season[n - 12]
     return Level, Trend, Season[:n], Forecast, next_forecast
 
-# --- 4. ฟังก์ชันคำนวณการจัดสรรจำนวนถังตามเงื่อนไข ---
-def calculate_tanks(product_key, order_qty):
+# --- 4. ฟังก์ชันคำนวณแยกช่องย่อยประเภทขนาดถัง ---
+def get_tank_rows(product_key, order_qty):
     if order_qty <= 0:
-        return "ไม่ต้องสั่งซื้อ"
-    
-    # 5.1 น้ำยาล้างรถ: เฉพาะถัง 20 ลิตร และ 30 ลิตร
+        return []
+
     if product_key == "carwash":
         best_t30, best_t20 = 0, 0
         min_waste = float('inf')
         min_tanks = float('inf')
-        
+
         max_30 = math.ceil(order_qty / 30) + 1
         for t30 in range(max_30, -1, -1):
             rem = order_qty - 30 * t30
@@ -188,36 +215,34 @@ def calculate_tanks(product_key, order_qty):
             total_vol = 30 * t30 + 20 * t20
             waste = total_vol - order_qty
             tanks_count = t30 + t20
-            
+
             if waste < min_waste or (waste == min_waste and tanks_count < min_tanks):
                 min_waste = waste
                 min_tanks = tanks_count
                 best_t30 = t30
                 best_t20 = t20
-                
-        tanks_text = []
+
+        rows = []
         if best_t30 > 0:
-            tanks_text.append(f"ถัง 30L: <b>{best_t30}</b> ถัง")
+            rows.append(("ถัง 30 ลิตร", f"{best_t30} ถัง"))
         if best_t20 > 0:
-            tanks_text.append(f"ถัง 20L: <b>{best_t20}</b> ถัง")
-        return "<br>".join(tanks_text) if tanks_text else "0 ถัง"
-        
-    # 5.2 ผลิตภัณฑ์อื่นๆ: ถัง 10 ลิตร, 20 ลิตร, 30 ลิตร
+            rows.append(("ถัง 20 ลิตร", f"{best_t20} ถัง"))
+        return rows
     else:
         t30 = order_qty // 30
         rem = order_qty % 30
         t20 = rem // 20
         rem = rem % 20
         t10 = rem // 10
-        
-        tanks_text = []
+
+        rows = []
         if t30 > 0:
-            tanks_text.append(f"ถัง 30L: <b>{t30}</b> ถัง")
+            rows.append(("ถัง 30 ลิตร", f"{t30} ถัง"))
         if t20 > 0:
-            tanks_text.append(f"ถัง 20L: <b>{t20}</b> ถัง")
+            rows.append(("ถัง 20 ลิตร", f"{t20} ถัง"))
         if t10 > 0:
-            tanks_text.append(f"ถัง 10L: <b>{t10}</b> ถัง")
-        return "<br>".join(tanks_text) if tanks_text else "0 ถัง"
+            rows.append(("ถัง 10 ลิตร", f"{t10} ถัง"))
+        return rows
 
 # --- 5. สร้าง UI หน้าต่างหลัก 4 Tabs ---
 tab1, tab2, tab3, tab4 = st.tabs([
@@ -240,7 +265,7 @@ for tab, p_key in tabs_map:
         
         st.markdown(f'<div class="product-header">📦 ผลิตภัณฑ์: {p_info["name"]}</div>', unsafe_allow_html=True)
         
-        # ส่วนป้อนข้อมูลขนาดใหญ่สำหรับผู้สูงอายุ
+        # ส่วนป้อนข้อมูล
         c_input, c_results = st.columns([1, 2])
         
         with c_input:
@@ -256,18 +281,19 @@ for tab, p_key in tabs_map:
             )
             
             st.markdown('<div class="large-label">2. ปริมาณยอดคงเหลือ (ลิตร):</div>', unsafe_allow_html=True)
-            stock_qty = st.number_input(
+            stock_qty_input = st.number_input(
                 label="ปริมาณยอดคงเหลือ",
                 label_visibility="collapsed",
                 min_value=0.0,
-                value=0.0,
+                value=None,
+                placeholder="กรอกตัวเลข...",
                 step=1.0,
                 key=f"stock_{p_key}"
             )
             
             st.info(f"⚙️ ค่าพารามิเตอร์โมเดล:  \n**α (Alpha)** = {p_info['alpha']} | **β (Beta)** = {p_info['beta']} | **γ (Gamma)** = {p_info['gamma']}")
 
-        # ประมวลผลข้อมูล
+        # ประมวลผลข้อมูล Holt-Winters
         if last_usage is not None:
             y_data = p_info["history"] + [last_usage]
             labels = base_labels + ["เดือนล่าสุด"]
@@ -275,25 +301,44 @@ for tab, p_key in tabs_map:
             y_data = p_info["history"]
             labels = base_labels
 
-        # คำนวณ Holt-Winters
         Level, Trend, Season, Forecast, next_f = run_holt_winters(
             y_data, p_info["alpha"], p_info["beta"], p_info["gamma"]
         )
 
-        # กำหนดค่าความคลาดเคลื่อน 1% ตามข้อกำหนดใหม่
-        error_pct = 1.0
-        error_liters = next_f * (error_pct / 100.0)
-        total_demand = next_f + error_liters
-        net_needed = max(0.0, total_demand - stock_qty)
-        
-        # ปัดเป็นเลขลงท้ายด้วย 0 (เช่น 42 -> 50, 4.1 -> 10)
+        # 1. การคำนวณความคลาดเคลื่อน 1% (แยกค่า + และ - ไม่ใช้ ±)
+        error_val = next_f * 0.01
+
+        # 2. การคำนวณปริมาณแนะนำสั่งซื้อ: นำผลพยากรณ์ลบยอดคงเหลือก่อน แล้วค่อยปัดขึ้นลงท้ายด้วย 0
+        stock_qty = stock_qty_input if stock_qty_input is not None else 0.0
+        net_needed = next_f - stock_qty
+
         if net_needed > 0:
             recommended_qty = math.ceil(net_needed / 10.0) * 10
         else:
             recommended_qty = 0
 
-        # จัดสรรจำนวนถัง
-        tanks_breakdown = calculate_tanks(p_key, recommended_qty)
+        # 3. จัดสร้างตารางแยกช่องย่อยจำนวนถัง
+        tank_rows = get_tank_rows(p_key, recommended_qty)
+        if tank_rows:
+            table_html_rows = "".join([
+                f"<tr><td>{size}</td><td class='qty-col'>{qty}</td></tr>" 
+                for size, qty in tank_rows
+            ])
+            tanks_display_html = f"""
+                <table class="tank-table">
+                    <thead>
+                        <tr>
+                            <th>ขนาดถัง</th>
+                            <th style="text-align:right;">จำนวนสั่ง</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {table_html_rows}
+                    </tbody>
+                </table>
+            """
+        else:
+            tanks_display_html = "<div style='font-size:22px; font-weight:800; color:#1e40af; margin-top:10px;'>ไม่ต้องสั่งซื้อ</div>"
 
         # ส่วนการแสดงผล 4 ช่องหลัก
         with c_results:
@@ -308,11 +353,16 @@ for tab, p_key in tabs_map:
                     </div>
                 ''', unsafe_allow_html=True)
             with r2:
-                # แสดงเฉพาะค่าความคลาดเคลื่อนตัวเลข +/- ลิตร (คำนวณจาก 1%)
+                # แสดงค่าความคลาดเคลื่อนแยก + และ - ชัดเจน
                 st.markdown(f'''
                     <div class="card-base">
-                        <div class="card-title">2. ค่าความคลาดเคลื่อน</div>
-                        <div class="card-value" style="color:#d97706;">±{error_liters:.2f} <small style="font-size:16px">ลิตร</small></div>
+                        <div class="card-title">2. ค่าความคลาดเคลื่อน (1%)</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #16a34a; margin-top: 4px;">
+                            คลาดเคลื่อน (+): +{error_val:.2f} ลิตร
+                        </div>
+                        <div style="font-size: 18px; font-weight: 800; color: #dc2626; margin-top: 2px;">
+                            คลาดเคลื่อน (-): -{error_val:.2f} ลิตร
+                        </div>
                     </div>
                 ''', unsafe_allow_html=True)
 
@@ -322,14 +372,14 @@ for tab, p_key in tabs_map:
                     <div class="card-recommend">
                         <div class="card-recommend-title">3. ปริมาณการสั่งซื้อที่แนะนำ</div>
                         <div class="card-recommend-value">{recommended_qty} <small style="font-size:18px">ลิตร</small></div>
-                        <div style="font-size:13px; color:#16a34a; margin-top:4px; font-weight:600;">(หักคงเหลือ & ปัดขึ้นลงท้ายด้วย 0)</div>
+                        <div style="font-size:13px; color:#15803d; margin-top:4px; font-weight:600;">(ผลพยากรณ์ - คงเหลือ → ปัดขึ้นลงท้ายด้วย 0)</div>
                     </div>
                 ''', unsafe_allow_html=True)
             with r4:
                 st.markdown(f'''
                     <div class="card-tanks">
                         <div class="card-tanks-title">4. จำนวนถังที่ต้องสั่งซื้อ</div>
-                        <div class="card-tanks-value">{tanks_breakdown}</div>
+                        {tanks_display_html}
                     </div>
                 ''', unsafe_allow_html=True)
 
