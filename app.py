@@ -58,15 +58,6 @@ st.markdown("""
         display: none !important;
     }
     
-    /* ปรับแต่ง Dropdown เลือกเดือน */
-    div[data-baseweb="select"] > div {
-        font-size: 22px !important;
-        font-weight: bold !important;
-        height: 55px !important;
-        border-radius: 10px !important;
-        border: 2px solid #94a3b8 !important;
-    }
-
     /* ปรับ Label หัวข้อช่องกรอก */
     .large-label {
         font-size: 20px !important;
@@ -142,7 +133,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("📊 ระบบพยากรณ์และบริหารการสั่งซื้อวัสดุ (Holt-Winters Model)")
-st.caption("คำนวณตามสูตร Holt-Winters Multiplicative Seasonal Smoothing (ตรงตามตารางพยากรณ์ปี 2569)")
+st.caption("คำนวณตามสูตร Holt-Winters Multiplicative Seasonal Smoothing (ฤดูกาล 12 เดือน)")
 
 # --- 2. ข้อมูลย้อนหลัง 36 เดือน (ปี 2566 - 2568) ---
 months_base = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."]
@@ -180,21 +171,31 @@ products_data = {
     }
 }
 
-# --- 3. ข้อมูลผลพยากรณ์เป๊ะๆ 100% จากตารางปี 2569 ตามรูปภาพ ---
-forecast_table_2569 = {
-    "ม.ค. 69": {"carwash": 39.51, "interior": 28.39, "glass": 18.93, "wheel": 6.31},
-    "ก.พ. 69": {"carwash": 43.56, "interior": 24.70, "glass": 16.47, "wheel": 4.48},
-    "มี.ค. 69": {"carwash": 66.55, "interior": 31.76, "glass": 21.17, "wheel": 5.00},
-    "เม.ย. 69": {"carwash": 86.83, "interior": 33.17, "glass": 22.11, "wheel": 4.18},
-    "พ.ค. 69": {"carwash": 74.50, "interior": 31.89, "glass": 21.26, "wheel": 2.72},
-    "มิ.ย. 69": {"carwash": 67.71, "interior": 28.31, "glass": 18.87, "wheel": 1.28},
-    "ก.ค. 69": {"carwash": 32.20, "interior": 7.90, "glass": 5.27, "wheel": 0.05},
-    "ส.ค. 69": {"carwash": 21.82, "interior": 3.62, "glass": 2.41, "wheel": 0.09},
-    "ก.ย. 69": {"carwash": 10.31, "interior": 1.66, "glass": 1.10, "wheel": 0.10},
-    "ต.ค. 69": {"carwash": 15.57, "interior": 4.85, "glass": 3.23, "wheel": 0.50},
-    "พ.ย. 69": {"carwash": 16.74, "interior": 18.91, "glass": 12.61, "wheel": 3.06},
-    "ธ.ค. 69": {"carwash": 41.57, "interior": 25.22, "glass": 16.81, "wheel": 5.36},
-}
+# --- 3. ฟังก์ชันคำนวณ Holt-Winters Multiplicative ---
+def run_holt_winters(y, alpha, beta, gamma, L=12):
+    n = len(y)
+    Level = [np.nan] * n
+    Trend = [np.nan] * n
+    Season = [np.nan] * (n + L)
+    Forecast = [np.nan] * n
+
+    init_level = sum(y[:L]) / L
+    init_trend = ((sum(y[L:2*L]) / L) - init_level) / L
+
+    for i in range(L):
+        Season[i] = y[i] / init_level if init_level != 0 else 1.0
+
+    Level[L-1] = init_level
+    Trend[L-1] = init_trend
+
+    for t in range(L, n):
+        Forecast[t] = (Level[t-1] + Trend[t-1]) * Season[t-12]
+        Level[t] = alpha * (y[t] / Season[t-12]) + (1 - alpha) * (Level[t-1] + Trend[t-1])
+        Trend[t] = beta * (Level[t] - Level[t-1]) + (1 - beta) * Trend[t-1]
+        Season[t] = gamma * (y[t] / Level[t]) + (1 - gamma) * Season[t-12]
+
+    next_forecast = (Level[-1] + Trend[-1]) * Season[n - 12]
+    return Level, Trend, Season[:n], Forecast, next_forecast
 
 # --- 4. ฟังก์ชันคำนวณแยกช่องย่อยประเภทขนาดถัง ---
 def get_tank_rows(product_key, order_qty):
@@ -268,16 +269,7 @@ for tab, p_key in tabs_map:
         c_input, c_results = st.columns([1, 2])
         
         with c_input:
-            st.markdown('<div class="large-label">1. เลือกเดือนที่ต้องการดูผลพยากรณ์:</div>', unsafe_allow_html=True)
-            selected_month = st.selectbox(
-                label="เลือกเดือนพยากรณ์",
-                options=list(forecast_table_2569.keys()),
-                index=0,
-                label_visibility="collapsed",
-                key=f"month_{p_key}"
-            )
-
-            st.markdown('<div class="large-label">2. ปริมาณการใช้ของเดือนล่าสุด (ลิตร):</div>', unsafe_allow_html=True)
+            st.markdown('<div class="large-label">1. ปริมาณการใช้ของเดือนล่าสุด (ลิตร):</div>', unsafe_allow_html=True)
             last_usage = st.number_input(
                 label="ปริมาณการใช้เดือนล่าสุด",
                 label_visibility="collapsed",
@@ -288,7 +280,7 @@ for tab, p_key in tabs_map:
                 key=f"usage_{p_key}"
             )
             
-            st.markdown('<div class="large-label">3. ปริมาณยอดคงเหลือ (ลิตร):</div>', unsafe_allow_html=True)
+            st.markdown('<div class="large-label">2. ปริมาณยอดคงเหลือ (ลิตร):</div>', unsafe_allow_html=True)
             stock_qty_input = st.number_input(
                 label="ปริมาณยอดคงเหลือ",
                 label_visibility="collapsed",
@@ -301,14 +293,23 @@ for tab, p_key in tabs_map:
             
             st.info(f"⚙️ ค่าพารามิเตอร์โมเดล:  \n**α (Alpha)** = {p_info['alpha']} | **β (Beta)** = {p_info['beta']} | **γ (Gamma)** = {p_info['gamma']}")
 
-        # ดึงค่าพยากรณ์ตรงตามตารางภาพ 100%
-        next_f = forecast_table_2569[selected_month][p_key]
+        # ประมวลผลข้อมูล Holt-Winters แบบไดนามิก
+        if last_usage is not None:
+            y_data = p_info["history"] + [last_usage]
+            labels = base_labels + ["เดือนล่าสุด"]
+        else:
+            y_data = p_info["history"]
+            labels = base_labels
+
+        Level, Trend, Season, Forecast, next_f = run_holt_winters(
+            y_data, p_info["alpha"], p_info["beta"], p_info["gamma"]
+        )
 
         # 1. การคำนวณความคลาดเคลื่อน 1% (แยกค่า + และ - ชัดเจน)
         error_val = next_f * 0.01
 
-        # 2. การคำนวณปริมาณแนะนำสั่งซื้อ: (ผลพยากรณ์ - ยอดคงเหลือ)
-        # ตัวอย่าง: ผล 41 -> ปัดเป็น 50 ลิตร / ผล 39.51 -> ปัดเป็น 40 ลิตร
+        # 2. การคำนวณปริมาณแนะนำสั่งซื้อ:
+        # นำ (ผลพยากรณ์ - ยอดคงเหลือ) หากเหลือ 41 จะปัดขึ้นเป็น 50 ลิตรทันที
         stock_qty = stock_qty_input if stock_qty_input is not None else 0.0
         net_needed = next_f - stock_qty
 
@@ -342,7 +343,7 @@ for tab, p_key in tabs_map:
 
         # ส่วนการแสดงผล 4 ช่องหลัก
         with c_results:
-            st.markdown(f'<div class="large-label">📌 สรุปผลการคำนวณและการสั่งซื้อ (ประจำเดือน {selected_month})</div>', unsafe_allow_html=True)
+            st.markdown('<div class="large-label">📌 สรุปผลการคำนวณและการสั่งซื้อ</div>', unsafe_allow_html=True)
             
             r1, r2 = st.columns(2)
             with r1:
@@ -353,7 +354,6 @@ for tab, p_key in tabs_map:
                     </div>
                 ''', unsafe_allow_html=True)
             with r2:
-                # แสดงค่าความคลาดเคลื่อนแยก + และ - ชัดเจน
                 st.markdown(f'''
                     <div class="card-base">
                         <div class="card-title">2. ค่าความคลาดเคลื่อน (1%)</div>
@@ -385,34 +385,38 @@ for tab, p_key in tabs_map:
 
         st.markdown("---")
 
-        # กราฟแสดงแนวโน้ม 12 เดือนของปี 2569
-        st.subheader(f"📈 กราฟแสดงแนวโน้มผลพยากรณ์ปี 2569 ({p_info['name']})")
-        
-        months_2569 = list(forecast_table_2569.keys())
-        values_2569 = [forecast_table_2569[m][p_key] for m in months_2569]
-
+        # กราฟแสดงแนวโน้ม
+        st.subheader("📈 กราฟแสดงแนวโน้มการใช้งานย้อนหลังและการพยากรณ์")
         fig = go.Figure()
         
         fig.add_trace(go.Scatter(
-            x=months_2569, y=values_2569,
+            x=labels, y=y_data,
             mode='lines+markers',
-            name='ผลพยากรณ์ปี 2569',
-            line=dict(color='#2563eb', width=3),
-            marker=dict(size=8)
+            name='ยอดใช้จริง (Actual)',
+            line=dict(color='#0f172a', width=3),
+            marker=dict(size=6)
+        ))
+        
+        fig.add_trace(go.Scatter(
+            x=labels[12:], y=Forecast[12:],
+            mode='lines+markers',
+            name='HW-Forecast (พยากรณ์)',
+            line=dict(color='#2563eb', width=2, dash='dash'),
+            marker=dict(size=5)
         ))
 
         fig.add_trace(go.Scatter(
-            x=[selected_month], y=[next_f],
+            x=["งวดถัดไป"], y=[recommended_qty],
             mode='markers+text',
-            name=f'เดือนที่เลือก ({selected_month}): {next_f:.2f} ลิตร',
+            name=f'ยอดแนะนำสั่งซื้อ: {recommended_qty} ลิตร',
             marker=dict(color='#16a34a', size=14, symbol='star'),
-            text=[f"{next_f:.2f} ลิตร"],
+            text=[f"{recommended_qty} ลิตร"],
             textposition="top center"
         ))
 
         fig.update_layout(
-            xaxis_title="เดือน (ปี 2569)",
-            yaxis_title="ผลพยากรณ์ (ลิตร)",
+            xaxis_title="เดือน/ปี",
+            yaxis_title="ปริมาณการใช้ (ลิตร)",
             hovermode="x unified",
             template="plotly_white",
             height=380,
@@ -420,13 +424,14 @@ for tab, p_key in tabs_map:
         )
         st.plotly_chart(fig, use_container_width=True)
 
-        # ตารางเปรียบเทียบทั้ง 12 เดือนตามรูปภาพ
-        with st.expander("📋 ดูตารางผลพยากรณ์ทั้ง 12 เดือนของปี 2569 (ตรงตามเอกสารเป๊ะ)"):
-            df_full = pd.DataFrame({
-                "เดือน": months_2569,
-                "น้ำยาล้างรถ (ลิตร)": [f"{forecast_table_2569[m]['carwash']:.2f}" for m in months_2569],
-                "น้ำยาเคลือบภายใน (ลิตร)": [f"{forecast_table_2569[m]['interior']:.2f}" for m in months_2569],
-                "น้ำยาเช็ดกระจก (ลิตร)": [f"{forecast_table_2569[m]['glass']:.2f}" for m in months_2569],
-                "น้ำยาลงล้อ (ลิตร)": [f"{forecast_table_2569[m]['wheel']:.2f}" for m in months_2569],
+        # ตารางรายละเอียดคำนวณ
+        with st.expander("📋 ดูตารางรายละเอียดการคำนวณ (Level, Trend, Seasonality)"):
+            df = pd.DataFrame({
+                "งวด/เดือน/ปี": labels,
+                "ยอดใช้จริง (Y)": [f"{v:.2f}" for v in y_data],
+                "Level (L)": [f"{v:.2f}" if not np.isnan(v) else "-" for v in Level],
+                "Trend (T)": [f"{v:.2f}" if not np.isnan(v) else "-" for v in Trend],
+                "Season (S)": [f"{v:.2f}" if not np.isnan(v) else "-" for v in Season],
+                "HW-Forecast (F)": [f"{v:.2f}" if not np.isnan(v) else "-" for v in Forecast]
             })
-            st.dataframe(df_full, use_container_width=True, height=350)
+            st.dataframe(df, use_container_width=True, height=250)
