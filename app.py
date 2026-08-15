@@ -388,63 +388,25 @@ for tab, p_key in zip(tabs, keys_list):
                     f"<tr><td>{size}</td><td class='qty-col'>{qty}</td></tr>" 
                     for size, qty in tank_rows
                 ])
-                tanks_display_html = f"""
-                    <table class="tank-table">
-                        <thead>
-                            <tr>
-                                <th>ขนาดถัง</th>
-                                <th style="text-align:right;">จำนวนสั่ง</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {table_html_rows}
-                        </tbody>
-                    </table>
-                """
+                tanks_display_html = f"""<table class="tank-table"><thead><tr><th>ขนาดถัง</th><th style="text-align:right;">จำนวนสั่ง</th></tr></thead><tbody>{table_html_rows}</tbody></table>"""
             else:
                 tanks_display_html = "<div style='font-size:20px; font-weight:800; color:#1e40af; margin-top:10px;'>ไม่ต้องสั่งซื้อ</div>"
 
-            # แสดงผลการคำนวณ (ปรับลำดับ 1 & 2 ขึ้นก่อน)
+            # แสดงผลการคำนวณ
             with c_results:
                 st.markdown(f'<div class="large-label">📌 สรุปผลพยากรณ์ประจำเดือน: <span style="color:#2563eb;">{forecast_month_label}</span></div>', unsafe_allow_html=True)
                 
                 r1, r2 = st.columns(2)
                 with r1:
-                    st.markdown(f'''
-                        <div class="card-recommend">
-                            <div class="card-recommend-title">1. ปริมาณสั่งซื้อแนะนำ</div>
-                            <div class="card-recommend-value">{recommended_qty} <small style="font-size:18px">ลิตร</small></div>
-                            <div style="font-size:13px; color:#15803d; margin-top:4px; font-weight:600;">(พยากรณ์ {next_f:.2f} - คงเหลือ {stock_qty_input:.0f} ➔ ปัดขึ้นลงท้าย 0)</div>
-                        </div>
-                    ''', unsafe_allow_html=True)
+                    st.markdown(f'<div class="card-recommend"><div class="card-recommend-title">1. ปริมาณสั่งซื้อแนะนำ</div><div class="card-recommend-value">{recommended_qty} <small style="font-size:18px">ลิตร</small></div><div style="font-size:13px; color:#15803d; margin-top:4px; font-weight:600;">(พยากรณ์ {next_f:.2f} - คงเหลือ {stock_qty_input:.0f} ➔ ปัดขึ้นลงท้าย 0)</div></div>', unsafe_allow_html=True)
                 with r2:
-                    st.markdown(f'''
-                        <div class="card-tanks">
-                            <div class="card-tanks-title">2. จำนวนถังที่ต้องสั่งซื้อ</div>
-                            {tanks_display_html}
-                        </div>
-                    ''', unsafe_allow_html=True)
+                    st.markdown(f'<div class="card-tanks"><div class="card-tanks-title">2. จำนวนถังที่ต้องสั่งซื้อ</div>{tanks_display_html}</div>', unsafe_allow_html=True)
 
                 r3, r4 = st.columns(2)
                 with r3:
-                    st.markdown(f'''
-                        <div class="card-base">
-                            <div class="card-title">3. ผลการพยากรณ์ ({forecast_month_label})</div>
-                            <div class="card-value" style="color:#2563eb;">{next_f:.2f} <small style="font-size:16px">ลิตร</small></div>
-                        </div>
-                    ''', unsafe_allow_html=True)
+                    st.markdown(f'<div class="card-base"><div class="card-title">3. ผลการพยากรณ์ ({forecast_month_label})</div><div class="card-value" style="color:#2563eb;">{next_f:.2f} <small style="font-size:16px">ลิตร</small></div></div>', unsafe_allow_html=True)
                 with r4:
-                    st.markdown(f'''
-                        <div class="card-base">
-                            <div class="card-title">4. ค่าความคลาดเคลื่อน (1%)</div>
-                            <div style="font-size: 17px; font-weight: 800; color: #16a34a; margin-top: 4px;">
-                                คลาดเคลื่อน (+): +{error_val:.2f} ลิตร
-                            </div>
-                            <div style="font-size: 17px; font-weight: 800; color: #dc2626; margin-top: 2px;">
-                                คลาดเคลื่อน (-): -{error_val:.2f} ลิตร
-                            </div>
-                        </div>
-                    ''', unsafe_allow_html=True)
+                    st.markdown(f'<div class="card-base"><div class="card-title">4. ค่าความคลาดเคลื่อน</div><div style="font-size: 17px; font-weight: 800; color: #16a34a; margin-top: 4px;">คลาดเคลื่อน (+): +{error_val:.2f} ลิตร</div><div style="font-size: 17px; font-weight: 800; color: #dc2626; margin-top: 2px;">คลาดเคลื่อน (-): -{error_val:.2f} ลิตร</div></div>', unsafe_allow_html=True)
 
                 st.markdown("---")
                 if st.button(f"🟢 บันทึกยอด {input_month_label} และร่นไปคำนวณเดือน {forecast_month_label} ➔", key=f"btn_save_{p_key}", type="primary", use_container_width=True):
@@ -512,14 +474,4 @@ for tab, p_key in zip(tabs, keys_list):
                 st.dataframe(df, use_container_width=True, height=250)
         else:
             with c_results:
-                st.markdown(f'''
-                    <div style="background-color: #fefce8; border: 2px dashed #eab308; border-radius: 14px; padding: 35px 20px; text-align: center; margin-top: 10px;">
-                        <div style="font-size: 45px; margin-bottom: 10px;">📝</div>
-                        <div style="font-size: 24px; font-weight: 800; color: #854d0e;">กรุณากรอกข้อมูลให้ครบทั้ง 2 ช่อง</div>
-                        <div style="font-size: 19px; color: #a16207; margin-top: 10px; line-height: 1.6;">
-                            1. ปริมาณการใช้ของเดือนล่าสุด <strong>({input_month_label})</strong><br>
-                            2. ปริมาณยอดคงเหลือปัจจุบัน<br><br>
-                            <strong style="color: #854d0e;">⚡ เมื่อกรอกครบแล้ว ระบบจะคำนวณผลพยากรณ์สำหรับเดือน ({forecast_month_label}) ให้ทันที</strong>
-                        </div>
-                    </div>
-                ''', unsafe_allow_html=True)
+                st.markdown(f'<div style="background-color: #fefce8; border: 2px dashed #eab308; border-radius: 14px; padding: 35px 20px; text-align: center; margin-top: 10px;"><div style="font-size: 45px; margin-bottom: 10px;">📝</div><div style="font-size: 24px; font-weight: 800; color: #854d0e;">กรุณากรอกข้อมูลให้ครบทั้ง 2 ช่อง</div><div style="font-size: 19px; color: #a16207; margin-top: 10px; line-height: 1.6;">1. ปริมาณการใช้ของเดือนล่าสุด <strong>({input_month_label})</strong><br>2. ปริมาณยอดคงเหลือปัจจุบัน<br><br><strong style="color: #854d0e;">⚡ เมื่อกรอกครบแล้ว ระบบจะคำนวณผลพยากรณ์สำหรับเดือน ({forecast_month_label}) ให้ทันที</strong></div></div>', unsafe_allow_html=True)
