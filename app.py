@@ -91,7 +91,7 @@ st.markdown("""
         border: 2px solid #e2e8f0;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         margin-bottom: 10px;
-        min-height: 140px;
+        min-height: 160px;
     }
     .card-title { font-size: 16px; color: #475569; font-weight: 700; }
     .card-value { font-size: 28px; color: #0f172a; font-weight: 800; margin-top: 4px; }
@@ -172,7 +172,6 @@ default_products = {
     "carwash": {
         "name": "🚗 น้ำยาล้างรถ",
         "alpha": 0.5, "beta": 0.01, "gamma": 0.99,
-        "default_last": 40.00,
         "history": [20.00, 25.00, 40.00, 50.00, 45.00, 40.00, 20.00, 15.00, 5.00, 10.00, 10.00, 25.00,
                     25.00, 30.00, 50.00, 65.00, 55.00, 50.00, 25.00, 15.00, 8.00, 12.00, 15.00, 30.00,
                     35.00, 40.00, 60.00, 80.00, 70.00, 65.00, 30.00, 20.00, 10.00, 15.00, 15.00],
@@ -181,7 +180,6 @@ default_products = {
     "interior": {
         "name": "✨ น้ำยาเคลือบภายใน",
         "alpha": 0.5, "beta": 0.01, "gamma": 0.99,
-        "default_last": 24.18,
         "history": [14.88, 13.44, 18.60, 19.80, 18.60, 16.20, 3.72, 1.86, 0.90, 2.76, 12.60, 16.74,
                     18.60, 16.80, 22.32, 23.40, 22.32, 19.80, 5.58, 2.76, 1.32, 3.72, 16.20, 20.46,
                     22.32, 20.16, 26.04, 27.00, 26.04, 23.40, 7.44, 3.72, 1.80, 5.58, 19.80],
@@ -190,7 +188,6 @@ default_products = {
     "glass": {
         "name": "🪟 น้ำยาเช็ดกระจก",
         "alpha": 0.5, "beta": 0.01, "gamma": 0.99,
-        "default_last": 16.12,
         "history": [9.92, 8.96, 12.40, 13.20, 12.40, 10.80, 2.48, 1.24, 0.60, 1.84, 8.40, 11.16,
                     12.40, 11.20, 14.88, 15.60, 14.88, 13.20, 3.72, 1.84, 0.88, 2.48, 10.80, 13.64,
                     14.88, 13.44, 17.36, 18.00, 17.36, 15.60, 4.96, 2.48, 1.20, 3.72, 13.20],
@@ -199,7 +196,6 @@ default_products = {
     "wheel": {
         "name": "🛞 น้ำยาลงล้อ",
         "alpha": 0.9, "beta": 0.99, "gamma": 0.99,
-        "default_last": 8.06,
         "history": [4.96, 4.48, 6.20, 6.60, 6.20, 5.40, 1.24, 0.62, 0.30, 0.92, 4.20, 5.58,
                     6.20, 5.60, 7.44, 7.80, 7.44, 6.60, 1.86, 0.92, 0.44, 1.24, 5.40, 6.82,
                     7.44, 6.72, 8.68, 9.00, 8.68, 7.80, 2.48, 1.24, 0.60, 1.86, 6.60],
@@ -218,9 +214,9 @@ with st.sidebar:
 
     if st.button("🔴 รีเซ็ตข้อมูลทั้งหมด", use_container_width=True):
         st.session_state.product_store = copy.deepcopy(default_products)
-        for key in list(st.session_state.keys()):
-            if key.startswith("usage_") or key.startswith("stock_"):
-                del st.session_state[key]
+        for p_k in default_products:
+            st.session_state[f"usage_{p_k}"] = None
+            st.session_state[f"stock_{p_k}"] = None
         st.success("✅ รีเซ็ตข้อมูลทั้งหมดกลับค่าเริ่มต้นเรียบร้อยแล้ว!")
         st.rerun()
 
@@ -228,9 +224,7 @@ with st.sidebar:
         for p_key in st.session_state.product_store:
             st.session_state.product_store[p_key]["history"] = copy.deepcopy(default_products[p_key]["history"])
             st.session_state.product_store[p_key]["labels"] = copy.deepcopy(default_products[p_key]["labels"])
-        for key in list(st.session_state.keys()):
-            if key.startswith("usage_"):
-                del st.session_state[key]
+            st.session_state[f"usage_{p_key}"] = None
         st.success("✅ รีเซ็ตประวัติยอดใช้งานทั้งหมดเรียบร้อยแล้ว!")
         st.rerun()
 
@@ -240,27 +234,23 @@ with st.sidebar:
             if len(st.session_state.product_store[p_key]["history"]) > 35:
                 st.session_state.product_store[p_key]["history"].pop()
                 st.session_state.product_store[p_key]["labels"].pop()
+                st.session_state[f"usage_{p_key}"] = None
                 undo_success = True
         if undo_success:
-            for key in list(st.session_state.keys()):
-                if key.startswith("usage_"):
-                    del st.session_state[key]
             st.success("✅ ย้อนกลับการบันทึกของเดือนก่อนเรียบร้อยแล้ว!")
             st.rerun()
         else:
             st.warning("⚠️ ไม่พบข้อมูลเดือนที่เพิ่มเข้ามา (อยู่ที่ประวัติเริ่มต้นแล้ว)")
 
     if st.button("📦 รีเซ็ตยอดคงเหลือทั้งหมด", use_container_width=True):
-        for key in list(st.session_state.keys()):
-            if key.startswith("stock_"):
-                del st.session_state[key]
+        for p_key in st.session_state.product_store:
+            st.session_state[f"stock_{p_key}"] = None
         st.success("✅ ล้างยอดคงเหลือของทุกสินค้าเรียบร้อยแล้ว!")
         st.rerun()
 
     if st.button("⏪ รีเซ็ตยอดคงเหลือของเดือนก่อน", use_container_width=True):
-        for key in list(st.session_state.keys()):
-            if key.startswith("stock_"):
-                del st.session_state[key]
+        for p_key in st.session_state.product_store:
+            st.session_state[f"stock_{p_key}"] = None
         st.success("✅ ล้างช่องยอดคงเหลือของงวดนี้เรียบร้อยแล้ว!")
         st.rerun()
 
@@ -414,22 +404,39 @@ for tab, p_key in zip(tabs, keys_list):
             else:
                 tanks_display_html = "<div style='font-size:20px; font-weight:800; color:#1e40af; margin-top:10px;'>ไม่ต้องสั่งซื้อ</div>"
 
-            # แสดงผลการคำนวณ
+            # แสดงผลการคำนวณ (ปรับลำดับ 1 & 2 ขึ้นก่อน)
             with c_results:
                 st.markdown(f'<div class="large-label">📌 สรุปผลพยากรณ์ประจำเดือน: <span style="color:#2563eb;">{forecast_month_label}</span></div>', unsafe_allow_html=True)
                 
                 r1, r2 = st.columns(2)
                 with r1:
                     st.markdown(f'''
-                        <div class="card-base">
-                            <div class="card-title">1. ผลการพยากรณ์ ({forecast_month_label})</div>
-                            <div class="card-value" style="color:#2563eb;">{next_f:.2f} <small style="font-size:16px">ลิตร</small></div>
+                        <div class="card-recommend">
+                            <div class="card-recommend-title">1. ปริมาณสั่งซื้อแนะนำ</div>
+                            <div class="card-recommend-value">{recommended_qty} <small style="font-size:18px">ลิตร</small></div>
+                            <div style="font-size:13px; color:#15803d; margin-top:4px; font-weight:600;">(พยากรณ์ {next_f:.2f} - คงเหลือ {stock_qty_input:.0f} ➔ ปัดขึ้นลงท้าย 0)</div>
                         </div>
                     ''', unsafe_allow_html=True)
                 with r2:
                     st.markdown(f'''
+                        <div class="card-tanks">
+                            <div class="card-tanks-title">2. จำนวนถังที่ต้องสั่งซื้อ</div>
+                            {tanks_display_html}
+                        </div>
+                    ''', unsafe_allow_html=True)
+
+                r3, r4 = st.columns(2)
+                with r3:
+                    st.markdown(f'''
                         <div class="card-base">
-                            <div class="card-title">2. ค่าความคลาดเคลื่อน (1%)</div>
+                            <div class="card-title">3. ผลการพยากรณ์ ({forecast_month_label})</div>
+                            <div class="card-value" style="color:#2563eb;">{next_f:.2f} <small style="font-size:16px">ลิตร</small></div>
+                        </div>
+                    ''', unsafe_allow_html=True)
+                with r4:
+                    st.markdown(f'''
+                        <div class="card-base">
+                            <div class="card-title">4. ค่าความคลาดเคลื่อน (1%)</div>
                             <div style="font-size: 17px; font-weight: 800; color: #16a34a; margin-top: 4px;">
                                 คลาดเคลื่อน (+): +{error_val:.2f} ลิตร
                             </div>
@@ -439,32 +446,15 @@ for tab, p_key in zip(tabs, keys_list):
                         </div>
                     ''', unsafe_allow_html=True)
 
-                r3, r4 = st.columns(2)
-                with r3:
-                    st.markdown(f'''
-                        <div class="card-recommend">
-                            <div class="card-recommend-title">3. ปริมาณสั่งซื้อแนะนำ</div>
-                            <div class="card-recommend-value">{recommended_qty} <small style="font-size:18px">ลิตร</small></div>
-                            <div style="font-size:13px; color:#15803d; margin-top:4px; font-weight:600;">(พยากรณ์ {next_f:.2f} - คงเหลือ {stock_qty_input:.0f} ➔ ปัดขึ้นลงท้าย 0)</div>
-                        </div>
-                    ''', unsafe_allow_html=True)
-                with r4:
-                    st.markdown(f'''
-                        <div class="card-tanks">
-                            <div class="card-tanks-title">4. จำนวนถังที่ต้องสั่งซื้อ</div>
-                            {tanks_display_html}
-                        </div>
-                    ''', unsafe_allow_html=True)
-
                 st.markdown("---")
                 if st.button(f"🟢 บันทึกยอด {input_month_label} และร่นไปคำนวณเดือน {forecast_month_label} ➔", key=f"btn_save_{p_key}", type="primary", use_container_width=True):
+                    # บันทึกประวัติ
                     st.session_state.product_store[p_key]["history"].append(last_usage)
                     st.session_state.product_store[p_key]["labels"].append(input_month_label)
                     
-                    if f"usage_{p_key}" in st.session_state:
-                        del st.session_state[f"usage_{p_key}"]
-                    if f"stock_{p_key}" in st.session_state:
-                        del st.session_state[f"stock_{p_key}"]
+                    # ล้างค่าในช่องกรอกตัวเลข
+                    st.session_state[f"usage_{p_key}"] = None
+                    st.session_state[f"stock_{p_key}"] = None
 
                     st.success(f"✅ บันทึกยอดใช้จริงของเดือน {input_month_label} เรียบร้อยแล้ว! ระบบร่นไปงวดถัดไปแล้วครับ")
                     st.rerun()
