@@ -6,7 +6,11 @@ import math
 import copy
 
 # --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่ง ---
-st.set_page_config(page_title="ระบบพยากรณ์และบริหารการสั่งซื้อวัสดุ Holt-Winters", page_icon="📊", layout="wide")
+st.set_page_config(
+    page_title="ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์", 
+    page_icon="🚛",  # ใช้ไอคอนโลจิสติกส์/รถบรรทุกขนส่งตามรูปแอป
+    layout="wide"
+)
 
 st.markdown("""
     <style>
@@ -142,7 +146,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("📊 ระบบพยากรณ์และบริหารการสั่งซื้อวัสดุต่อเนื่อง (Holt-Winters Model)")
+st.title("🚛 ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์")
 st.caption("คำนวณและเก็บบันทึกประวัติเพื่อพยากรณ์ต่อเนื่องทุกเดือนอัตโนมัติ")
 
 # --- 2. ฟังก์ชันช่วยคำนวณชื่อเดือนถัดไปอัตโนมัติ ---
@@ -207,7 +211,7 @@ default_products = {
 if "product_store" not in st.session_state:
     st.session_state.product_store = copy.deepcopy(default_products)
 
-# --- 5. เมนูควบคุมการรีเซ็ตข้อมูล (Sidebar ชิดซ้าย ไม่มี Expander) ---
+# --- 5. เมนูควบคุมการรีเซ็ตข้อมูล (Sidebar ชิดซ้าย) ---
 with st.sidebar:
     st.header("⚙️ เมนูรีเซ็ตข้อมูล")
     st.markdown("เลือกประเภทการรีเซ็ตที่ต้องการ:")
@@ -533,4 +537,3 @@ for tab, p_key in zip(tabs, keys_list):
                         </div>
                     </div>
                 ''', unsafe_allow_html=True)
-        
