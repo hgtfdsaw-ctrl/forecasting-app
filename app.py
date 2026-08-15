@@ -255,12 +255,13 @@ def cb_save_data(p_key, usage_val, label_val):
     st.session_state[f"stock_{p_key}"] = None
     st.session_state[f"success_msg_{p_key}"] = f"✅ บันทึกยอดใช้จริงของเดือน {label_val} เรียบร้อยแล้ว! ระบบร่นไปงวดถัดไปแล้วครับ"
 
-# --- 7. Sidebar สำหรับ Reboot App เท่านั้น ---
+# --- 7. Sidebar สำหรับ Reboot App ---
 with st.sidebar:
     st.header("⚙️ ระบบควบคุมแอป")
-    st.info("🔒 ระบบตั้งค่าการพยากรณ์ถูกล็อคไว้ ไม่สามารถแก้ไขโค้ดหรือพารามิเตอร์ได้")
+    st.info("🔒 ล็อคระบบตั้งค่าพยากรณ์ ไม่สามารถแก้ไขโค้ดได้")
     
-    if st.button("🔄 รีบูทแอปพลิเคชัน (Reboot)", type="primary", use_container_width=True):
+    # ปุ่ม Reboot ที่ทำหน้าที่ล้างทุกอย่างและเริ่มแอปใหม่เหมือนรีสตาร์ทเครื่อง
+    if st.button("🔄 รีสตาร์ท / รีบูทแอป (Reboot App)", type="primary", use_container_width=True):
         st.session_state.clear()
         st.rerun()
 
