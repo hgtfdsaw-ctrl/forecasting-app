@@ -8,7 +8,7 @@ import copy
 # --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่ง ---
 st.set_page_config(
     page_title="ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์", 
-    page_icon="🚛",  # ใช้ไอคอนโลจิสติกส์/รถบรรทุกขนส่งตามรูปแอป
+    page_icon="🚛", 
     layout="wide"
 )
 
@@ -360,7 +360,6 @@ for tab, p_key in zip(tabs, keys_list):
                 label_visibility="collapsed",
                 min_value=0.0,
                 value=None,
-                placeholder=f"ตัวอย่าง: {p_info['default_last']}",
                 step=1.0,
                 key=f"usage_{p_key}"
             )
@@ -371,12 +370,9 @@ for tab, p_key in zip(tabs, keys_list):
                 label_visibility="collapsed",
                 min_value=0.0,
                 value=None,
-                placeholder="กรอกตัวเลขยอดคงเหลือ...",
                 step=1.0,
                 key=f"stock_{p_key}"
             )
-            
-            st.info(f"⚙️ ค่าพารามิเตอร์โมเดล:  \n**α (Alpha)** = {p_info['alpha']} | **β (Beta)** = {p_info['beta']} | **γ (Gamma)** = {p_info['gamma']}")
 
         # --- คำนวณเมื่อกรอกข้อมูลครบ ---
         if last_usage is not None and stock_qty_input is not None:
