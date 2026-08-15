@@ -8,13 +8,44 @@ import copy
 # --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่ง ---
 st.set_page_config(
     page_title="ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์", 
-    page_icon="🚛", 
+    page_icon="📈", 
     layout="wide"
 )
 
 st.markdown("""
     <style>
     .main { background-color: #f8fafc; }
+    
+    /* Header & Icon Style */
+    .header-container {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+    }
+    .header-icon-box {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        padding: 14px;
+        border-radius: 18px;
+        box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .header-title-text {
+        font-size: 30px !important;
+        font-weight: 800 !important;
+        color: #0f172a;
+        margin: 0;
+        line-height: 1.2;
+    }
+    .header-subtitle-text {
+        font-size: 16px !important;
+        color: #64748b;
+        margin-top: 4px;
+        margin-bottom: 0;
+    }
     
     /* บังคับไอคอนและข้อความในปุ่มกดของ Sidebar ทั้งหมดให้ชิดซ้าย 100% */
     section[data-testid="stSidebar"] button {
@@ -146,8 +177,24 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🚛 ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์")
-st.caption("คำนวณและเก็บบันทึกประวัติเพื่อพยากรณ์ต่อเนื่องทุกเดือนอัตโนมัติ")
+# --- หัวข้อหลักพร้อมไอคอนกราฟพยากรณ์สวยงาม (SVG) ---
+st.markdown("""
+    <div class="header-container">
+        <div class="header-icon-box">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+                <path d="M3 3l7 7 4-4 7 7"></path>
+                <polyline points="14 6 21 6 21 13"></polyline>
+            </svg>
+        </div>
+        <div>
+            <h1 class="header-title-text">ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์</h1>
+            <p class="header-subtitle-text">คำนวณและเก็บบันทึกประวัติเพื่อพยากรณ์ต่อเนื่องทุกเดือนอัตโนมัติ</p>
+        </div>
+    </div>
+""", unsafe_allow_html=True)
 
 # --- 2. ฟังก์ชันช่วยคำนวณชื่อเดือนถัดไปอัตโนมัติ ---
 months_base = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."]
