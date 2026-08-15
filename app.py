@@ -5,8 +5,8 @@ import plotly.graph_objects as go
 import math
 import copy
 
-# --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่ง (ตัวหนังสือใหญ่ ชัดเจน) ---
-st.set_page_config(page_title="ระบบพยากรณ์ยอดใช้วัสดุ Holt-Winters", page_icon="📊", layout="wide")
+# --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่ง ---
+st.set_page_config(page_title="ระบบพยากรณ์และบริหารการสั่งซื้อวัสดุ Holt-Winters", page_icon="📊", layout="wide")
 
 st.markdown("""
     <style>
@@ -126,8 +126,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("📊 ระบบพยากรณ์และบริหารการสั่งซื้อวัสดุอัตโนมัติ (Holt-Winters Model)")
-st.caption("คำนวณตามสูตร Holt-Winters Multiplicative Seasonal Smoothing")
+st.title("📊 ระบบพยากรณ์และบริหารการสั่งซื้อวัสดุต่อเนื่อง (Holt-Winters Model)")
+st.caption("คำนวณและเก็บบันทึกประวัติเพื่อพยากรณ์ต่อเนื่องทุกเดือนอัตโนมัติ")
 
 # --- 2. ฟังก์ชันช่วยคำนวณชื่อเดือนถัดไปอัตโนมัติ ---
 months_base = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."]
@@ -196,7 +196,6 @@ with st.sidebar:
     st.header("⚙️ เมนูรีเซ็ตข้อมูล")
     st.markdown("เลือกประเภทการรีเซ็ตที่ต้องการ:")
 
-    # 1. รีเซ็ตข้อมูลทั้งหมด
     if st.button("🔴 1. รีเซ็ตข้อมูลทั้งหมด", use_container_width=True):
         st.session_state.product_store = copy.deepcopy(default_products)
         for key in list(st.session_state.keys()):
@@ -205,7 +204,6 @@ with st.sidebar:
         st.success("✅ รีเซ็ตข้อมูลทั้งหมดกลับค่าเริ่มต้นเรียบร้อยแล้ว!")
         st.rerun()
 
-    # 2. รีเซ็ตปริมาณการใช้งานทั้งหมด
     if st.button("📊 2. รีเซ็ตปริมาณการใช้งานทั้งหมด", use_container_width=True):
         for p_key in st.session_state.product_store:
             st.session_state.product_store[p_key]["history"] = copy.deepcopy(default_products[p_key]["history"])
@@ -216,7 +214,6 @@ with st.sidebar:
         st.success("✅ รีเซ็ตประวัติยอดใช้งานทั้งหมดเรียบร้อยแล้ว!")
         st.rerun()
 
-    # 3. รีเซ็ตการใช้งานของเดือนก่อน (Undo)
     if st.button("↩️ 3. รีเซ็ตการใช้งานของเดือนก่อน", use_container_width=True):
         undo_success = False
         for p_key in st.session_state.product_store:
@@ -233,7 +230,6 @@ with st.sidebar:
         else:
             st.warning("⚠️ ไม่พบข้อมูลเดือนที่เพิ่มเข้ามา (อยู่ที่ประวัติเริ่มต้นแล้ว)")
 
-    # 4. รีเซ็ตยอดคงเหลือทั้งหมด
     if st.button("📦 4. รีเซ็ตยอดคงเหลือทั้งหมด", use_container_width=True):
         for key in list(st.session_state.keys()):
             if key.startswith("stock_"):
@@ -241,7 +237,6 @@ with st.sidebar:
         st.success("✅ ล้างยอดคงเหลือของทุกสินค้าเรียบร้อยแล้ว!")
         st.rerun()
 
-    # 5. รีเซ็ตยอดคงเหลือของเดือนก่อน
     if st.button("⏪ 5. รีเซ็ตยอดคงเหลือของเดือนก่อน", use_container_width=True):
         for key in list(st.session_state.keys()):
             if key.startswith("stock_"):
@@ -446,10 +441,19 @@ for tab, p_key in zip(tabs, keys_list):
                     ''', unsafe_allow_html=True)
 
                 st.markdown("---")
-                if st.button(f"💾 บันทึกยอด {input_month_label} ลงระบบ (เพื่อใช้คำนวณเดือน {forecast_month_label} ถัดไป)", key=f"btn_save_{p_key}", type="primary", use_container_width=True):
+                # ปุ่มบันทึกเพื่อร่นเดือนถัดไปแบบเด่นชัด
+                if st.button(f"🟢 บันทึกยอด {input_month_label} และร่นไปคำนวณเดือน {forecast_month_label} ➔", key=f"btn_save_{p_key}", type="primary", use_container_width=True):
+                    # บันทึกยอดเข้าประวัติ
                     st.session_state.product_store[p_key]["history"].append(last_usage)
                     st.session_state.product_store[p_key]["labels"].append(input_month_label)
-                    st.success(f"✅ บันทึกยอดใช้จริงของเดือน {input_month_label} เรียบร้อยแล้ว!")
+                    
+                    # ล้างค่าช่องกรอกเพื่อรอรับเดือนถัดไป
+                    if f"usage_{p_key}" in st.session_state:
+                        del st.session_state[f"usage_{p_key}"]
+                    if f"stock_{p_key}" in st.session_state:
+                        del st.session_state[f"stock_{p_key}"]
+
+                    st.success(f"✅ บันทึกยอดใช้จริงของเดือน {input_month_label} เรียบร้อยแล้ว! ระบบร่นไปงวดถัดไปแล้วครับ")
                     st.rerun()
 
         st.markdown("---")
