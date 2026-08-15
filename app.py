@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import math
+import copy
 
 # --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่ง (ตัวหนังสือใหญ่ ชัดเจน) ---
 st.set_page_config(page_title="ระบบพยากรณ์ยอดใช้วัสดุ Holt-Winters", page_icon="📊", layout="wide")
@@ -126,7 +127,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("📊 ระบบพยากรณ์และบริหารการสั่งซื้อวัสดุอัตโนมัติ (Holt-Winters Model)")
-st.caption("คำนวณตามสูตร Holt-Winters Multiplicative Seasonal Smoothing (รองรับการบันทึกประวัติและคำนวณต่อเนื่อง)")
+st.caption("คำนวณตามสูตร Holt-Winters Multiplicative Seasonal Smoothing")
 
 # --- 2. ฟังก์ชันช่วยคำนวณชื่อเดือนถัดไปอัตโนมัติ ---
 months_base = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."]
@@ -137,7 +138,7 @@ def get_next_month_label(last_label):
     y_num = int(parts[1])
     m_idx = months_base.index(m_name)
     
-    if m_idx == 11:  # ถ้าเป็น ธ.ค. ให้ขึ้น ม.ค. ปีถัดไป
+    if m_idx == 11:
         return f"ม.ค. {y_num + 1}"
     else:
         return f"{months_base[m_idx + 1]} {y_num}"
@@ -188,16 +189,67 @@ default_products = {
 
 # --- 4. สร้าง Session State สำหรับบันทึกประวัติยาวนาน ---
 if "product_store" not in st.session_state:
-    st.session_state.product_store = default_products
+    st.session_state.product_store = copy.deepcopy(default_products)
 
-# ปุ่ม Reset สำหรับกรณีต้องการย้อนกลับค่าตั้งต้น
+# --- 5. เมนูควบคุมการรีเซ็ตข้อมูลทั้ง 5 แบบ (Sidebar) ---
 with st.sidebar:
-    st.header("⚙️ การจัดการข้อมูล")
-    if st.button("🔄 รีเซ็ตข้อมูลกลับค่าเริ่มต้น"):
-        st.session_state.product_store = default_products
+    st.header("⚙️ เมนูรีเซ็ตข้อมูล")
+    st.markdown("เลือกประเภทการรีเซ็ตที่ต้องการ:")
+
+    # 1. รีเซ็ตข้อมูลทั้งหมด
+    if st.button("🔴 1. รีเซ็ตข้อมูลทั้งหมด", use_container_width=True):
+        st.session_state.product_store = copy.deepcopy(default_products)
+        for key in list(st.session_state.keys()):
+            if key.startswith("usage_") or key.startswith("stock_"):
+                del st.session_state[key]
+        st.success("✅ รีเซ็ตข้อมูลทั้งหมดกลับค่าเริ่มต้นเรียบร้อยแล้ว!")
         st.rerun()
 
-# --- 5. ฟังก์ชันคำนวณ Holt-Winters Multiplicative ---
+    # 2. รีเซ็ตปริมาณการใช้งานทั้งหมด
+    if st.button("📊 2. รีเซ็ตปริมาณการใช้งานทั้งหมด", use_container_width=True):
+        for p_key in st.session_state.product_store:
+            st.session_state.product_store[p_key]["history"] = copy.deepcopy(default_products[p_key]["history"])
+            st.session_state.product_store[p_key]["labels"] = copy.deepcopy(default_products[p_key]["labels"])
+        for key in list(st.session_state.keys()):
+            if key.startswith("usage_"):
+                del st.session_state[key]
+        st.success("✅ รีเซ็ตประวัติยอดใช้งานทั้งหมดเรียบร้อยแล้ว!")
+        st.rerun()
+
+    # 3. รีเซ็ตการใช้งานของเดือนก่อน (Undo)
+    if st.button("↩️ 3. รีเซ็ตการใช้งานของเดือนก่อน", use_container_width=True):
+        undo_success = False
+        for p_key in st.session_state.product_store:
+            if len(st.session_state.product_store[p_key]["history"]) > 35:
+                st.session_state.product_store[p_key]["history"].pop()
+                st.session_state.product_store[p_key]["labels"].pop()
+                undo_success = True
+        if undo_success:
+            for key in list(st.session_state.keys()):
+                if key.startswith("usage_"):
+                    del st.session_state[key]
+            st.success("✅ ย้อนกลับการบันทึกของเดือนก่อนเรียบร้อยแล้ว!")
+            st.rerun()
+        else:
+            st.warning("⚠️ ไม่พบข้อมูลเดือนที่เพิ่มเข้ามา (อยู่ที่ประวัติเริ่มต้นแล้ว)")
+
+    # 4. รีเซ็ตยอดคงเหลือทั้งหมด
+    if st.button("📦 4. รีเซ็ตยอดคงเหลือทั้งหมด", use_container_width=True):
+        for key in list(st.session_state.keys()):
+            if key.startswith("stock_"):
+                del st.session_state[key]
+        st.success("✅ ล้างยอดคงเหลือของทุกสินค้าเรียบร้อยแล้ว!")
+        st.rerun()
+
+    # 5. รีเซ็ตยอดคงเหลือของเดือนก่อน
+    if st.button("⏪ 5. รีเซ็ตยอดคงเหลือของเดือนก่อน", use_container_width=True):
+        for key in list(st.session_state.keys()):
+            if key.startswith("stock_"):
+                del st.session_state[key]
+        st.success("✅ ล้างช่องยอดคงเหลือของงวดนี้เรียบร้อยแล้ว!")
+        st.rerun()
+
+# --- 6. ฟังก์ชันคำนวณ Holt-Winters Multiplicative ---
 def run_holt_winters(y, alpha, beta, gamma, L=12):
     n = len(y)
     Level = [np.nan] * n
@@ -223,7 +275,7 @@ def run_holt_winters(y, alpha, beta, gamma, L=12):
     next_forecast = (Level[-1] + Trend[-1]) * Season[n - 12]
     return Level, Trend, Season[:n], Forecast, next_forecast
 
-# --- 6. ฟังก์ชันคำนวณแยกประเภทถัง ---
+# --- 7. ฟังก์ชันคำนวณแยกประเภทถัง ---
 def get_tank_rows(product_key, order_qty):
     if order_qty <= 0:
         return []
@@ -270,7 +322,7 @@ def get_tank_rows(product_key, order_qty):
             rows.append(("ถัง 10 ลิตร", f"{t10} ถัง"))
         return rows
 
-# --- 7. สร้าง UI หน้าต่างหลัก ---
+# --- 8. สร้าง UI หน้าต่างหลัก ---
 tabs = st.tabs([p["name"] for p in st.session_state.product_store.values()])
 keys_list = list(st.session_state.product_store.keys())
 
@@ -278,7 +330,6 @@ for tab, p_key in zip(tabs, keys_list):
     with tab:
         p_info = st.session_state.product_store[p_key]
         
-        # คำนวณชื่อเดือนที่ต้องกรอก และชื่อเดือนที่จะพยากรณ์
         last_recorded_month = p_info["labels"][-1]
         input_month_label = get_next_month_label(last_recorded_month)
         forecast_month_label = get_next_month_label(input_month_label)
@@ -394,19 +445,16 @@ for tab, p_key in zip(tabs, keys_list):
                         </div>
                     ''', unsafe_allow_html=True)
 
-                # --- ปุ่มบันทึกข้อมูลเพื่อใช้ในเดือนถัดไป ---
                 st.markdown("---")
                 if st.button(f"💾 บันทึกยอด {input_month_label} ลงระบบ (เพื่อใช้คำนวณเดือน {forecast_month_label} ถัดไป)", key=f"btn_save_{p_key}", type="primary", use_container_width=True):
-                    # อัปเดตข้อมูลเข้า Session State
                     st.session_state.product_store[p_key]["history"].append(last_usage)
                     st.session_state.product_store[p_key]["labels"].append(input_month_label)
-                    st.success(f"✅ บันทึกยอดใช้จริงของเดือน {input_month_label} เรียบร้อยแล้ว! ระบบกำลังร่นเดือนถัดไป...")
+                    st.success(f"✅ บันทึกยอดใช้จริงของเดือน {input_month_label} เรียบร้อยแล้ว!")
                     st.rerun()
 
         st.markdown("---")
 
         if last_usage is not None and stock_qty_input is not None:
-            # กราฟแสดงแนวโน้ม
             st.subheader(f"📈 กราฟแสดงแนวโน้มประวัติการใช้งานและการพยากรณ์ ({forecast_month_label})")
             fig = go.Figure()
             
@@ -445,7 +493,6 @@ for tab, p_key in zip(tabs, keys_list):
             )
             st.plotly_chart(fig, use_container_width=True)
 
-            # ตารางรายละเอียดคำนวณ
             with st.expander("📋 ดูตารางรายละเอียดประวัติและการคำนวณทั้งหมด"):
                 df = pd.DataFrame({
                     "งวด/เดือน/ปี": current_labels,
