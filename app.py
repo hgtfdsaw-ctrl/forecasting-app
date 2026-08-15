@@ -47,20 +47,13 @@ st.markdown("""
         margin-bottom: 0;
     }
     
-    /* บังคับไอคอนและข้อความในปุ่มกดของ Sidebar ทั้งหมดให้ชิดซ้าย */
+    /* Sidebar styling */
     section[data-testid="stSidebar"] button {
         display: flex !important;
-        justify-content: flex-start !important;
+        justify-content: center !important;
         align-items: center !important;
-        text-align: left !important;
-        padding-left: 16px !important;
-    }
-    section[data-testid="stSidebar"] button div, 
-    section[data-testid="stSidebar"] button div p, 
-    section[data-testid="stSidebar"] button p {
-        justify-content: flex-start !important;
-        text-align: left !important;
-        width: 100% !important;
+        text-align: center !important;
+        font-weight: 700 !important;
     }
 
     .stTabs [data-baseweb="tab-list"] { gap: 10px; }
@@ -177,7 +170,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- หัวข้อหลักพร้อมไอคอนกราฟพยากรณ์สวยงาม (SVG) ---
+# --- 2. หัวข้อหลักพร้อมไอคอน SVG ---
 st.markdown("""
     <div class="header-container">
         <div class="header-icon-box">
@@ -196,7 +189,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. ฟังก์ชันช่วยคำนวณชื่อเดือนถัดไปอัตโนมัติ ---
+# --- 3. ฟังก์ชันช่วยคำนวณชื่อเดือนถัดไปอัตโนมัติ ---
 months_base = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."]
 
 def get_next_month_label(last_label):
@@ -210,7 +203,7 @@ def get_next_month_label(last_label):
     else:
         return f"{months_base[m_idx + 1]} {y_num}"
 
-# --- 3. ค่าตั้งต้นประวัติ 35 เดือน (ม.ค. 66 - พ.ย. 68) ---
+# --- 4. ค่าตั้งต้นประวัติ 35 เดือน (ม.ค. 66 - พ.ย. 68) ---
 base_labels_35 = [f"{m} 66" for m in months_base] + \
                  [f"{m} 67" for m in months_base] + \
                  [f"{m} 68" for m in months_base[:11]]
@@ -250,11 +243,11 @@ default_products = {
     }
 }
 
-# --- 4. สร้าง Session State สำหรับบันทึกประวัติยาวนาน ---
+# --- 5. สร้าง Session State ---
 if "product_store" not in st.session_state:
     st.session_state.product_store = copy.deepcopy(default_products)
 
-# --- 5. Callback Function สำหรับกดบันทึกโดยไม่ติด Error ---
+# --- 6. Callback Function บันทึกข้อมูล ---
 def cb_save_data(p_key, usage_val, label_val):
     st.session_state.product_store[p_key]["history"].append(usage_val)
     st.session_state.product_store[p_key]["labels"].append(label_val)
@@ -262,54 +255,16 @@ def cb_save_data(p_key, usage_val, label_val):
     st.session_state[f"stock_{p_key}"] = None
     st.session_state[f"success_msg_{p_key}"] = f"✅ บันทึกยอดใช้จริงของเดือน {label_val} เรียบร้อยแล้ว! ระบบร่นไปงวดถัดไปแล้วครับ"
 
-# --- 6. เมนูควบคุมการรีเซ็ตข้อมูล (Sidebar ชิดซ้าย) ---
+# --- 7. Sidebar สำหรับ Reboot App เท่านั้น ---
 with st.sidebar:
-    st.header("⚙️ เมนูรีเซ็ตข้อมูล")
-    st.markdown("เลือกประเภทการรีเซ็ตที่ต้องการ:")
-
-    if st.button("🔴 รีเซ็ตข้อมูลทั้งหมด", use_container_width=True):
-        st.session_state.product_store = copy.deepcopy(default_products)
-        for p_k in default_products:
-            st.session_state[f"usage_{p_k}"] = None
-            st.session_state[f"stock_{p_k}"] = None
-        st.success("✅ รีเซ็ตข้อมูลทั้งหมดกลับค่าเริ่มต้นเรียบร้อยแล้ว!")
+    st.header("⚙️ ระบบควบคุมแอป")
+    st.info("🔒 ระบบตั้งค่าการพยากรณ์ถูกล็อคไว้ ไม่สามารถแก้ไขโค้ดหรือพารามิเตอร์ได้")
+    
+    if st.button("🔄 รีบูทแอปพลิเคชัน (Reboot)", type="primary", use_container_width=True):
+        st.session_state.clear()
         st.rerun()
 
-    if st.button("📊 รีเซ็ตปริมาณการใช้งานทั้งหมด", use_container_width=True):
-        for p_key in st.session_state.product_store:
-            st.session_state.product_store[p_key]["history"] = copy.deepcopy(default_products[p_key]["history"])
-            st.session_state.product_store[p_key]["labels"] = copy.deepcopy(default_products[p_key]["labels"])
-            st.session_state[f"usage_{p_key}"] = None
-        st.success("✅ รีเซ็ตประวัติยอดใช้งานทั้งหมดเรียบร้อยแล้ว!")
-        st.rerun()
-
-    if st.button("↩️ รีเซ็ตการใช้งานของเดือนก่อน", use_container_width=True):
-        undo_success = False
-        for p_key in st.session_state.product_store:
-            if len(st.session_state.product_store[p_key]["history"]) > 35:
-                st.session_state.product_store[p_key]["history"].pop()
-                st.session_state.product_store[p_key]["labels"].pop()
-                st.session_state[f"usage_{p_key}"] = None
-                undo_success = True
-        if undo_success:
-            st.success("✅ ย้อนกลับการบันทึกของเดือนก่อนเรียบร้อยแล้ว!")
-            st.rerun()
-        else:
-            st.warning("⚠️ ไม่พบข้อมูลเดือนที่เพิ่มเข้ามา (อยู่ที่ประวัติเริ่มต้นแล้ว)")
-
-    if st.button("📦 รีเซ็ตยอดคงเหลือทั้งหมด", use_container_width=True):
-        for p_key in st.session_state.product_store:
-            st.session_state[f"stock_{p_key}"] = None
-        st.success("✅ ล้างยอดคงเหลือของทุกสินค้าเรียบร้อยแล้ว!")
-        st.rerun()
-
-    if st.button("⏪ รีเซ็ตยอดคงเหลือของเดือนก่อน", use_container_width=True):
-        for p_key in st.session_state.product_store:
-            st.session_state[f"stock_{p_key}"] = None
-        st.success("✅ ล้างช่องยอดคงเหลือของงวดนี้เรียบร้อยแล้ว!")
-        st.rerun()
-
-# --- 7. ฟังก์ชันคำนวณ Holt-Winters Multiplicative ---
+# --- 8. ฟังก์ชันคำนวณ Holt-Winters Multiplicative ---
 def run_holt_winters(y, alpha, beta, gamma, L=12):
     n = len(y)
     Level = [np.nan] * n
@@ -335,7 +290,7 @@ def run_holt_winters(y, alpha, beta, gamma, L=12):
     next_forecast = (Level[-1] + Trend[-1]) * Season[n - 12]
     return Level, Trend, Season[:n], Forecast, next_forecast
 
-# --- 8. ฟังก์ชันคำนวณแยกประเภทถัง ---
+# --- 9. ฟังก์ชันคำนวณแยกประเภทถัง ---
 def get_tank_rows(product_key, order_qty):
     if order_qty <= 0:
         return []
@@ -382,7 +337,7 @@ def get_tank_rows(product_key, order_qty):
             rows.append(("ถัง 10 ลิตร", f"{t10} ถัง"))
         return rows
 
-# --- 9. สร้าง UI หน้าต่างหลัก ---
+# --- 10. สร้าง UI หน้าต่างหลัก ---
 tabs = st.tabs([p["name"] for p in st.session_state.product_store.values()])
 keys_list = list(st.session_state.product_store.keys())
 
@@ -396,7 +351,6 @@ for tab, p_key in zip(tabs, keys_list):
 
         st.markdown(f'<div class="product-header">📦 ผลิตภัณฑ์: {p_info["name"]}</div>', unsafe_allow_html=True)
         
-        # แสดงแจ้งเตือนความสำเร็จเมื่อบันทึกข้อมูลแล้ว (ถ้ามี)
         if f"success_msg_{p_key}" in st.session_state:
             st.success(st.session_state[f"success_msg_{p_key}"])
             del st.session_state[f"success_msg_{p_key}"]
@@ -404,9 +358,9 @@ for tab, p_key in zip(tabs, keys_list):
         c_input, c_results = st.columns([1.1, 1.9])
         
         with c_input:
-            st.markdown(f'<div class="large-label">1. ปริมาณการใช้ของเดือนล่าสุด ({input_month_label}) (ลิตร):</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="large-label">1. ปริมาณการใช้งานของเดือนปัจจุบันนี้ ({input_month_label}) (ลิตร):</div>', unsafe_allow_html=True)
             last_usage = st.number_input(
-                label="ปริมาณการใช้เดือนล่าสุด",
+                label="ปริมาณการใช้งานของเดือนปัจจุบันนี้",
                 label_visibility="collapsed",
                 min_value=0.0,
                 value=None,
@@ -414,9 +368,9 @@ for tab, p_key in zip(tabs, keys_list):
                 key=f"usage_{p_key}"
             )
             
-            st.markdown('<div class="large-label">2. ปริมาณยอดคงเหลือปัจจุบัน (ลิตร):</div>', unsafe_allow_html=True)
+            st.markdown('<div class="large-label">2. ปริมาณคงเหลือ ณ ปัจจุบัน (ลิตร):</div>', unsafe_allow_html=True)
             stock_qty_input = st.number_input(
-                label="ปริมาณยอดคงเหลือ",
+                label="ปริมาณคงเหลือ ณ ปัจจุบัน",
                 label_visibility="collapsed",
                 min_value=0.0,
                 value=None,
@@ -458,7 +412,7 @@ for tab, p_key in zip(tabs, keys_list):
                 
                 r1, r2 = st.columns(2)
                 with r1:
-                    st.markdown(f'<div class="card-recommend"><div class="card-recommend-title">1. ปริมาณสั่งซื้อแนะนำ</div><div class="card-recommend-value">{recommended_qty} <small style="font-size:18px">ลิตร</small></div><div style="font-size:13px; color:#15803d; margin-top:4px; font-weight:600;">(พยากรณ์ {next_f:.2f} - คงเหลือ {stock_qty_input:.0f} ➔ ปัดขึ้นลงท้าย 0)</div></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="card-recommend"><div class="card-recommend-title">1. ปริมาณสั่งซื้อแนะนำ</div><div class="card-recommend-value">{recommended_qty} <small style="font-size:18px">ลิตร</small></div></div>', unsafe_allow_html=True)
                 with r2:
                     st.markdown(f'<div class="card-tanks"><div class="card-tanks-title">2. จำนวนถังที่ต้องสั่งซื้อ</div>{tanks_display_html}</div>', unsafe_allow_html=True)
 
@@ -469,7 +423,6 @@ for tab, p_key in zip(tabs, keys_list):
                     st.markdown(f'<div class="card-base"><div class="card-title">4. ค่าความคลาดเคลื่อน</div><div style="font-size: 17px; font-weight: 800; color: #16a34a; margin-top: 4px;">คลาดเคลื่อน (+): +{error_val:.2f} ลิตร</div><div style="font-size: 17px; font-weight: 800; color: #dc2626; margin-top: 2px;">คลาดเคลื่อน (-): -{error_val:.2f} ลิตร</div></div>', unsafe_allow_html=True)
 
                 st.markdown("---")
-                # ปุ่มใช้ Callback เพื่อล้างค่าและบันทึกโดยไม่เกิด StreamlitAPIException
                 st.button(
                     f"🟢 บันทึกยอด {input_month_label} และร่นไปคำนวณเดือน {forecast_month_label} ➔", 
                     key=f"btn_save_{p_key}", 
@@ -532,4 +485,4 @@ for tab, p_key in zip(tabs, keys_list):
                 st.dataframe(df, use_container_width=True, height=250)
         else:
             with c_results:
-                st.markdown(f'<div style="background-color: #fefce8; border: 2px dashed #eab308; border-radius: 14px; padding: 35px 20px; text-align: center; margin-top: 10px;"><div style="font-size: 45px; margin-bottom: 10px;">📝</div><div style="font-size: 24px; font-weight: 800; color: #854d0e;">กรุณากรอกข้อมูลให้ครบทั้ง 2 ช่อง</div><div style="font-size: 19px; color: #a16207; margin-top: 10px; line-height: 1.6;">1. ปริมาณการใช้ของเดือนล่าสุด <strong>({input_month_label})</strong><br>2. ปริมาณยอดคงเหลือปัจจุบัน<br><br><strong style="color: #854d0e;">⚡ เมื่อกรอกครบแล้ว ระบบจะคำนวณผลพยากรณ์สำหรับเดือน ({forecast_month_label}) ให้ทันที</strong></div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="background-color: #fefce8; border: 2px dashed #eab308; border-radius: 14px; padding: 35px 20px; text-align: center; margin-top: 10px;"><div style="font-size: 45px; margin-bottom: 10px;">📝</div><div style="font-size: 24px; font-weight: 800; color: #854d0e;">กรุณากรอกข้อมูลให้ครบทั้ง 2 ช่อง</div><div style="font-size: 19px; color: #a16207; margin-top: 10px; line-height: 1.6;">1. ปริมาณการใช้งานของเดือนปัจจุบันนี้ <strong>({input_month_label})</strong><br>2. ปริมาณคงเหลือ ณ ปัจจุบัน<br><br><strong style="color: #854d0e;">⚡ เมื่อกรอกครบแล้ว ระบบจะคำนวณผลพยากรณ์สำหรับเดือน ({forecast_month_label}) ให้ทันที</strong></div></div>', unsafe_allow_html=True)
