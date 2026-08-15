@@ -47,13 +47,26 @@ st.markdown("""
         margin-bottom: 0;
     }
     
-    /* Sidebar styling */
+    /* Sidebar Styling & Font Sizes */
+    .reset-category-header {
+        font-size: 18px !important;
+        font-weight: 800 !important;
+        color: #1e293b;
+        margin-top: 14px;
+        margin-bottom: 6px;
+        padding-bottom: 4px;
+        border-bottom: 2px solid #cbd5e1;
+    }
+    
+    /* ปรับขนาดตัวอักษรของปุ่มใน Sidebar เป็น 14px */
     section[data-testid="stSidebar"] button {
+        font-size: 14px !important;
+        font-weight: 700 !important;
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         text-align: center !important;
-        font-weight: 700 !important;
+        padding: 6px 12px !important;
     }
 
     .stTabs [data-baseweb="tab-list"] { gap: 10px; }
@@ -255,23 +268,59 @@ def cb_save_data(p_key, usage_val, label_val):
     st.session_state[f"stock_{p_key}"] = None
     st.session_state[f"success_msg_{p_key}"] = f"✅ บันทึกยอดใช้จริงของเดือน {label_val} เรียบร้อยแล้ว! ระบบร่นไปงวดถัดไปแล้วครับ"
 
-# --- 7. Sidebar สำหรับควบคุม (Reset & Reboot) ---
+# --- 7. Sidebar จัดการรีเซ็ตแยกหมวดหมู่ ---
 with st.sidebar:
     st.header("⚙️ ระบบควบคุมแอป")
     st.info("🔒 ระบบตั้งค่าการพยากรณ์ถูกล็อคไว้ ไม่สามารถแก้ไขโค้ดหรือพารามิเตอร์ได้")
     
-    # ปุ่ม 1: รีเซ็ตข้อมูลกลับค่าตั้งต้น
-    if st.button("🔄 รีเซ็ตข้อมูลกลับค่าเริ่มต้น (Reset Data)", type="secondary", use_container_width=True):
+    # --- หมวดที่ 1: ปริมาณใช้งาน ---
+    st.markdown('<div class="reset-category-header">📊 ปริมาณใช้งาน</div>', unsafe_allow_html=True)
+    
+    if st.button("↩️ รีเซ็ตปริมาณใช้งานเดือนก่อน", type="secondary", use_container_width=True):
+        for p_key in st.session_state.product_store:
+            if len(st.session_state.product_store[p_key]["history"]) > 35:
+                st.session_state.product_store[p_key]["history"].pop()
+                st.session_state.product_store[p_key]["labels"].pop()
+            if f"usage_{p_key}" in st.session_state:
+                st.session_state[f"usage_{p_key}"] = None
+        st.rerun()
+        
+    if st.button("🗑️ รีเซ็ตปริมาณใช้งานทั้งหมด", type="secondary", use_container_width=True):
+        for p_key in st.session_state.product_store:
+            st.session_state.product_store[p_key]["history"] = copy.deepcopy(default_products[p_key]["history"])
+            st.session_state.product_store[p_key]["labels"] = copy.deepcopy(default_products[p_key]["labels"])
+            if f"usage_{p_key}" in st.session_state:
+                st.session_state[f"usage_{p_key}"] = None
+        st.rerun()
+
+    # --- หมวดที่ 2: ปริมาณคงเหลือ ---
+    st.markdown('<div class="reset-category-header">📦 ปริมาณคงเหลือ</div>', unsafe_allow_html=True)
+    
+    if st.button("↩️ รีเซ็ตปริมาณคงเหลือเดือนก่อน", type="secondary", use_container_width=True):
+        for k in list(st.session_state.keys()):
+            if k.startswith("stock_"):
+                st.session_state[k] = None
+        st.rerun()
+        
+    if st.button("🗑️ รีเซ็ตปริมาณคงเหลือทั้งหมด", type="secondary", use_container_width=True):
+        for k in list(st.session_state.keys()):
+            if k.startswith("stock_"):
+                st.session_state[k] = None
+        st.rerun()
+
+    # --- หมวดที่ 3: รีเซ็ตข้อมูลทั้งหมด & รีบูท ---
+    st.markdown('<div class="reset-category-header">🚨 รีเซ็ตระบบทั้งหมด</div>', unsafe_allow_html=True)
+    
+    if st.button("🔄 รีเซ็ตข้อมูลทั้งหมด", type="secondary", use_container_width=True):
         st.session_state.product_store = copy.deepcopy(default_products)
         for k in list(st.session_state.keys()):
             if k.startswith("usage_") or k.startswith("stock_") or k.startswith("success_msg_"):
                 del st.session_state[k]
         st.rerun()
 
-    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
     
-    # ปุ่ม 2: รีบูทแอปพลิเคชัน (Restart เหมือนเปิดใหม่)
-    if st.button("⚡ รีบูทแอปพลิเคชัน / รีสตาร์ท (Reboot App)", type="primary", use_container_width=True):
+    if st.button("⚡ รีบูทแอปพลิเคชัน (Reboot)", type="primary", use_container_width=True):
         st.session_state.clear()
         st.rerun()
 
