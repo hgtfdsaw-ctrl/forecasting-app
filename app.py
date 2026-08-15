@@ -293,145 +293,157 @@ for tab, p_key in tabs_map:
             
             st.info(f"⚙️ ค่าพารามิเตอร์โมเดล:  \n**α (Alpha)** = {p_info['alpha']} | **β (Beta)** = {p_info['beta']} | **γ (Gamma)** = {p_info['gamma']}")
 
-        # ประมวลผลข้อมูล Holt-Winters แบบไดนามิก
-        if last_usage is not None:
+        # --- ตรวจสอบเงื่อนไข: ต้องกรอกครบทั้ง 2 ช่องก่อน จึงจะคำนวณและแสดงผล ---
+        if last_usage is not None and stock_qty_input is not None:
+            
+            # 1. ประมวลผลข้อมูล Holt-Winters
             y_data = p_info["history"] + [last_usage]
             labels = base_labels + ["เดือนล่าสุด"]
-        else:
-            y_data = p_info["history"]
-            labels = base_labels
 
-        Level, Trend, Season, Forecast, next_f = run_holt_winters(
-            y_data, p_info["alpha"], p_info["beta"], p_info["gamma"]
-        )
+            Level, Trend, Season, Forecast, next_f = run_holt_winters(
+                y_data, p_info["alpha"], p_info["beta"], p_info["gamma"]
+            )
 
-        # 1. การคำนวณความคลาดเคลื่อน 1% (แยกค่า + และ - ชัดเจน)
-        error_val = next_f * 0.01
+            # 2. คำนวณความคลาดเคลื่อน 1% (แยกค่า + และ -)
+            error_val = next_f * 0.01
 
-        # 2. การคำนวณปริมาณแนะนำสั่งซื้อ:
-        # นำ (ผลพยากรณ์ - ยอดคงเหลือ) หากเหลือ 41 จะปัดขึ้นเป็น 50 ลิตรทันที
-        stock_qty = stock_qty_input if stock_qty_input is not None else 0.0
-        net_needed = next_f - stock_qty
+            # 3. คำนวณปริมาณแนะนำสั่งซื้อ: (ผลพยากรณ์ - ยอดคงเหลือ) ปัดขึ้นลงท้าย 0
+            net_needed = next_f - stock_qty_input
 
-        if net_needed > 0:
-            recommended_qty = math.ceil(net_needed / 10.0) * 10
-        else:
-            recommended_qty = 0
+            if net_needed > 0:
+                recommended_qty = math.ceil(net_needed / 10.0) * 10
+            else:
+                recommended_qty = 0
 
-        # 3. จัดสร้างตารางแยกช่องย่อยจำนวนถัง
-        tank_rows = get_tank_rows(p_key, recommended_qty)
-        if tank_rows:
-            table_html_rows = "".join([
-                f"<tr><td>{size}</td><td class='qty-col'>{qty}</td></tr>" 
-                for size, qty in tank_rows
-            ])
-            tanks_display_html = f"""
-                <table class="tank-table">
-                    <thead>
-                        <tr>
-                            <th>ขนาดถัง</th>
-                            <th style="text-align:right;">จำนวนสั่ง</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {table_html_rows}
-                    </tbody>
-                </table>
-            """
-        else:
-            tanks_display_html = "<div style='font-size:22px; font-weight:800; color:#1e40af; margin-top:10px;'>ไม่ต้องสั่งซื้อ</div>"
+            # 4. จัดสร้างตารางแยกช่องย่อยจำนวนถัง
+            tank_rows = get_tank_rows(p_key, recommended_qty)
+            if tank_rows:
+                table_html_rows = "".join([
+                    f"<tr><td>{size}</td><td class='qty-col'>{qty}</td></tr>" 
+                    for size, qty in tank_rows
+                ])
+                tanks_display_html = f"""
+                    <table class="tank-table">
+                        <thead>
+                            <tr>
+                                <th>ขนาดถัง</th>
+                                <th style="text-align:right;">จำนวนสั่ง</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {table_html_rows}
+                        </tbody>
+                    </table>
+                """
+            else:
+                tanks_display_html = "<div style='font-size:22px; font-weight:800; color:#1e40af; margin-top:10px;'>ไม่ต้องสั่งซื้อ</div>"
 
-        # ส่วนการแสดงผล 4 ช่องหลัก
-        with c_results:
-            st.markdown('<div class="large-label">📌 สรุปผลการคำนวณและการสั่งซื้อ</div>', unsafe_allow_html=True)
+            # แสดงผลช่องการแสดงผล (ฝั่งขวา)
+            with c_results:
+                st.markdown('<div class="large-label">📌 สรุปผลการคำนวณและการสั่งซื้อ</div>', unsafe_allow_html=True)
+                
+                r1, r2 = st.columns(2)
+                with r1:
+                    st.markdown(f'''
+                        <div class="card-base">
+                            <div class="card-title">1. ผลการพยากรณ์ (Forecast)</div>
+                            <div class="card-value" style="color:#2563eb;">{next_f:.2f} <small style="font-size:16px">ลิตร</small></div>
+                        </div>
+                    ''', unsafe_allow_html=True)
+                with r2:
+                    st.markdown(f'''
+                        <div class="card-base">
+                            <div class="card-title">2. ค่าความคลาดเคลื่อน (1%)</div>
+                            <div style="font-size: 18px; font-weight: 800; color: #16a34a; margin-top: 4px;">
+                                คลาดเคลื่อน (+): +{error_val:.2f} ลิตร
+                            </div>
+                            <div style="font-size: 18px; font-weight: 800; color: #dc2626; margin-top: 2px;">
+                                คลาดเคลื่อน (-): -{error_val:.2f} ลิตร
+                            </div>
+                        </div>
+                    ''', unsafe_allow_html=True)
+
+                r3, r4 = st.columns(2)
+                with r3:
+                    st.markdown(f'''
+                        <div class="card-recommend">
+                            <div class="card-recommend-title">3. ปริมาณการสั่งซื้อที่แนะนำ</div>
+                            <div class="card-recommend-value">{recommended_qty} <small style="font-size:18px">ลิตร</small></div>
+                            <div style="font-size:13px; color:#15803d; margin-top:4px; font-weight:600;">(ผลพยากรณ์ {next_f:.2f} - คงเหลือ {stock_qty_input:.0f} ➔ ปัดขึ้นลงท้าย 0)</div>
+                        </div>
+                    ''', unsafe_allow_html=True)
+                with r4:
+                    st.markdown(f'''
+                        <div class="card-tanks">
+                            <div class="card-tanks-title">4. จำนวนถังที่ต้องสั่งซื้อ</div>
+                            {tanks_display_html}
+                        </div>
+                    ''', unsafe_allow_html=True)
+
+            st.markdown("---")
+
+            # กราฟแสดงแนวโน้ม
+            st.subheader("📈 กราฟแสดงแนวโน้มการใช้งานย้อนหลังและการพยากรณ์")
+            fig = go.Figure()
             
-            r1, r2 = st.columns(2)
-            with r1:
-                st.markdown(f'''
-                    <div class="card-base">
-                        <div class="card-title">1. ผลการพยากรณ์ (Forecast)</div>
-                        <div class="card-value" style="color:#2563eb;">{next_f:.2f} <small style="font-size:16px">ลิตร</small></div>
-                    </div>
-                ''', unsafe_allow_html=True)
-            with r2:
-                st.markdown(f'''
-                    <div class="card-base">
-                        <div class="card-title">2. ค่าความคลาดเคลื่อน (1%)</div>
-                        <div style="font-size: 18px; font-weight: 800; color: #16a34a; margin-top: 4px;">
-                            คลาดเคลื่อน (+): +{error_val:.2f} ลิตร
+            fig.add_trace(go.Scatter(
+                x=labels, y=y_data,
+                mode='lines+markers',
+                name='ยอดใช้จริง (Actual)',
+                line=dict(color='#0f172a', width=3),
+                marker=dict(size=6)
+            ))
+            
+            fig.add_trace(go.Scatter(
+                x=labels[12:], y=Forecast[12:],
+                mode='lines+markers',
+                name='HW-Forecast (พยากรณ์)',
+                line=dict(color='#2563eb', width=2, dash='dash'),
+                marker=dict(size=5)
+            ))
+
+            fig.add_trace(go.Scatter(
+                x=["งวดถัดไป"], y=[recommended_qty],
+                mode='markers+text',
+                name=f'ยอดแนะนำสั่งซื้อ: {recommended_qty} ลิตร',
+                marker=dict(color='#16a34a', size=14, symbol='star'),
+                text=[f"{recommended_qty} ลิตร"],
+                textposition="top center"
+            ))
+
+            fig.update_layout(
+                xaxis_title="เดือน/ปี",
+                yaxis_title="ปริมาณการใช้ (ลิตร)",
+                hovermode="x unified",
+                template="plotly_white",
+                height=380,
+                margin=dict(l=20, r=20, t=30, b=20)
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
+            # ตารางรายละเอียดคำนวณ
+            with st.expander("📋 ดูตารางรายละเอียดการคำนวณ (Level, Trend, Seasonality)"):
+                df = pd.DataFrame({
+                    "งวด/เดือน/ปี": labels,
+                    "ยอดใช้จริง (Y)": [f"{v:.2f}" for v in y_data],
+                    "Level (L)": [f"{v:.2f}" if not np.isnan(v) else "-" for v in Level],
+                    "Trend (T)": [f"{v:.2f}" if not np.isnan(v) else "-" for v in Trend],
+                    "Season (S)": [f"{v:.2f}" if not np.isnan(v) else "-" for v in Season],
+                    "HW-Forecast (F)": [f"{v:.2f}" if not np.isnan(v) else "-" for v in Forecast]
+                })
+                st.dataframe(df, use_container_width=True, height=250)
+
+        else:
+            # หากยังกรอกข้อมูลไม่ครบทั้ง 2 ช่อง จะขึ้นกล่องแจ้งเตือนนี้แทน
+            with c_results:
+                st.markdown('''
+                    <div style="background-color: #fefce8; border: 2px dashed #eab308; border-radius: 14px; padding: 35px 20px; text-align: center; margin-top: 10px;">
+                        <div style="font-size: 45px; margin-bottom: 10px;">📝</div>
+                        <div style="font-size: 24px; font-weight: 800; color: #854d0e;">กรุณากรอกข้อมูลให้ครบทั้ง 2 ช่อง</div>
+                        <div style="font-size: 19px; color: #a16207; margin-top: 10px; line-height: 1.6;">
+                            1. ปริมาณการใช้ของเดือนล่าสุด<br>
+                            2. ปริมาณยอดคงเหลือ<br><br>
+                            <strong style="color: #854d0e;">⚡ ระบบจะคำนวณและแสดงผลลัพธ์ทันทีเมื่อกรอกข้อมูลครบถ้วนครับ</strong>
                         </div>
-                        <div style="font-size: 18px; font-weight: 800; color: #dc2626; margin-top: 2px;">
-                            คลาดเคลื่อน (-): -{error_val:.2f} ลิตร
-                        </div>
                     </div>
                 ''', unsafe_allow_html=True)
-
-            r3, r4 = st.columns(2)
-            with r3:
-                st.markdown(f'''
-                    <div class="card-recommend">
-                        <div class="card-recommend-title">3. ปริมาณการสั่งซื้อที่แนะนำ</div>
-                        <div class="card-recommend-value">{recommended_qty} <small style="font-size:18px">ลิตร</small></div>
-                        <div style="font-size:13px; color:#15803d; margin-top:4px; font-weight:600;">(ผลพยากรณ์ {next_f:.2f} - คงเหลือ {stock_qty:.0f} ➔ ปัดขึ้นลงท้าย 0)</div>
-                    </div>
-                ''', unsafe_allow_html=True)
-            with r4:
-                st.markdown(f'''
-                    <div class="card-tanks">
-                        <div class="card-tanks-title">4. จำนวนถังที่ต้องสั่งซื้อ</div>
-                        {tanks_display_html}
-                    </div>
-                ''', unsafe_allow_html=True)
-
-        st.markdown("---")
-
-        # กราฟแสดงแนวโน้ม
-        st.subheader("📈 กราฟแสดงแนวโน้มการใช้งานย้อนหลังและการพยากรณ์")
-        fig = go.Figure()
-        
-        fig.add_trace(go.Scatter(
-            x=labels, y=y_data,
-            mode='lines+markers',
-            name='ยอดใช้จริง (Actual)',
-            line=dict(color='#0f172a', width=3),
-            marker=dict(size=6)
-        ))
-        
-        fig.add_trace(go.Scatter(
-            x=labels[12:], y=Forecast[12:],
-            mode='lines+markers',
-            name='HW-Forecast (พยากรณ์)',
-            line=dict(color='#2563eb', width=2, dash='dash'),
-            marker=dict(size=5)
-        ))
-
-        fig.add_trace(go.Scatter(
-            x=["งวดถัดไป"], y=[recommended_qty],
-            mode='markers+text',
-            name=f'ยอดแนะนำสั่งซื้อ: {recommended_qty} ลิตร',
-            marker=dict(color='#16a34a', size=14, symbol='star'),
-            text=[f"{recommended_qty} ลิตร"],
-            textposition="top center"
-        ))
-
-        fig.update_layout(
-            xaxis_title="เดือน/ปี",
-            yaxis_title="ปริมาณการใช้ (ลิตร)",
-            hovermode="x unified",
-            template="plotly_white",
-            height=380,
-            margin=dict(l=20, r=20, t=30, b=20)
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-        # ตารางรายละเอียดคำนวณ
-        with st.expander("📋 ดูตารางรายละเอียดการคำนวณ (Level, Trend, Seasonality)"):
-            df = pd.DataFrame({
-                "งวด/เดือน/ปี": labels,
-                "ยอดใช้จริง (Y)": [f"{v:.2f}" for v in y_data],
-                "Level (L)": [f"{v:.2f}" if not np.isnan(v) else "-" for v in Level],
-                "Trend (T)": [f"{v:.2f}" if not np.isnan(v) else "-" for v in Trend],
-                "Season (S)": [f"{v:.2f}" if not np.isnan(v) else "-" for v in Season],
-                "HW-Forecast (F)": [f"{v:.2f}" if not np.isnan(v) else "-" for v in Forecast]
-            })
-            st.dataframe(df, use_container_width=True, height=250)
