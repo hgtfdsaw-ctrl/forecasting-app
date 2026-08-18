@@ -68,6 +68,7 @@ st.markdown("""
         padding: 6px 12px !important;
     }
 
+    /* Tabs Styling (สำหรับ 4 สินค้า) */
     .stTabs [data-baseweb="tab-list"] { gap: 10px; }
     .stTabs [data-baseweb="tab"] {
         height: 60px;
@@ -75,9 +76,9 @@ st.markdown("""
         background-color: #ffffff;
         border-radius: 12px 12px 0 0;
         border: 2px solid #cbd5e1;
-        padding: 10px 20px;
+        padding: 10px 24px;
         font-weight: 700;
-        font-size: 18px !important;
+        font-size: 20px !important;
         color: #334155;
     }
     .stTabs [aria-selected="true"] {
@@ -180,7 +181,6 @@ st.markdown("""
         font-size: 22px;
     }
 
-    /* Policy Tag Styling */
     .policy-tag {
         display: inline-block;
         background-color: #e0f2fe;
@@ -209,7 +209,7 @@ st.markdown("""
         </div>
         <div>
             <h1 class="header-title-text">ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์ (Hybrid Policy Engine)</h1>
-            <p class="header-subtitle-text">วิเคราะห์การพยากรณ์ Holt-Winters ผสานโมเดลคลังสินค้า EOQ / POQ / ROP / SS</p>
+            <p class="header-subtitle-text">วิเคราะห์การพยากรณ์ Holt-Winters โครงสร้างแบบจำลองคลังสินค้า EOQ / POQ / ROP / SS</p>
         </div>
     </div>
 """, unsafe_allow_html=True)
@@ -428,14 +428,12 @@ def get_tank_rows(product_key, order_qty):
             rows.append(("ถัง 10 ลิตร", f"{t10} ถัง"))
         return rows
 
-# --- 11. สร้าง UI หน้าต่างหลัก (เพิ่ม Tab ที่ 5 สรุปต้นทุน) ---
-tabs_list = [p["name"] for p in st.session_state.product_store.values()] + ["📊 สรุปและเปรียบเทียบต้นทุนรวม"]
-tabs = st.tabs(tabs_list)
+# --- 11. แสดง 4 แท็บผลิตภัณฑ์หลัก ---
+tabs = st.tabs([p["name"] for p in st.session_state.product_store.values()])
 keys_list = list(st.session_state.product_store.keys())
 
-# --- TAB 1 - 4: ผลิตภัณฑ์แต่ละรายการ ---
-for i, p_key in enumerate(keys_list):
-    with tabs[i]:
+for tab, p_key in zip(tabs, keys_list):
+    with tab:
         p_info = st.session_state.product_store[p_key]
         p_inv = inventory_params[p_key]
         
@@ -447,7 +445,7 @@ for i, p_key in enumerate(keys_list):
         
         # ป้ายบอกนโยบายที่เลือกใช้
         policy_desc = f"🎯 นโยบายที่เหมาะสมที่สุด: <strong>{p_inv['policy']}</strong> " + \
-                      (f"(สั่งล็อตประหยัด <strong>{p_inv['selected_lot']} ลิตร</strong>)" if p_inv['policy']=='EOQ' else f"(รอบการสั่งซื้อ <strong>k = {p_inv['k']} เดือน</strong>)")
+                      (f"(สั่งครั้งละ <strong>{p_inv['selected_lot']} ลิตร</strong>)" if p_inv['policy']=='EOQ' else f"(รอบการสั่งซื้อ <strong>k = {p_inv['k']} เดือน</strong>)")
         st.markdown(f'<div class="policy-tag">{policy_desc}</div>', unsafe_allow_html=True)
 
         if f"success_msg_{p_key}" in st.session_state:
@@ -477,7 +475,7 @@ for i, p_key in enumerate(keys_list):
                 key=f"stock_{p_key}"
             )
 
-            # --- เพิ่มส่วนแจ้งเตือนสถานะ ROP & Safety Stock ---
+            # ส่วนแจ้งเตือน ROP & Safety Stock
             if stock_qty_input is not None:
                 st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
                 if stock_qty_input <= p_inv["ss"]:
@@ -487,7 +485,7 @@ for i, p_key in enumerate(keys_list):
                 else:
                     st.success(f"✅ **สถานะปกติ:** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) สูงกว่าจุดสั่งซื้อ ROP ({p_inv['rop']} ลิตร) เพียงพอสำหรับใช้งาน")
 
-        # --- คำนวณเมื่อกรอกข้อมูลครบ ---
+        # คำนวณเมื่อกรอกข้อมูลครบ
         if last_usage is not None and stock_qty_input is not None:
             
             y_data = p_info["history"] + [last_usage]
@@ -499,15 +497,13 @@ for i, p_key in enumerate(keys_list):
 
             error_val = next_f * 0.01
 
-            # --- คำนวณปริมาณสั่งซื้อตามโมเดลที่เลือก (Hybrid Policy Engine) ---
+            # คำนวณปริมาณสั่งซื้อตามนโยบาย
             if p_inv["policy"] == "EOQ":
-                # สำหรับ EOQ: สั่งซื้อเมื่อคงเหลือ <= ROP โดยสั่งตามขนาด EOQ Pack (40 ลิตร)
                 if stock_qty_input <= p_inv["rop"]:
                     recommended_qty = p_inv["selected_lot"]
                 else:
                     recommended_qty = 0
             else:
-                # สำหรับ POQ: สั่งซื้อตามความต้องการพยากรณ์รวมในรอบ k เดือน หักคงเหลือ
                 needed_for_k_months = next_f * p_inv["k"]
                 net_needed = needed_for_k_months - stock_qty_input
                 if net_needed > 0:
@@ -606,72 +602,71 @@ for i, p_key in enumerate(keys_list):
             with c_results:
                 st.markdown(f'<div style="background-color: #fefce8; border: 2px dashed #eab308; border-radius: 14px; padding: 35px 20px; text-align: center; margin-top: 10px;"><div style="font-size: 45px; margin-bottom: 10px;">📝</div><div style="font-size: 24px; font-weight: 800; color: #854d0e;">กรุณากรอกข้อมูลให้ครบทั้ง 2 ช่อง</div><div style="font-size: 19px; color: #a16207; margin-top: 10px; line-height: 1.6;">1. ปริมาณการใช้งานของเดือนปัจจุบันนี้ <strong>({input_month_label})</strong><br>2. ปริมาณคงเหลือ ณ ปัจจุบัน<br><br><strong style="color: #854d0e;">⚡ เมื่อกรอกครบแล้ว ระบบจะคำนวณผลพยากรณ์สำหรับเดือน ({forecast_month_label}) ให้ทันที</strong></div></div>', unsafe_allow_html=True)
 
-# --- TAB 5: หน้าสรุปและเปรียบเทียบต้นทุนรวม (Cost Comparison Dashboard) ---
-with tabs[4]:
-    st.markdown('<div class="product-header">📊 ตารางสรุปเปรียบเทียบต้นทุนรวมการจัดการสินค้าคงคลัง</div>', unsafe_allow_html=True)
-    st.caption("การเปรียบเทียบต้นทุนรวม (Total Inventory Cost) ระหว่าง 3 นโยบาย เพื่อเลือกใช้นโยบายที่ต้นทุนต่ำที่สุด (Hybrid Policy)")
-    
-    # ตารางเปรียบเทียบต้นทุนรวม
-    summary_data = []
-    for k_p, v_info in default_products.items():
-        inv = inventory_params[k_p]
-        summary_data.append({
-            "รายการสินค้า": v_info["name"],
-            "ความต้องการเฉลี่ย (D)": f"{inv['d_avg']:.2f}",
-            "จุดสั่งซื้อใหม่ (ROP)": f"{inv['rop']:.2f}",
-            "สินค้าคงคลังสำรอง (SS)": f"{inv['ss']:.2f}",
-            "นโยบาย POQ (บาท)": f"{inv['poq_cost']:,.2f}",
-            "นโยบาย EOQ (บาท)": f"{inv['eoq_cost']:,.2f}",
-            "สั่งตามพยากรณ์ (บาท)": f"{inv['fc_cost']:,.2f}",
-            "นโยบายที่เลือกใช้": f"<b>{inv['policy']}</b> (สั่งครั้งละ {inv['selected_lot']} ลิตร)" if inv['policy']=='EOQ' else f"<b>{inv['policy']}</b> (k={inv['k']})",
-            "ต้นทุนรวมต่ำสุด (บาท)": f"<b>{inv['best_cost']:,.2f}</b>"
-        })
-    
-    df_summary = pd.DataFrame(summary_data)
-    st.write(df_summary.to_html(escape=False, index=False), unsafe_allow_html=True)
-    st.markdown("<br>", unsafe_allow_html=True)
+# --- 12. ส่วนสรุปเปรียบเทียบต้นทุนรวม (ย้ายมาไว้ด้านล่างสุดของหน้าจอ) ---
+st.markdown("<br><hr style='border: 2px solid #cbd5e1;'><br>", unsafe_allow_html=True)
+st.markdown('<div class="product-header">📊 ตารางสรุปการเปรียบเทียบต้นทุนรวมการจัดการสินค้าคงคลัง</div>', unsafe_allow_html=True)
+st.caption("การเปรียบเทียบต้นทุนรวม (Total Inventory Cost) 3 วิธี เพื่อเลือกใช้นโยบายที่เหมาะสมที่สุด (Hybrid Policy)")
 
-    # คำนวณยอดเงินประหยัดรวม
-    total_eoq_all = sum(v["eoq_cost"] for v in inventory_params.values())
-    total_hybrid_best = sum(v["best_cost"] for v in inventory_params.values())
-    total_savings = total_eoq_all - total_hybrid_best
+# สร้างตาราง HTML
+summary_data = []
+for k_p, v_info in default_products.items():
+    inv = inventory_params[k_p]
+    summary_data.append({
+        "รายการสินค้า": v_info["name"],
+        "ความต้องการเฉลี่ย (D)": f"{inv['d_avg']:.2f}",
+        "จุดสั่งซื้อใหม่ (ROP)": f"{inv['rop']:.2f}",
+        "สินค้าคงคลังสำรอง (SS)": f"{inv['ss']:.2f}",
+        "นโยบาย POQ (บาท)": f"{inv['poq_cost']:,.2f}",
+        "แนวทางปฏิบัติ EOQ (บาท)": f"{inv['eoq_cost']:,.2f}",
+        "สั่งตามพยากรณ์ (บาท)": f"{inv['fc_cost']:,.2f}",
+        "นโยบายที่เลือกใช้": f"<b>{inv['policy']}</b> (สั่งซื้อครั้งละ {inv['selected_lot']} ลิตร)" if inv['policy']=='EOQ' else f"<b>{inv['policy']}</b> (k={inv['k']})",
+        "ต้นทุนรวมต่ำสุด (บาท)": f"<b>{inv['best_cost']:,.2f}</b>"
+    })
 
-    col_s1, col_s2 = st.columns(2)
-    with col_s1:
-        st.markdown(f"""
-            <div style="background-color: #f0fdf4; border: 2px solid #16a34a; padding: 20px; border-radius: 14px;">
-                <div style="font-size: 18px; color: #15803d; font-weight: 800;">💰 ต้นทุนรวมนโยบายแบบ Hybrid (เลือกวิธีที่ดีที่สุด)</div>
-                <div style="font-size: 32px; color: #16a34a; font-weight: 900; margin-top: 5px;">{total_hybrid_best:,.2f} บาท</div>
-            </div>
-        """, unsafe_allow_html=True)
-    with col_s2:
-        st.markdown(f"""
-            <div style="background-color: #eff6ff; border: 2px solid #2563eb; padding: 20px; border-radius: 14px;">
-                <div style="font-size: 18px; color: #1d4ed8; font-weight: 800;">🎉 ยอดประหยัดได้รวม (เมื่อเทียบกับ EOQ ทั้งหมด)</div>
-                <div style="font-size: 32px; color: #2563eb; font-weight: 900; margin-top: 5px;">ประหยัดได้ {total_savings:,.2f} บาท</div>
-            </div>
-        """, unsafe_allow_html=True)
+df_summary = pd.DataFrame(summary_data)
+st.write(df_summary.to_html(escape=False, index=False), unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.subheader("📊 กราฟเปรียบเทียบต้นทุนรวมของทั้ง 3 นโยบาย")
-    
-    # กราฟแท่งเปรียบเทียบ
-    categories = [v["name"] for v in default_products.values()]
-    poq_costs = [v["poq_cost"] for v in inventory_params.values()]
-    eoq_costs = [v["eoq_cost"] for v in inventory_params.values()]
-    fc_costs = [v["fc_cost"] for v in inventory_params.values()]
+# การคำนวณยอดเงินประหยัดรวม
+total_eoq_all = sum(v["eoq_cost"] for v in inventory_params.values())
+total_hybrid_best = sum(v["best_cost"] for v in inventory_params.values())
+total_savings = total_eoq_all - total_hybrid_best
 
-    fig_cost = go.Figure()
-    fig_cost.add_trace(go.Bar(x=categories, y=poq_costs, name='นโยบาย POQ', marker_color='#3b82f6'))
-    fig_cost.add_trace(go.Bar(x=categories, y=eoq_costs, name='นโยบาย EOQ', marker_color='#f59e0b'))
-    fig_cost.add_trace(go.Bar(x=categories, y=fc_costs, name='สั่งตามพยากรณ์', marker_color='#ef4444'))
+col_s1, col_s2 = st.columns(2)
+with col_s1:
+    st.markdown(f"""
+        <div style="background-color: #f0fdf4; border: 2px solid #16a34a; padding: 20px; border-radius: 14px;">
+            <div style="font-size: 18px; color: #15803d; font-weight: 800;">💰 ต้นทุนรวมนโยบายแบบ Hybrid (เลือกวิธีที่ดีที่สุด)</div>
+            <div style="font-size: 32px; color: #16a34a; font-weight: 900; margin-top: 5px;">{total_hybrid_best:,.2f} บาท</div>
+        </div>
+    """, unsafe_allow_html=True)
+with col_s2:
+    st.markdown(f"""
+        <div style="background-color: #eff6ff; border: 2px solid #2563eb; padding: 20px; border-radius: 14px;">
+            <div style="font-size: 18px; color: #1d4ed8; font-weight: 800;">🎉 ยอดประหยัดได้รวม (เมื่อเทียบกับ EOQ ทั้งหมด)</div>
+            <div style="font-size: 32px; color: #2563eb; font-weight: 900; margin-top: 5px;">ประหยัดได้ {total_savings:,.2f} บาท</div>
+        </div>
+    """, unsafe_allow_html=True)
 
-    fig_cost.update_layout(
-        barmode='group',
-        xaxis_title="รายการสินค้า",
-        yaxis_title="ต้นทุนรวม (บาท)",
-        template="plotly_white",
-        height=400,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-    )
-    st.plotly_chart(fig_cost, use_container_width=True)
+st.markdown("<br>", unsafe_allow_html=True)
+st.subheader("📈 กราฟเปรียบเทียบต้นทุนรวมของทั้ง 3 นโยบาย")
+
+categories = [v["name"] for v in default_products.values()]
+poq_costs = [v["poq_cost"] for v in inventory_params.values()]
+eoq_costs = [v["eoq_cost"] for v in inventory_params.values()]
+fc_costs = [v["fc_cost"] for v in inventory_params.values()]
+
+fig_cost = go.Figure()
+fig_cost.add_trace(go.Bar(x=categories, y=poq_costs, name='นโยบาย POQ', marker_color='#3b82f6'))
+fig_cost.add_trace(go.Bar(x=categories, y=eoq_costs, name='นโยบาย EOQ', marker_color='#f59e0b'))
+fig_cost.add_trace(go.Bar(x=categories, y=fc_costs, name='สั่งตามพยากรณ์', marker_color='#ef4444'))
+
+fig_cost.update_layout(
+    barmode='group',
+    xaxis_title="รายการสินค้า",
+    yaxis_title="ต้นทุนรวม (บาท)",
+    template="plotly_white",
+    height=400,
+    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+)
+st.plotly_chart(fig_cost, use_container_width=True)
