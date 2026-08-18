@@ -235,29 +235,29 @@ inventory_params = {
         "policy": "EOQ", "k": 1, "d_avg": 43.07, "h": 1.50, "eoq": 33.89, "ss": 9.35, "rop": 12.94,
         "selected_lot": 40, "poq_cost": 16236.66, "eoq_cost": 13506.66, "fc_cost": 17901.66, "best_cost": 13506.66,
         "lead_time_days": 2.5, "vc": 0.37,
-        "tank_prices": {30: 1350, 20: 900}, # ถัง 20L = 900 บ. (45 บ./ลิตร)
-        "rationale": "<b>ประหยัดต้นทุนรวมได้สูงสุด</b> (ลดลง 4,395.00 บาท/ปี เมื่อเทียบกับการสั่งตามพยากรณ์) เนื่องจากเป็นสินค้าที่มีความผันผวนอุปสงค์ต่ำ ($VC = 0.37 \\le 0.5$) การสั่งซื้อตามขนาดประหยัด EOQ ล็อตละ 40 ลิตร ช่วยลดต้นทุนการสั่งซื้อได้อย่างมีประสิทธิภาพที่สุด"
+        "tank_prices": {30: 1350, 20: 900},
+        "rationale": "**ประหยัดต้นทุนรวมได้สูงสุด** (ลดลง 4,395.00 บาท/ปี เมื่อเทียบกับการสั่งตามพยากรณ์) เนื่องจากเป็นสินค้าที่มีความผันผวนอุปสงค์ต่ำ ($VC = 0.37 \\le 0.5$) การสั่งซื้อตามขนาดประหยัด EOQ ล็อตละ 40 ลิตร ช่วยลดต้นทุนการสั่งซื้อได้อย่างมีประสิทธิภาพที่สุด"
     },
     "interior": {
         "policy": "POQ", "k": 1, "d_avg": 20.03, "h": 1.50, "eoq": 23.11, "ss": 3.71, "rop": 5.38,
         "selected_lot": 30, "poq_cost": 7093.70, "eoq_cost": 11316.20, "fc_cost": 9474.95, "best_cost": 7093.70,
         "lead_time_days": 2.5, "vc": 0.48,
-        "tank_prices": {30: 1800, 20: 1200, 10: 600}, # 60 บ./ลิตร
-        "rationale": "<b>ประหยัดต้นทุนรวมได้สูงสุด</b> (ลดลง 4,222.50 บาท/ปี เมื่อเทียบกับ EOQ) เหมาะกับสินค้าที่มีความผันผวนอุปสงค์ปานกลาง ($VC = 0.48$) นโยบาย POQ ($k=1$) ช่วยควบคุมระดับคลังสินค้าไม่ให้สะสมเกินความจำเป็น"
+        "tank_prices": {30: 1800, 20: 1200, 10: 600},
+        "rationale": "**ประหยัดต้นทุนรวมได้สูงสุด** (ลดลง 4,222.50 บาท/ปี เมื่อเทียบกับ EOQ) เหมาะกับสินค้าที่มีความผันผวนอุปสงค์ปานกลาง ($VC = 0.48$) นโยบาย POQ ($k=1$) ช่วยควบคุมระดับคลังสินค้าไม่ให้สะสมเกินความจำเป็น"
     },
     "glass": {
         "policy": "POQ", "k": 1, "d_avg": 13.35, "h": 2.00, "eoq": 16.34, "ss": 2.21, "rop": 3.32,
         "selected_lot": 20, "poq_cost": 6175.13, "eoq_cost": 10021.13, "fc_cost": 9654.88, "best_cost": 6175.13,
         "lead_time_days": 2.0, "vc": 0.52,
-        "tank_prices": {30: 1500, 20: 1000, 10: 500}, # 50 บ./ลิตร
-        "rationale": "<b>ประหยัดต้นทุนรวมได้สูงสุด</b> (ลดลง 3,846.00 บาท/ปี เมื่อเทียบกับ EOQ) เนื่องจากอัตราค่าการถือครองคลังสินค้า ($h=2.00$) สูง นโยบาย POQ ($k=1$) จึงช่วยลดปริมาณสินค้าคลังเฉลี่ยลงได้อย่างมีนัยสำคัญ"
+        "tank_prices": {30: 1500, 20: 1000, 10: 500},
+        "rationale": "**ประหยัดต้นทุนรวมได้สูงสุด** (ลดลง 3,846.00 บาท/ปี เมื่อเทียบกับ EOQ) เนื่องจากอัตราค่าการถือครองคลังสินค้า ($h=2.00$) สูง นโยบาย POQ ($k=1$) จึงช่วยลดปริมาณสินค้าคลังเฉลี่ยลงได้อย่างมีนัยสำคัญ"
     },
     "wheel": {
         "policy": "POQ", "k": 3, "d_avg": 2.76, "h": 1.50, "eoq": 8.58, "ss": 0.44, "rop": 0.67,
         "selected_lot": 10, "poq_cost": 2066.39, "eoq_cost": 4062.89, "fc_cost": 4062.89, "best_cost": 2066.39,
         "lead_time_days": 3.0, "vc": 0.65,
-        "tank_prices": {30: 2400, 20: 1600, 10: 800}, # 80 บ./ลิตร
-        "rationale": "<b>ประหยัดต้นทุนรวมได้สูงสุด</b> (ลดลง 1,996.50 บาท/ปี เมื่อเทียบกับ EOQ) เนื่องจากเป็นสินค้าที่มีปริมาณความต้องการต่ำและผันผวน ($VC = 0.65$) การรวบงวดสั่งซื้อแบบ POQ ($k=3$) ช่วยประหยัดค่าสั่งซื้อได้อย่างคุ้มค่า"
+        "tank_prices": {30: 2400, 20: 1600, 10: 800},
+        "rationale": "**ประหยัดต้นทุนรวมได้สูงสุด** (ลดลง 1,996.50 บาท/ปี เมื่อเทียบกับ EOQ) เนื่องจากเป็นสินค้าที่มีปริมาณความต้องการต่ำและผันผวน ($VC = 0.65$) การรวบงวดสั่งซื้อแบบ POQ ($k=3$) ช่วยประหยัดค่าสั่งซื้อได้อย่างคุ้มค่า"
     }
 }
 
@@ -460,7 +460,7 @@ for tab, p_key in zip(tabs, keys_list):
 
         st.markdown(f'<div class="product-header">📦 ผลิตภัณฑ์: {p_info["name"]}</div>', unsafe_allow_html=True)
         
-        # --- [เพิ่มฟีเจอร์ที่ 2] แสดง Badge นโยบาย พร้อม Popover เหตุผลการเลือกนโยบาย ---
+        # --- Badge นโยบาย + Popover ---
         c_badge, c_popover = st.columns([3.5, 1])
         with c_badge:
             policy_desc = f"🎯 นโยบายที่เหมาะสมที่สุด: <strong>{p_inv['policy']}</strong> " + \
@@ -497,21 +497,21 @@ for tab, p_key in zip(tabs, keys_list):
                 key=f"stock_{p_key}"
             )
 
-            # --- [เพิ่มฟีเจอร์ที่ 3] คำนวณวันคาดการณ์ที่จะได้รับสินค้า (Lead Time & Arrival Date) ---
+            # คำนวณวันคาดการณ์ที่จะได้รับสินค้า (Markdown Standard Format)
             lead_days = p_inv["lead_time_days"]
             expected_arrival = datetime.now() + timedelta(days=lead_days)
             arrival_str = expected_arrival.strftime("%d/%m/%Y")
-            lead_info_msg = f"<br>⏱️ <b>ระยะเวลาจัดส่งโดยประมาณ:</b> {lead_days} วัน (คาดว่าจะได้รับสินค้าภายในวันที่ <b>{arrival_str}</b>)"
+            lead_info_msg = f"\n\n⏱️ **ระยะเวลาจัดส่งโดยประมาณ:** {lead_days} วัน (คาดว่าจะได้รับสินค้าภายในวันที่ **{arrival_str}**)"
 
-            # ส่วนแจ้งเตือน ROP & Safety Stock
+            # ส่วนแจ้งเตือน ROP & Safety Stock (แก้ไขเอา unsafe_allow_html ออก)
             if stock_qty_input is not None:
                 st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
                 if stock_qty_input <= p_inv["ss"]:
-                    st.error(f"🚨 **สถานะวิกฤต (Below Safety Stock):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) ต่ำกว่าระดับความปลอดภัย SS ({p_inv['ss']} ลิตร) เสี่ยงสินค้าขาดมือ!{lead_info_msg}", unsafe_allow_html=True)
+                    st.error(f"🚨 **สถานะวิกฤต (Below Safety Stock):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) ต่ำกว่าระดับความปลอดภัย SS ({p_inv['ss']} ลิตร) เสี่ยงสินค้าขาดมือ!{lead_info_msg}")
                 elif stock_qty_input <= p_inv["rop"]:
-                    st.warning(f"⚠️ **เตือนจุดสั่งซื้อ (Reorder Point):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) แตะจุดสั่งซื้อ ROP ({p_inv['rop']} ลิตร) แล้ว ควรเริ่มดำเนินสั่งซื้อ!{lead_info_msg}", unsafe_allow_html=True)
+                    st.warning(f"⚠️ **เตือนจุดสั่งซื้อ (Reorder Point):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) แตะจุดสั่งซื้อ ROP ({p_inv['rop']} ลิตร) แล้ว ควรเริ่มดำเนินสั่งซื้อ!{lead_info_msg}")
                 else:
-                    st.success(f"✅ **สถานะปกติ:** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) สูงกว่าจุดสั่งซื้อ ROP ({p_inv['rop']} ลิตร) เพียงพอสำหรับใช้งาน{lead_info_msg}", unsafe_allow_html=True)
+                    st.success(f"✅ **สถานะปกติ:** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) สูงกว่าจุดสั่งซื้อ ROP ({p_inv['rop']} ลิตร) เพียงพอสำหรับใช้งาน{lead_info_msg}")
 
         # คำนวณเมื่อกรอกข้อมูลครบ
         if last_usage is not None and stock_qty_input is not None:
@@ -539,7 +539,7 @@ for tab, p_key in zip(tabs, keys_list):
                 else:
                     recommended_qty = 0
 
-            # --- [เพิ่มฟีเจอร์ที่ 1] คำนวณถังและยอดประมาณการค่าใช้จ่าย ---
+            # คำนวณถังและยอดประมาณการค่าใช้จ่าย
             tank_rows, est_cost = get_tank_rows_and_cost(p_key, recommended_qty)
             if tank_rows:
                 table_html_rows = "".join([
@@ -639,12 +639,11 @@ for tab, p_key in zip(tabs, keys_list):
             with c_results:
                 st.markdown(f'<div style="background-color: #fefce8; border: 2px dashed #eab308; border-radius: 14px; padding: 35px 20px; text-align: center; margin-top: 10px;"><div style="font-size: 45px; margin-bottom: 10px;">📝</div><div style="font-size: 24px; font-weight: 800; color: #854d0e;">กรุณากรอกข้อมูลให้ครบทั้ง 2 ช่อง</div><div style="font-size: 19px; color: #a16207; margin-top: 10px; line-height: 1.6;">1. ปริมาณการใช้งานของเดือนปัจจุบันนี้ <strong>({input_month_label})</strong><br>2. ปริมาณคงเหลือ ณ ปัจจุบัน<br><br><strong style="color: #854d0e;">⚡ เมื่อกรอกครบแล้ว ระบบจะคำนวณผลพยากรณ์สำหรับเดือน ({forecast_month_label}) ให้ทันที</strong></div></div>', unsafe_allow_html=True)
 
-# --- 12. ส่วนสรุปเปรียบเทียบต้นทุนรวม (ย้ายมาไว้ด้านล่างสุดของหน้าจอ) ---
+# --- 12. ส่วนสรุปเปรียบเทียบต้นทุนรวม ---
 st.markdown("<br><hr style='border: 2px solid #cbd5e1;'><br>", unsafe_allow_html=True)
 st.markdown('<div class="product-header">📊 ตารางสรุปการเปรียบเทียบต้นทุนรวมการจัดการสินค้าคงคลัง</div>', unsafe_allow_html=True)
 st.caption("การเปรียบเทียบต้นทุนรวม (Total Inventory Cost) 3 วิธี เพื่อเลือกใช้นโยบายที่เหมาะสมที่สุด (Hybrid Policy)")
 
-# สร้างตาราง HTML
 summary_data = []
 for k_p, v_info in default_products.items():
     inv = inventory_params[k_p]
@@ -664,7 +663,6 @@ df_summary = pd.DataFrame(summary_data)
 st.write(df_summary.to_html(escape=False, index=False), unsafe_allow_html=True)
 st.markdown("<br>", unsafe_allow_html=True)
 
-# การคำนวณยอดเงินประหยัดรวม
 total_eoq_all = sum(v["eoq_cost"] for v in inventory_params.values())
 total_hybrid_best = sum(v["best_cost"] for v in inventory_params.values())
 total_savings = total_eoq_all - total_hybrid_best
