@@ -194,36 +194,40 @@ st.markdown("""
         border: 1px solid #7dd3fc;
     }
 
-    /* Product Cost Card Style */
+    /* Product Cost Card Style Inside Tab */
     .prod-cost-card {
         background: #ffffff;
-        border: 2px solid #e2e8f0;
+        border: 2px solid #cbd5e1;
         border-radius: 16px;
         padding: 20px;
-        margin-bottom: 20px;
+        margin-top: 25px;
+        margin-bottom: 15px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
     .prod-cost-title {
         font-size: 20px;
         font-weight: 800;
         color: #0f172a;
-        margin-bottom: 12px;
+        margin-bottom: 14px;
         border-bottom: 2px solid #f1f5f9;
         padding-bottom: 8px;
     }
     .cost-box {
-        padding: 12px 14px;
-        border-radius: 10px;
+        padding: 14px;
+        border-radius: 12px;
         text-align: center;
     }
-    .cost-box-title { font-size: 13px; font-weight: 700; color: #64748b; }
-    .cost-box-val { font-size: 20px; font-weight: 800; margin-top: 4px; }
+    .cost-box-title { font-size: 14px; font-weight: 700; color: #64748b; }
+    .cost-box-val { font-size: 22px; font-weight: 800; margin-top: 4px; }
+    
     .cost-winner {
         background-color: #f0fdf4;
         border: 2px solid #16a34a;
+        box-shadow: 0 2px 8px rgba(22, 163, 74, 0.12);
     }
     .cost-winner .cost-box-title { color: #15803d; }
     .cost-winner .cost-box-val { color: #15803d; }
+    
     .cost-normal {
         background-color: #f8fafc;
         border: 1px solid #cbd5e1;
@@ -273,7 +277,7 @@ inventory_params = {
         "lead_time_days": 2.5, "vc": 0.37,
         "price_per_liter": 30,
         "tank_prices": {30: 900, 20: 600},
-        "rationale": "**ประหยัดกว่าวิธีอื่นยังไง:** เนื่องจากเป็นสินค้าที่มีอุปสงค์สูงและสม่ำเสมอ ($VC = 0.37 \\le 0.5$) การสั่งซื้อด้วยขนาดล็อตประหยัด **EOQ (ครั้งละ 40 ลิตร)** จะลดความถี่การสั่งซื้อลงได้มาก โดยไม่ทำให้เกิดค่าเก็บรักษาคลังสินค้าที่สูงเกินไป ประหยัดกว่าการสั่งตามพยากรณ์ถึง **4,395.00 บาท/ปี**"
+        "rationale": "<b>ทำไม EOQ ถึงประหยัดที่สุด?</b> เนื่องจากน้ำยาล้างรถมีอุปสงค์สูงและค่อนข้างสม่ำเสมอ (VC = 0.37 ≤ 0.5) การสั่งซื้อแบบล็อตประหยัดขนาดคงที่ <b>EOQ (ครั้งละ 40 ลิตร)</b> จะช่วยถัวเฉลี่ยค่าสั่งซื้อและค่าถือครองคลังสินค้าได้สมดุลที่สุด <b>ประหยัดกว่าการสั่งตามพยากรณ์ 4,395.00 บาท/ปี</b> และ<b>ถูกกว่าวิธี POQ ถึง 2,730.00 บาท/ปี</b>"
     },
     "interior": {
         "policy": "POQ", "k": 1, "d_avg": 20.03, "h": 1.50, "eoq": 23.11, "ss": 3.71, "rop": 5.38,
@@ -281,7 +285,7 @@ inventory_params = {
         "lead_time_days": 2.5, "vc": 0.48,
         "price_per_liter": 30,
         "tank_prices": {30: 900, 20: 600, 10: 300},
-        "rationale": "**ประหยัดกว่าวิธีอื่นยังไง:** มีความผันผวนของอุปสงค์ระดับปานกลาง ($VC = 0.48$) การใช้ **POQ ($k=1$)** รวบคำสั่งซื้อรายเดือน จะช่วยปรับปริมาณสั่งซื้อให้พอดีกับความต้องการแต่ละช่วง ป้องกันไม่ให้สต็อกเหลือค้างคลัง ประหยัดกว่าวิธี EOQ ถึง **4,222.50 บาท/ปี**"
+        "rationale": "<b>ทำไม POQ (k=1) ถึงประหยัดที่สุด?</b> สินค้ามีความผันผวนระดับปานกลาง (VC = 0.48) การใช้นโยบายรอบเวลาสั่งซื้อรายเดือน <b>POQ (k=1)</b> จะสั่งซื้อตามปริมาณที่คาดว่าต้องใช้จริงในแต่ละงวด ป้องกันไม่ให้มีสต็อกเหลือค้างคลังเกินจำเป็น <b>ประหยัดกว่าวิธี EOQ ถึง 4,222.50 บาท/ปี</b> และ<b>ถูกกว่าวิธีพยากรณ์ 2,381.25 บาท/ปี</b>"
     },
     "glass": {
         "policy": "POQ", "k": 1, "d_avg": 13.35, "h": 2.00, "eoq": 16.34, "ss": 2.21, "rop": 3.32,
@@ -289,7 +293,7 @@ inventory_params = {
         "lead_time_days": 2.0, "vc": 0.52,
         "price_per_liter": 40,
         "tank_prices": {30: 1200, 20: 800, 10: 400},
-        "rationale": "**ประหยัดกว่าวิธีอื่นยังไง:** เป็นสินค้าที่มีราคาสูงกว่ากลุ่ม (40 บาท/ลิตร) และค่าถือครองสูง ($h=2.00$) การใช้ **POQ ($k=1$)** ช่วยให้ไม่ต้องสั่งล็อตใหญ่มาดองไว้ในคลัง ลดต้นทุนการเก็บรักษาได้อย่างมหาศาล ประหยัดกว่าวิธี EOQ ถึง **3,846.00 บาท/ปี**"
+        "rationale": "<b>ทำไม POQ (k=1) ถึงประหยัดที่สุด?</b> น้ำยาเช็ดกระจกมีราคาต่อหน่วยสูงกว่ากลุ่ม (40 บาท/ลิตร) และมีค่าถือครองสูง (h = 2.00 บาท) การใช้ <b>POQ (k=1)</b> ช่วยดึงระดับสต็อกเฉลี่ยลงมาให้ต่ำที่สุด จึงตัดค่าเก็บรักษาที่ไม่จำเป็นออกไปได้มหาศาล <b>ประหยัดกว่าวิธี EOQ ถึง 3,846.00 บาท/ปี</b> และ<b>ถูกกว่าวิธีพยากรณ์ 3,479.75 บาท/ปี</b>"
     },
     "wheel": {
         "policy": "POQ", "k": 3, "d_avg": 2.76, "h": 1.50, "eoq": 8.58, "ss": 0.44, "rop": 0.67,
@@ -297,7 +301,7 @@ inventory_params = {
         "lead_time_days": 3.0, "vc": 0.65,
         "price_per_liter": 30,
         "tank_prices": {30: 900, 20: 600, 10: 300},
-        "rationale": "**ประหยัดกว่าวิธีอื่นยังไง:** สินค้ามีการใช้น้อยและผันผวนสูงมาก ($VC = 0.65$) การใช้นโยบาย **POQ ($k=3$)** คือการรวบงวดสั่งซื้อทุกๆ 3 เดือน ตัดค่าใช้จ่ายในการสั่งซื้อบ่อยๆ ออกไป ประหยัดกว่าวิธี EOQ และแบบพยากรณ์ถึง **1,996.50 บาท/ปี**"
+        "rationale": "<b>ทำไม POQ (k=3) ถึงประหยัดที่สุด?</b> สินค้ามีการใช้น้อยและผันผวนสูงมาก (VC = 0.65) การใช้นโยบาย <b>POQ (k=3)</b> หรือการรวบคำสั่งซื้อทุกๆ 3 เดือน ช่วยลดความถี่และต้นทุนในการออกคำสั่งซื้อบ่อยๆ ได้อย่างมีประสิทธิภาพ <b>ประหยัดกว่าทั้งวิธี EOQ และวิธีสั่งตามพยากรณ์ถึง 1,996.50 บาท/ปี</b>"
     }
 }
 
@@ -492,14 +496,10 @@ for tab, p_key in zip(tabs, keys_list):
 
         st.markdown(f'<div class="product-header">📦 ผลิตภัณฑ์: {p_info["name"]}</div>', unsafe_allow_html=True)
         
-        c_badge, c_popover = st.columns([3.5, 1])
-        with c_badge:
-            policy_desc = f"🎯 นโยบายที่เหมาะสมที่สุด: <strong>{p_inv['policy']}</strong> " + \
-                          (f"(สั่งครั้งละ <strong>{p_inv['selected_lot']} ลิตร</strong>)" if p_inv['policy']=='EOQ' else f"(รอบการสั่งซื้อ <strong>k = {p_inv['k']} เดือน</strong>)")
-            st.markdown(f'<div class="policy-tag">{policy_desc}</div>', unsafe_allow_html=True)
-        with c_popover:
-            with st.popover("💡 เหตุผลการเลือกนโยบาย"):
-                st.markdown(f"{p_inv['rationale']}")
+        # Policy Badge
+        policy_desc = f"🎯 นโยบายที่เลือกใช้: <strong>{p_inv['policy']}</strong> " + \
+                      (f"(สั่งครั้งละ <strong>{p_inv['selected_lot']} ลิตร</strong>)" if p_inv['policy']=='EOQ' else f"(รอบสั่งซื้อ <strong>k = {p_inv['k']} เดือน</strong>)")
+        st.markdown(f'<div class="policy-tag">{policy_desc}</div>', unsafe_allow_html=True)
 
         if f"success_msg_{p_key}" in st.session_state:
             st.success(st.session_state[f"success_msg_{p_key}"])
@@ -608,70 +608,55 @@ for tab, p_key in zip(tabs, keys_list):
             fig.update_layout(xaxis_title="เดือน/ปี", yaxis_title="ปริมาณการใช้ (ลิตร)", hovermode="x unified", template="plotly_white", height=380, margin=dict(l=20, r=20, t=30, b=20))
             st.plotly_chart(fig, use_container_width=True)
 
+        # --- 12. ส่วนการเปรียบเทียบต้นทุนของน้ำยาแต่ละชนิด (อยู่ในหมวดหมู่/แท็บ ของน้ำยานั้นๆ) ---
+        poq_cls = "cost-winner" if p_inv["policy"] == "POQ" else "cost-normal"
+        eoq_cls = "cost-winner" if p_inv["policy"] == "EOQ" else "cost-normal"
+        fc_cls = "cost-normal"
 
-# --- 12. ส่วนสรุปการเปรียบเทียบต้นทุนแยกรายน้ำยา (ตามคำขอใหม่) ---
-st.markdown("<br><hr style='border: 2px solid #cbd5e1;'><br>", unsafe_allow_html=True)
-st.markdown('<div class="product-header">📊 สรุปการเปรียบเทียบต้นทุนแยกตามชนิดน้ำยา (Individual Product Cost Analysis)</div>', unsafe_allow_html=True)
-st.caption("เปรียบเทียบต้นทุนรวมของการจัดการสินค้าคงคลังทั้ง 3 วิธีแยกตามชนิดน้ำยา พร้อมวิเคราะห์ความประหยัดของนโยบายที่เลือก")
-
-# สร้าง Card แสดงแยกแต่ละผลิตภัณฑ์
-for p_key, p_info in default_products.items():
-    inv = inventory_params[p_key]
-    
-    # คำนวณค่านิยมประหยัดเมื่อเทียบกับ EOQ หรือ Forecast
-    poq_cls = "cost-winner" if inv["policy"] == "POQ" else "cost-normal"
-    eoq_cls = "cost-winner" if inv["policy"] == "EOQ" else "cost-normal"
-    fc_cls = "cost-normal"
-    
-    st.markdown(f"""
-        <div class="prod-cost-card">
-            <div class="prod-cost-title">{p_info['name']} <span style="font-size:15px; font-weight:600; color:#64748b;">(ราคา {inv['price_per_liter']} บาท/ลิตร | ความต้องการเฉลี่ย {inv['d_avg']:.2f} ลิตร/เดือน)</span></div>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 12px;">
-                <div class="cost-box {poq_cls}">
-                    <div class="cost-box-title">นโยบาย POQ {'🏆 (เลือกใช้)' if inv['policy']=='POQ' else ''}</div>
-                    <div class="cost-box-val">{inv['poq_cost']:,.2f} บาท</div>
+        st.markdown(f"""
+            <div class="prod-cost-card">
+                <div class="prod-cost-title">💰 ตารางเปรียบเทียบต้นทุนทั้ง 3 วิธีของ {p_info['name']}</div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 14px;">
+                    <div class="cost-box {poq_cls}">
+                        <div class="cost-box-title">1. นโยบาย POQ {'🏆 (เลือกใช้)' if p_inv['policy']=='POQ' else ''}</div>
+                        <div class="cost-box-val">{p_inv['poq_cost']:,.2f} บาท</div>
+                    </div>
+                    <div class="cost-box {eoq_cls}">
+                        <div class="cost-box-title">2. นโยบาย EOQ {'🏆 (เลือกใช้)' if p_inv['policy']=='EOQ' else ''}</div>
+                        <div class="cost-box-val">{p_inv['eoq_cost']:,.2f} บาท</div>
+                    </div>
+                    <div class="cost-box {fc_cls}">
+                        <div class="cost-box-title">3. สั่งตามพยากรณ์ (Forecast)</div>
+                        <div class="cost-box-val">{p_inv['fc_cost']:,.2f} บาท</div>
+                    </div>
                 </div>
-                <div class="cost-box {eoq_cls}">
-                    <div class="cost-box-title">นโยบาย EOQ {'🏆 (เลือกใช้)' if inv['policy']=='EOQ' else ''}</div>
-                    <div class="cost-box-val">{inv['eoq_cost']:,.2f} บาท</div>
-                </div>
-                <div class="cost-box {fc_cls}">
-                    <div class="cost-box-title">สั่งตามพยากรณ์ (Forecast)</div>
-                    <div class="cost-box-val">{inv['fc_cost']:,.2f} บาท</div>
+                <div style="background-color: #f1f5f9; padding: 14px 18px; border-radius: 12px; font-size: 15px; color: #1e293b; line-height: 1.6; border-left: 5px solid #2563eb;">
+                    {p_inv['rationale']}
                 </div>
             </div>
-            <div style="background-color: #f1f5f9; padding: 12px 16px; border-radius: 10px; font-size: 15px; color: #334155;">
-                {inv['rationale']}
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-# --- 13. ช่องสรุปภาพรวมคำตอบ (Summary Highlight Box) ---
+
+# --- 13. ช่องสรุปภาพรวมคำตอบท้ายสุด (Overall Hybrid Policy Summary) ---
 total_eoq_all = sum(v["eoq_cost"] for v in inventory_params.values())
 total_hybrid_best = sum(v["best_cost"] for v in inventory_params.values())
 total_savings = total_eoq_all - total_hybrid_best
 
+st.markdown("<br><hr style='border: 2px solid #cbd5e1;'><br>", unsafe_allow_html=True)
 st.markdown("""
-    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #ffffff; padding: 25px; border-radius: 18px; margin-top: 10px;">
-        <h3 style="color: #38bdf8; margin-top:0; font-size:22px; font-weight:800;">📌 ช่องสรุปเปรียบเทียบ: ทำไมการเลือกใช้ Hybrid Policy ถึงถูกที่สุด?</h3>
+    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #ffffff; padding: 25px; border-radius: 18px;">
+        <h3 style="color: #38bdf8; margin-top:0; font-size:22px; font-weight:800;">🏆 ช่องสรุปภาพรวม: การบริหารจัดการด้วย Hybrid Policy</h3>
         <p style="font-size: 16px; line-height: 1.7; color: #e2e8f0;">
-            จากการวิเคราะห์ลักษณะอุปสงค์และค่าใช้จ่ายของน้ำยาแต่ละชนิด การใช้ <strong>นโยบายผสม (Hybrid Policy)</strong> โดยเลือกใช้ 
-            <span style="color:#4ade80; font-weight:bold;">EOQ สำหรับน้ำยาล้างรถ</span> และใช้ 
-            <span style="color:#38bdf8; font-weight:bold;">POQ สำหรับน้ำยาเคลือบภายใน, น้ำยาเช็ดกระจก และน้ำยาลงล้อ</span> 
-            ให้ผลลัพธ์การประหยัดต้นทุนรวมดีที่สุดด้วยเหตุผลดังนี้:
+            เมื่อเลือกใช้นโยบายที่เหมาะสมที่สุดกับน้ำยาแต่ละชนิด (<strong>EOQ สำหรับน้ำยาล้างรถ</strong> และ <strong>POQ สำหรับน้ำยาเคลือบภายใน, น้ำยาเช็ดกระจก, น้ำยาลงล้อ</strong>) 
+            จะได้ต้นทุนรวมทั้งระบบที่ต่ำที่สุดเมื่อเทียบกับการใช้วิธีเดียวกับทุกสินค้า
         </p>
-        <ul style="font-size: 15px; line-height: 1.8; color: #cbd5e1; margin-left: -10px;">
-            <li><strong>น้ำยาล้างรถ (ใช้ EOQ):</strong> เป็นสินค้าที่ใช้เยอะต่อเนื่อง สั่งล็อตใหญ่ทีเดียวคุ้มค่าสั่งซื้อ ประหยัดกว่าการสั่งตามพยากรณ์รายเดือน <strong>4,395 บาท</strong></li>
-            <li><strong>น้ำยาเคลือบภายใน & น้ำยาเช็ดกระจก (ใช้ POQ k=1):</strong> เป็นสินค้าที่มีความผันผวนและราคาสูง การสั่งรวบรายเดือนช่วยลดการถือครองคลังสินค้า ประหยัดกว่า EOQ ถึง <strong>4,222.50 บาท และ 3,846 บาท</strong> ตามลำดับ</li>
-            <li><strong>น้ำยาลงล้อ (ใช้ POQ k=3):</strong> เป็นสินค้าที่ใช้น้อย นานๆ สั่งที การสั่งรวบทุก 3 เดือนช่วยประหยัดค่าดำเนินการจัดสั่งซื้อ ประหยัดกว่า EOQ ถึง <strong>1,996.50 บาท</strong></li>
-        </ul>
         <div style="display: flex; gap: 20px; margin-top: 20px; border-top: 1px solid #334155; padding-top: 15px;">
             <div>
-                <span style="font-size: 14px; color: #94a3b8;">ต้นทุนรวมนโยบาย Hybrid:</span><br>
+                <span style="font-size: 14px; color: #94a3b8;">ต้นทุนรวมนโยบายผสม (Hybrid Policy):</span><br>
                 <span style="font-size: 28px; font-weight: 900; color: #4ade80;">""" + f"{total_hybrid_best:,.2f}" + """ บาท</span>
             </div>
             <div style="border-left: 1px solid #334155; padding-left: 20px;">
-                <span style="font-size: 14px; color: #94a3b8;">ประหยัดได้รวมทั้งหมด (เมื่อเทียบกับ EOQ):</span><br>
+                <span style="font-size: 14px; color: #94a3b8;">ยอดประหยัดได้รวมทั้งหมด (เมื่อเทียบกับ EOQ ทั้งหมด):</span><br>
                 <span style="font-size: 28px; font-weight: 900; color: #38bdf8;">""" + f"ประหยัดได้ {total_savings:,.2f}" + """ บาท</span>
             </div>
         </div>
