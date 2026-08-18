@@ -58,7 +58,6 @@ st.markdown("""
         border-bottom: 2px solid #cbd5e1;
     }
     
-    /* ปรับขนาดตัวอักษรของปุ่มใน Sidebar เป็น 14px */
     section[data-testid="stSidebar"] button {
         font-size: 14px !important;
         font-weight: 700 !important;
@@ -76,9 +75,9 @@ st.markdown("""
         background-color: #ffffff;
         border-radius: 12px 12px 0 0;
         border: 2px solid #cbd5e1;
-        padding: 10px 24px;
+        padding: 10px 20px;
         font-weight: 700;
-        font-size: 22px !important;
+        font-size: 18px !important;
         color: #334155;
     }
     .stTabs [aria-selected="true"] {
@@ -180,6 +179,19 @@ st.markdown("""
         color: #2563eb;
         font-size: 22px;
     }
+
+    /* Policy Tag Styling */
+    .policy-tag {
+        display: inline-block;
+        background-color: #e0f2fe;
+        color: #0369a1;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 15px;
+        margin-bottom: 12px;
+        border: 1px solid #7dd3fc;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -196,8 +208,8 @@ st.markdown("""
             </svg>
         </div>
         <div>
-            <h1 class="header-title-text">ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์</h1>
-            <p class="header-subtitle-text">คำนวณและเก็บบันทึกประวัติเพื่อพยากรณ์ต่อเนื่องทุกเดือนอัตโนมัติ</p>
+            <h1 class="header-title-text">ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์ (Hybrid Policy Engine)</h1>
+            <p class="header-subtitle-text">วิเคราะห์การพยากรณ์ Holt-Winters ผสานโมเดลคลังสินค้า EOQ / POQ / ROP / SS</p>
         </div>
     </div>
 """, unsafe_allow_html=True)
@@ -216,7 +228,27 @@ def get_next_month_label(last_label):
     else:
         return f"{months_base[m_idx + 1]} {y_num}"
 
-# --- 4. ค่าตั้งต้นประวัติ 35 เดือน (ม.ค. 66 - พ.ย. 68) ---
+# --- 4. ข้อมูลพารามิเตอร์โมเดลคลังสินค้า (จากผลงานวิจัย EOQ/POQ/SS/ROP) ---
+inventory_params = {
+    "carwash": {
+        "policy": "EOQ", "k": 1, "d_avg": 43.07, "h": 1.50, "eoq": 33.89, "ss": 9.35, "rop": 12.94,
+        "selected_lot": 40, "poq_cost": 16236.66, "eoq_cost": 13506.66, "fc_cost": 17901.66, "best_cost": 13506.66
+    },
+    "interior": {
+        "policy": "POQ", "k": 1, "d_avg": 20.03, "h": 1.50, "eoq": 23.11, "ss": 3.71, "rop": 5.38,
+        "selected_lot": 30, "poq_cost": 7093.70, "eoq_cost": 11316.20, "fc_cost": 9474.95, "best_cost": 7093.70
+    },
+    "glass": {
+        "policy": "POQ", "k": 1, "d_avg": 13.35, "h": 2.00, "eoq": 16.34, "ss": 2.21, "rop": 3.32,
+        "selected_lot": 20, "poq_cost": 6175.13, "eoq_cost": 10021.13, "fc_cost": 9654.88, "best_cost": 6175.13
+    },
+    "wheel": {
+        "policy": "POQ", "k": 3, "d_avg": 2.76, "h": 1.50, "eoq": 8.58, "ss": 0.44, "rop": 0.67,
+        "selected_lot": 10, "poq_cost": 2066.39, "eoq_cost": 4062.89, "fc_cost": 4062.89, "best_cost": 2066.39
+    }
+}
+
+# --- 5. ค่าตั้งต้นประวัติ 35 เดือน (ม.ค. 66 - พ.ย. 68) ---
 base_labels_35 = [f"{m} 66" for m in months_base] + \
                  [f"{m} 67" for m in months_base] + \
                  [f"{m} 68" for m in months_base[:11]]
@@ -256,11 +288,11 @@ default_products = {
     }
 }
 
-# --- 5. สร้าง Session State ---
+# --- 6. สร้าง Session State ---
 if "product_store" not in st.session_state:
     st.session_state.product_store = copy.deepcopy(default_products)
 
-# --- 6. Callback Function บันทึกข้อมูล ---
+# --- 7. Callback Function บันทึกข้อมูล ---
 def cb_save_data(p_key, usage_val, label_val):
     st.session_state.product_store[p_key]["history"].append(usage_val)
     st.session_state.product_store[p_key]["labels"].append(label_val)
@@ -268,7 +300,7 @@ def cb_save_data(p_key, usage_val, label_val):
     st.session_state[f"stock_{p_key}"] = None
     st.session_state[f"success_msg_{p_key}"] = f"✅ บันทึกยอดใช้จริงของเดือน {label_val} เรียบร้อยแล้ว! ระบบร่นไปงวดถัดไปแล้วครับ"
 
-# --- 7. Sidebar จัดการรีเซ็ตแยกหมวดหมู่ ---
+# --- 8. Sidebar จัดการรีเซ็ตแยกหมวดหมู่ ---
 with st.sidebar:
     st.header("⚙️ ระบบควบคุมแอป")
     
@@ -323,7 +355,7 @@ with st.sidebar:
         st.session_state.clear()
         st.rerun()
 
-# --- 8. ฟังก์ชันคำนวณ Holt-Winters Multiplicative ---
+# --- 9. ฟังก์ชันคำนวณ Holt-Winters Multiplicative ---
 def run_holt_winters(y, alpha, beta, gamma, L=12):
     n = len(y)
     Level = [np.nan] * n
@@ -349,7 +381,7 @@ def run_holt_winters(y, alpha, beta, gamma, L=12):
     next_forecast = (Level[-1] + Trend[-1]) * Season[n - 12]
     return Level, Trend, Season[:n], Forecast, next_forecast
 
-# --- 9. ฟังก์ชันคำนวณแยกประเภทถัง ---
+# --- 10. ฟังก์ชันคำนวณแยกประเภทถัง ---
 def get_tank_rows(product_key, order_qty):
     if order_qty <= 0:
         return []
@@ -396,13 +428,16 @@ def get_tank_rows(product_key, order_qty):
             rows.append(("ถัง 10 ลิตร", f"{t10} ถัง"))
         return rows
 
-# --- 10. สร้าง UI หน้าต่างหลัก ---
-tabs = st.tabs([p["name"] for p in st.session_state.product_store.values()])
+# --- 11. สร้าง UI หน้าต่างหลัก (เพิ่ม Tab ที่ 5 สรุปต้นทุน) ---
+tabs_list = [p["name"] for p in st.session_state.product_store.values()] + ["📊 สรุปและเปรียบเทียบต้นทุนรวม"]
+tabs = st.tabs(tabs_list)
 keys_list = list(st.session_state.product_store.keys())
 
-for tab, p_key in zip(tabs, keys_list):
-    with tab:
+# --- TAB 1 - 4: ผลิตภัณฑ์แต่ละรายการ ---
+for i, p_key in enumerate(keys_list):
+    with tabs[i]:
         p_info = st.session_state.product_store[p_key]
+        p_inv = inventory_params[p_key]
         
         last_recorded_month = p_info["labels"][-1]
         input_month_label = get_next_month_label(last_recorded_month)
@@ -410,6 +445,11 @@ for tab, p_key in zip(tabs, keys_list):
 
         st.markdown(f'<div class="product-header">📦 ผลิตภัณฑ์: {p_info["name"]}</div>', unsafe_allow_html=True)
         
+        # ป้ายบอกนโยบายที่เลือกใช้
+        policy_desc = f"🎯 นโยบายที่เหมาะสมที่สุด: <strong>{p_inv['policy']}</strong> " + \
+                      (f"(สั่งล็อตประหยัด <strong>{p_inv['selected_lot']} ลิตร</strong>)" if p_inv['policy']=='EOQ' else f"(รอบการสั่งซื้อ <strong>k = {p_inv['k']} เดือน</strong>)")
+        st.markdown(f'<div class="policy-tag">{policy_desc}</div>', unsafe_allow_html=True)
+
         if f"success_msg_{p_key}" in st.session_state:
             st.success(st.session_state[f"success_msg_{p_key}"])
             del st.session_state[f"success_msg_{p_key}"]
@@ -437,6 +477,16 @@ for tab, p_key in zip(tabs, keys_list):
                 key=f"stock_{p_key}"
             )
 
+            # --- เพิ่มส่วนแจ้งเตือนสถานะ ROP & Safety Stock ---
+            if stock_qty_input is not None:
+                st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+                if stock_qty_input <= p_inv["ss"]:
+                    st.error(f"🚨 **สถานะวิกฤต (Below Safety Stock):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) ต่ำกว่าระดับความปลอดภัย SS ({p_inv['ss']} ลิตร) เสี่ยงสินค้าขาดมือ!")
+                elif stock_qty_input <= p_inv["rop"]:
+                    st.warning(f"⚠️ **เตือนจุดสั่งซื้อ (Reorder Point):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) แตะจุดสั่งซื้อ ROP ({p_inv['rop']} ลิตร) แล้ว ควรเริ่มดำเนินสั่งซื้อ!")
+                else:
+                    st.success(f"✅ **สถานะปกติ:** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) สูงกว่าจุดสั่งซื้อ ROP ({p_inv['rop']} ลิตร) เพียงพอสำหรับใช้งาน")
+
         # --- คำนวณเมื่อกรอกข้อมูลครบ ---
         if last_usage is not None and stock_qty_input is not None:
             
@@ -448,12 +498,22 @@ for tab, p_key in zip(tabs, keys_list):
             )
 
             error_val = next_f * 0.01
-            net_needed = next_f - stock_qty_input
 
-            if net_needed > 0:
-                recommended_qty = math.ceil(net_needed / 10.0) * 10
+            # --- คำนวณปริมาณสั่งซื้อตามโมเดลที่เลือก (Hybrid Policy Engine) ---
+            if p_inv["policy"] == "EOQ":
+                # สำหรับ EOQ: สั่งซื้อเมื่อคงเหลือ <= ROP โดยสั่งตามขนาด EOQ Pack (40 ลิตร)
+                if stock_qty_input <= p_inv["rop"]:
+                    recommended_qty = p_inv["selected_lot"]
+                else:
+                    recommended_qty = 0
             else:
-                recommended_qty = 0
+                # สำหรับ POQ: สั่งซื้อตามความต้องการพยากรณ์รวมในรอบ k เดือน หักคงเหลือ
+                needed_for_k_months = next_f * p_inv["k"]
+                net_needed = needed_for_k_months - stock_qty_input
+                if net_needed > 0:
+                    recommended_qty = math.ceil(net_needed / 10.0) * 10
+                else:
+                    recommended_qty = 0
 
             tank_rows = get_tank_rows(p_key, recommended_qty)
             if tank_rows:
@@ -471,7 +531,7 @@ for tab, p_key in zip(tabs, keys_list):
                 
                 r1, r2 = st.columns(2)
                 with r1:
-                    st.markdown(f'<div class="card-recommend"><div class="card-recommend-title">1. ปริมาณสั่งซื้อแนะนำ</div><div class="card-recommend-value">{recommended_qty} <small style="font-size:18px">ลิตร</small></div></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="card-recommend"><div class="card-recommend-title">1. ปริมาณสั่งซื้อแนะนำ ({p_inv["policy"]})</div><div class="card-recommend-value">{recommended_qty} <small style="font-size:18px">ลิตร</small></div></div>', unsafe_allow_html=True)
                 with r2:
                     st.markdown(f'<div class="card-tanks"><div class="card-tanks-title">2. จำนวนถังที่ต้องสั่งซื้อ</div>{tanks_display_html}</div>', unsafe_allow_html=True)
 
@@ -545,3 +605,73 @@ for tab, p_key in zip(tabs, keys_list):
         else:
             with c_results:
                 st.markdown(f'<div style="background-color: #fefce8; border: 2px dashed #eab308; border-radius: 14px; padding: 35px 20px; text-align: center; margin-top: 10px;"><div style="font-size: 45px; margin-bottom: 10px;">📝</div><div style="font-size: 24px; font-weight: 800; color: #854d0e;">กรุณากรอกข้อมูลให้ครบทั้ง 2 ช่อง</div><div style="font-size: 19px; color: #a16207; margin-top: 10px; line-height: 1.6;">1. ปริมาณการใช้งานของเดือนปัจจุบันนี้ <strong>({input_month_label})</strong><br>2. ปริมาณคงเหลือ ณ ปัจจุบัน<br><br><strong style="color: #854d0e;">⚡ เมื่อกรอกครบแล้ว ระบบจะคำนวณผลพยากรณ์สำหรับเดือน ({forecast_month_label}) ให้ทันที</strong></div></div>', unsafe_allow_html=True)
+
+# --- TAB 5: หน้าสรุปและเปรียบเทียบต้นทุนรวม (Cost Comparison Dashboard) ---
+with tabs[4]:
+    st.markdown('<div class="product-header">📊 ตารางสรุปเปรียบเทียบต้นทุนรวมการจัดการสินค้าคงคลัง</div>', unsafe_allow_html=True)
+    st.caption("การเปรียบเทียบต้นทุนรวม (Total Inventory Cost) ระหว่าง 3 นโยบาย เพื่อเลือกใช้นโยบายที่ต้นทุนต่ำที่สุด (Hybrid Policy)")
+    
+    # ตารางเปรียบเทียบต้นทุนรวม
+    summary_data = []
+    for k_p, v_info in default_products.items():
+        inv = inventory_params[k_p]
+        summary_data.append({
+            "รายการสินค้า": v_info["name"],
+            "ความต้องการเฉลี่ย (D)": f"{inv['d_avg']:.2f}",
+            "จุดสั่งซื้อใหม่ (ROP)": f"{inv['rop']:.2f}",
+            "สินค้าคงคลังสำรอง (SS)": f"{inv['ss']:.2f}",
+            "นโยบาย POQ (บาท)": f"{inv['poq_cost']:,.2f}",
+            "นโยบาย EOQ (บาท)": f"{inv['eoq_cost']:,.2f}",
+            "สั่งตามพยากรณ์ (บาท)": f"{inv['fc_cost']:,.2f}",
+            "นโยบายที่เลือกใช้": f"<b>{inv['policy']}</b> (สั่งครั้งละ {inv['selected_lot']} ลิตร)" if inv['policy']=='EOQ' else f"<b>{inv['policy']}</b> (k={inv['k']})",
+            "ต้นทุนรวมต่ำสุด (บาท)": f"<b>{inv['best_cost']:,.2f}</b>"
+        })
+    
+    df_summary = pd.DataFrame(summary_data)
+    st.write(df_summary.to_html(escape=False, index=False), unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # คำนวณยอดเงินประหยัดรวม
+    total_eoq_all = sum(v["eoq_cost"] for v in inventory_params.values())
+    total_hybrid_best = sum(v["best_cost"] for v in inventory_params.values())
+    total_savings = total_eoq_all - total_hybrid_best
+
+    col_s1, col_s2 = st.columns(2)
+    with col_s1:
+        st.markdown(f"""
+            <div style="background-color: #f0fdf4; border: 2px solid #16a34a; padding: 20px; border-radius: 14px;">
+                <div style="font-size: 18px; color: #15803d; font-weight: 800;">💰 ต้นทุนรวมนโยบายแบบ Hybrid (เลือกวิธีที่ดีที่สุด)</div>
+                <div style="font-size: 32px; color: #16a34a; font-weight: 900; margin-top: 5px;">{total_hybrid_best:,.2f} บาท</div>
+            </div>
+        """, unsafe_allow_html=True)
+    with col_s2:
+        st.markdown(f"""
+            <div style="background-color: #eff6ff; border: 2px solid #2563eb; padding: 20px; border-radius: 14px;">
+                <div style="font-size: 18px; color: #1d4ed8; font-weight: 800;">🎉 ยอดประหยัดได้รวม (เมื่อเทียบกับ EOQ ทั้งหมด)</div>
+                <div style="font-size: 32px; color: #2563eb; font-weight: 900; margin-top: 5px;">ประหยัดได้ {total_savings:,.2f} บาท</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.subheader("📊 กราฟเปรียบเทียบต้นทุนรวมของทั้ง 3 นโยบาย")
+    
+    # กราฟแท่งเปรียบเทียบ
+    categories = [v["name"] for v in default_products.values()]
+    poq_costs = [v["poq_cost"] for v in inventory_params.values()]
+    eoq_costs = [v["eoq_cost"] for v in inventory_params.values()]
+    fc_costs = [v["fc_cost"] for v in inventory_params.values()]
+
+    fig_cost = go.Figure()
+    fig_cost.add_trace(go.Bar(x=categories, y=poq_costs, name='นโยบาย POQ', marker_color='#3b82f6'))
+    fig_cost.add_trace(go.Bar(x=categories, y=eoq_costs, name='นโยบาย EOQ', marker_color='#f59e0b'))
+    fig_cost.add_trace(go.Bar(x=categories, y=fc_costs, name='สั่งตามพยากรณ์', marker_color='#ef4444'))
+
+    fig_cost.update_layout(
+        barmode='group',
+        xaxis_title="รายการสินค้า",
+        yaxis_title="ต้นทุนรวม (บาท)",
+        template="plotly_white",
+        height=400,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+    st.plotly_chart(fig_cost, use_container_width=True)
