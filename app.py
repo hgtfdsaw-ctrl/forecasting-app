@@ -497,22 +497,6 @@ for tab, p_key in zip(tabs, keys_list):
                 key=f"stock_{p_key}"
             )
 
-            # คำนวณวันคาดการณ์ที่จะได้รับสินค้า (Markdown Standard Format)
-            lead_days = p_inv["lead_time_days"]
-            expected_arrival = datetime.now() + timedelta(days=lead_days)
-            arrival_str = expected_arrival.strftime("%d/%m/%Y")
-            lead_info_msg = f"\n\n⏱️ **ระยะเวลาจัดส่งโดยประมาณ:** {lead_days} วัน (คาดว่าจะได้รับสินค้าภายในวันที่ **{arrival_str}**)"
-
-            # ส่วนแจ้งเตือน ROP & Safety Stock (แก้ไขเอา unsafe_allow_html ออก)
-            if stock_qty_input is not None:
-                st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-                if stock_qty_input <= p_inv["ss"]:
-                    st.error(f"🚨 **สถานะวิกฤต (Below Safety Stock):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) ต่ำกว่าระดับความปลอดภัย SS ({p_inv['ss']} ลิตร) เสี่ยงสินค้าขาดมือ!{lead_info_msg}")
-                elif stock_qty_input <= p_inv["rop"]:
-                    st.warning(f"⚠️ **เตือนจุดสั่งซื้อ (Reorder Point):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) แตะจุดสั่งซื้อ ROP ({p_inv['rop']} ลิตร) แล้ว ควรเริ่มดำเนินสั่งซื้อ!{lead_info_msg}")
-                else:
-                    st.success(f"✅ **สถานะปกติ:** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) สูงกว่าจุดสั่งซื้อ ROP ({p_inv['rop']} ลิตร) เพียงพอสำหรับใช้งาน{lead_info_msg}")
-
         # คำนวณเมื่อกรอกข้อมูลครบ
         if last_usage is not None and stock_qty_input is not None:
             
@@ -539,6 +523,23 @@ for tab, p_key in zip(tabs, keys_list):
                 else:
                     recommended_qty = 0
 
+            # แสดงการแจ้งเตือน ROP & Safety Stock พร้อมระบุยอดพยากรณ์
+            lead_days = p_inv["lead_time_days"]
+            expected_arrival = datetime.now() + timedelta(days=lead_days)
+            arrival_str = expected_arrival.strftime("%d/%m/%Y")
+            
+            fc_info_msg = f"\n\n📊 **ยอดพยากรณ์การใช้ ({forecast_month_label}):** {next_f:.2f} ลิตร"
+            lead_info_msg = f"\n⏱️ **ระยะเวลาจัดส่งโดยประมาณ:** {lead_days} วัน (คาดว่าจะได้รับสินค้าภายในวันที่ **{arrival_str}**)"
+
+            with c_input:
+                st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+                if stock_qty_input <= p_inv["ss"]:
+                    st.error(f"🚨 **สถานะวิกฤต (Below Safety Stock):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) ต่ำกว่าระดับความปลอดภัย SS ({p_inv['ss']} ลิตร) เสี่ยงสินค้าขาดมือ!{fc_info_msg}{lead_info_msg}")
+                elif stock_qty_input <= p_inv["rop"]:
+                    st.warning(f"⚠️ **เตือนจุดสั่งซื้อ (Reorder Point):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) แตะจุดสั่งซื้อ ROP ({p_inv['rop']} ลิตร) แล้ว ควรเริ่มดำเนินสั่งซื้อ!{fc_info_msg}{lead_info_msg}")
+                else:
+                    st.success(f"✅ **สถานะปกติ:** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) สูงกว่าจุดสั่งซื้อ ROP ({p_inv['rop']} ลิตร) เพียงพอสำหรับใช้งาน{fc_info_msg}{lead_info_msg}")
+
             # คำนวณถังและยอดประมาณการค่าใช้จ่าย
             tank_rows, est_cost = get_tank_rows_and_cost(p_key, recommended_qty)
             if tank_rows:
@@ -556,10 +557,19 @@ for tab, p_key in zip(tabs, keys_list):
                 </div>
                 """
             else:
-                tanks_display_html = "<div style='font-size:20px; font-weight:800; color:#1e40af; margin-top:10px;'>ไม่ต้องสั่งซื้อ</div>"
+                tanks_display_html = f"""
+                <div style='font-size:20px; font-weight:800; color:#1e40af; margin-top:6px;'>ไม่ต้องสั่งซื้อ</div>
+                <div style='font-size:14px; font-weight:600; color:#1e3a8a; margin-top:8px; background:#dbeafe; padding:6px 10px; border-radius:8px;'>
+                    📈 ยอดพยากรณ์การใช้ ({forecast_month_label}): <b>{next_f:.2f} ลิตร</b>
+                </div>
+                """
 
-            # แสดงผลการคำนวณ
+            # แสดงผลการคำนวณฝั่งขวา
             with c_results:
+                # Banner สรุปยอดพยากรณ์ชัดเจน
+                st.info(f"💡 **สรุปผลพยากรณ์:** คาดการณ์ปริมาณการใช้น้ำยาในเดือน **{forecast_month_label}** เท่ากับ **{next_f:.2f} ลิตร** " + 
+                        (f"(แนะนำสั่งซื้อ **{recommended_qty} ลิตร**)" if recommended_qty > 0 else f"(สต็อกคงเหลือ {stock_qty_input:.2f} ลิตร ยังเพียงพอ จึงแนะนำ **สั่งซื้อ 0 ลิตร**)"))
+
                 st.markdown(f'<div class="large-label">📌 สรุปผลพยากรณ์ประจำเดือน: <span style="color:#2563eb;">{forecast_month_label}</span></div>', unsafe_allow_html=True)
                 
                 r1, r2 = st.columns(2)
