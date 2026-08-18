@@ -4,6 +4,7 @@ import numpy as np
 import plotly.graph_objects as go
 import math
 import copy
+from datetime import datetime, timedelta
 
 # --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่ง ---
 st.set_page_config(
@@ -164,21 +165,21 @@ st.markdown("""
     .tank-table th {
         border-bottom: 2px solid #93c5fd;
         padding: 4px 8px;
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 700;
         color: #1e40af;
         text-align: left;
     }
     .tank-table td {
-        padding: 6px 8px;
-        font-size: 20px;
+        padding: 4px 8px;
+        font-size: 18px;
         font-weight: 800;
         color: #1e3a8a;
     }
     .tank-table td.qty-col {
         text-align: right;
         color: #2563eb;
-        font-size: 22px;
+        font-size: 20px;
     }
 
     .policy-tag {
@@ -228,23 +229,35 @@ def get_next_month_label(last_label):
     else:
         return f"{months_base[m_idx + 1]} {y_num}"
 
-# --- 4. ข้อมูลพารามิเตอร์โมเดลคลังสินค้า (จากผลงานวิจัย EOQ/POQ/SS/ROP) ---
+# --- 4. ข้อมูลพารามิเตอร์โมเดลคลังสินค้า พร้อมราคา Lead Time และเหตุผลเชิงวิเคราะห์ ---
 inventory_params = {
     "carwash": {
         "policy": "EOQ", "k": 1, "d_avg": 43.07, "h": 1.50, "eoq": 33.89, "ss": 9.35, "rop": 12.94,
-        "selected_lot": 40, "poq_cost": 16236.66, "eoq_cost": 13506.66, "fc_cost": 17901.66, "best_cost": 13506.66
+        "selected_lot": 40, "poq_cost": 16236.66, "eoq_cost": 13506.66, "fc_cost": 17901.66, "best_cost": 13506.66,
+        "lead_time_days": 2.5, "vc": 0.37,
+        "tank_prices": {30: 1350, 20: 900}, # ถัง 20L = 900 บ. (45 บ./ลิตร)
+        "rationale": "<b>ประหยัดต้นทุนรวมได้สูงสุด</b> (ลดลง 4,395.00 บาท/ปี เมื่อเทียบกับการสั่งตามพยากรณ์) เนื่องจากเป็นสินค้าที่มีความผันผวนอุปสงค์ต่ำ ($VC = 0.37 \\le 0.5$) การสั่งซื้อตามขนาดประหยัด EOQ ล็อตละ 40 ลิตร ช่วยลดต้นทุนการสั่งซื้อได้อย่างมีประสิทธิภาพที่สุด"
     },
     "interior": {
         "policy": "POQ", "k": 1, "d_avg": 20.03, "h": 1.50, "eoq": 23.11, "ss": 3.71, "rop": 5.38,
-        "selected_lot": 30, "poq_cost": 7093.70, "eoq_cost": 11316.20, "fc_cost": 9474.95, "best_cost": 7093.70
+        "selected_lot": 30, "poq_cost": 7093.70, "eoq_cost": 11316.20, "fc_cost": 9474.95, "best_cost": 7093.70,
+        "lead_time_days": 2.5, "vc": 0.48,
+        "tank_prices": {30: 1800, 20: 1200, 10: 600}, # 60 บ./ลิตร
+        "rationale": "<b>ประหยัดต้นทุนรวมได้สูงสุด</b> (ลดลง 4,222.50 บาท/ปี เมื่อเทียบกับ EOQ) เหมาะกับสินค้าที่มีความผันผวนอุปสงค์ปานกลาง ($VC = 0.48$) นโยบาย POQ ($k=1$) ช่วยควบคุมระดับคลังสินค้าไม่ให้สะสมเกินความจำเป็น"
     },
     "glass": {
         "policy": "POQ", "k": 1, "d_avg": 13.35, "h": 2.00, "eoq": 16.34, "ss": 2.21, "rop": 3.32,
-        "selected_lot": 20, "poq_cost": 6175.13, "eoq_cost": 10021.13, "fc_cost": 9654.88, "best_cost": 6175.13
+        "selected_lot": 20, "poq_cost": 6175.13, "eoq_cost": 10021.13, "fc_cost": 9654.88, "best_cost": 6175.13,
+        "lead_time_days": 2.0, "vc": 0.52,
+        "tank_prices": {30: 1500, 20: 1000, 10: 500}, # 50 บ./ลิตร
+        "rationale": "<b>ประหยัดต้นทุนรวมได้สูงสุด</b> (ลดลง 3,846.00 บาท/ปี เมื่อเทียบกับ EOQ) เนื่องจากอัตราค่าการถือครองคลังสินค้า ($h=2.00$) สูง นโยบาย POQ ($k=1$) จึงช่วยลดปริมาณสินค้าคลังเฉลี่ยลงได้อย่างมีนัยสำคัญ"
     },
     "wheel": {
         "policy": "POQ", "k": 3, "d_avg": 2.76, "h": 1.50, "eoq": 8.58, "ss": 0.44, "rop": 0.67,
-        "selected_lot": 10, "poq_cost": 2066.39, "eoq_cost": 4062.89, "fc_cost": 4062.89, "best_cost": 2066.39
+        "selected_lot": 10, "poq_cost": 2066.39, "eoq_cost": 4062.89, "fc_cost": 4062.89, "best_cost": 2066.39,
+        "lead_time_days": 3.0, "vc": 0.65,
+        "tank_prices": {30: 2400, 20: 1600, 10: 800}, # 80 บ./ลิตร
+        "rationale": "<b>ประหยัดต้นทุนรวมได้สูงสุด</b> (ลดลง 1,996.50 บาท/ปี เมื่อเทียบกับ EOQ) เนื่องจากเป็นสินค้าที่มีปริมาณความต้องการต่ำและผันผวน ($VC = 0.65$) การรวบงวดสั่งซื้อแบบ POQ ($k=3$) ช่วยประหยัดค่าสั่งซื้อได้อย่างคุ้มค่า"
     }
 }
 
@@ -381,10 +394,12 @@ def run_holt_winters(y, alpha, beta, gamma, L=12):
     next_forecast = (Level[-1] + Trend[-1]) * Season[n - 12]
     return Level, Trend, Season[:n], Forecast, next_forecast
 
-# --- 10. ฟังก์ชันคำนวณแยกประเภทถัง ---
-def get_tank_rows(product_key, order_qty):
+# --- 10. ฟังก์ชันคำนวณแยกประเภทถัง และยอดประมาณการค่าใช้จ่าย ---
+def get_tank_rows_and_cost(product_key, order_qty):
     if order_qty <= 0:
-        return []
+        return [], 0.0
+
+    prices = inventory_params[product_key]["tank_prices"]
 
     if product_key == "carwash":
         best_t30, best_t20 = 0, 0
@@ -407,11 +422,12 @@ def get_tank_rows(product_key, order_qty):
                 best_t20 = t20
 
         rows = []
+        total_cost = (best_t30 * prices[30]) + (best_t20 * prices[20])
         if best_t30 > 0:
             rows.append(("ถัง 30 ลิตร", f"{best_t30} ถัง"))
         if best_t20 > 0:
             rows.append(("ถัง 20 ลิตร", f"{best_t20} ถัง"))
-        return rows
+        return rows, total_cost
     else:
         t30 = order_qty // 30
         rem = order_qty % 30
@@ -420,13 +436,14 @@ def get_tank_rows(product_key, order_qty):
         t10 = rem // 10
 
         rows = []
+        total_cost = (t30 * prices[30]) + (t20 * prices[20]) + (t10 * prices[10])
         if t30 > 0:
             rows.append(("ถัง 30 ลิตร", f"{t30} ถัง"))
         if t20 > 0:
             rows.append(("ถัง 20 ลิตร", f"{t20} ถัง"))
         if t10 > 0:
             rows.append(("ถัง 10 ลิตร", f"{t10} ถัง"))
-        return rows
+        return rows, total_cost
 
 # --- 11. แสดง 4 แท็บผลิตภัณฑ์หลัก ---
 tabs = st.tabs([p["name"] for p in st.session_state.product_store.values()])
@@ -443,10 +460,15 @@ for tab, p_key in zip(tabs, keys_list):
 
         st.markdown(f'<div class="product-header">📦 ผลิตภัณฑ์: {p_info["name"]}</div>', unsafe_allow_html=True)
         
-        # ป้ายบอกนโยบายที่เลือกใช้
-        policy_desc = f"🎯 นโยบายที่เหมาะสมที่สุด: <strong>{p_inv['policy']}</strong> " + \
-                      (f"(สั่งครั้งละ <strong>{p_inv['selected_lot']} ลิตร</strong>)" if p_inv['policy']=='EOQ' else f"(รอบการสั่งซื้อ <strong>k = {p_inv['k']} เดือน</strong>)")
-        st.markdown(f'<div class="policy-tag">{policy_desc}</div>', unsafe_allow_html=True)
+        # --- [เพิ่มฟีเจอร์ที่ 2] แสดง Badge นโยบาย พร้อม Popover เหตุผลการเลือกนโยบาย ---
+        c_badge, c_popover = st.columns([3.5, 1])
+        with c_badge:
+            policy_desc = f"🎯 นโยบายที่เหมาะสมที่สุด: <strong>{p_inv['policy']}</strong> " + \
+                          (f"(สั่งครั้งละ <strong>{p_inv['selected_lot']} ลิตร</strong>)" if p_inv['policy']=='EOQ' else f"(รอบการสั่งซื้อ <strong>k = {p_inv['k']} เดือน</strong>)")
+            st.markdown(f'<div class="policy-tag">{policy_desc}</div>', unsafe_allow_html=True)
+        with c_popover:
+            with st.popover("💡 เหตุผลการเลือกนโยบาย"):
+                st.markdown(f"**เหตุผลประกอบการตัดสินใจเชิงวิเคราะห์:**\n\n{p_inv['rationale']}")
 
         if f"success_msg_{p_key}" in st.session_state:
             st.success(st.session_state[f"success_msg_{p_key}"])
@@ -475,15 +497,21 @@ for tab, p_key in zip(tabs, keys_list):
                 key=f"stock_{p_key}"
             )
 
+            # --- [เพิ่มฟีเจอร์ที่ 3] คำนวณวันคาดการณ์ที่จะได้รับสินค้า (Lead Time & Arrival Date) ---
+            lead_days = p_inv["lead_time_days"]
+            expected_arrival = datetime.now() + timedelta(days=lead_days)
+            arrival_str = expected_arrival.strftime("%d/%m/%Y")
+            lead_info_msg = f"<br>⏱️ <b>ระยะเวลาจัดส่งโดยประมาณ:</b> {lead_days} วัน (คาดว่าจะได้รับสินค้าภายในวันที่ <b>{arrival_str}</b>)"
+
             # ส่วนแจ้งเตือน ROP & Safety Stock
             if stock_qty_input is not None:
                 st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
                 if stock_qty_input <= p_inv["ss"]:
-                    st.error(f"🚨 **สถานะวิกฤต (Below Safety Stock):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) ต่ำกว่าระดับความปลอดภัย SS ({p_inv['ss']} ลิตร) เสี่ยงสินค้าขาดมือ!")
+                    st.error(f"🚨 **สถานะวิกฤต (Below Safety Stock):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) ต่ำกว่าระดับความปลอดภัย SS ({p_inv['ss']} ลิตร) เสี่ยงสินค้าขาดมือ!{lead_info_msg}", unsafe_allow_html=True)
                 elif stock_qty_input <= p_inv["rop"]:
-                    st.warning(f"⚠️ **เตือนจุดสั่งซื้อ (Reorder Point):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) แตะจุดสั่งซื้อ ROP ({p_inv['rop']} ลิตร) แล้ว ควรเริ่มดำเนินสั่งซื้อ!")
+                    st.warning(f"⚠️ **เตือนจุดสั่งซื้อ (Reorder Point):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) แตะจุดสั่งซื้อ ROP ({p_inv['rop']} ลิตร) แล้ว ควรเริ่มดำเนินสั่งซื้อ!{lead_info_msg}", unsafe_allow_html=True)
                 else:
-                    st.success(f"✅ **สถานะปกติ:** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) สูงกว่าจุดสั่งซื้อ ROP ({p_inv['rop']} ลิตร) เพียงพอสำหรับใช้งาน")
+                    st.success(f"✅ **สถานะปกติ:** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) สูงกว่าจุดสั่งซื้อ ROP ({p_inv['rop']} ลิตร) เพียงพอสำหรับใช้งาน{lead_info_msg}", unsafe_allow_html=True)
 
         # คำนวณเมื่อกรอกข้อมูลครบ
         if last_usage is not None and stock_qty_input is not None:
@@ -511,13 +539,22 @@ for tab, p_key in zip(tabs, keys_list):
                 else:
                     recommended_qty = 0
 
-            tank_rows = get_tank_rows(p_key, recommended_qty)
+            # --- [เพิ่มฟีเจอร์ที่ 1] คำนวณถังและยอดประมาณการค่าใช้จ่าย ---
+            tank_rows, est_cost = get_tank_rows_and_cost(p_key, recommended_qty)
             if tank_rows:
                 table_html_rows = "".join([
                     f"<tr><td>{size}</td><td class='qty-col'>{qty}</td></tr>" 
                     for size, qty in tank_rows
                 ])
-                tanks_display_html = f"""<table class="tank-table"><thead><tr><th>ขนาดถัง</th><th style="text-align:right;">จำนวนสั่ง</th></tr></thead><tbody>{table_html_rows}</tbody></table>"""
+                tanks_display_html = f"""
+                <table class="tank-table">
+                    <thead><tr><th>ขนาดถัง</th><th style="text-align:right;">จำนวนสั่ง</th></tr></thead>
+                    <tbody>{table_html_rows}</tbody>
+                </table>
+                <div style="margin-top: 10px; padding-top: 6px; border-top: 2px dashed #93c5fd; font-size: 15px; font-weight: 800; color: #1e3a8a;">
+                    💳 รวมประมาณการค่าใช้จ่าย: <span style="color:#16a34a; font-size:19px;">{est_cost:,.2f}</span> บาท
+                </div>
+                """
             else:
                 tanks_display_html = "<div style='font-size:20px; font-weight:800; color:#1e40af; margin-top:10px;'>ไม่ต้องสั่งซื้อ</div>"
 
