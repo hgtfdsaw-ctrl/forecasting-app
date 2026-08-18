@@ -92,7 +92,7 @@ st.markdown("""
         font-size: 22px !important;
         font-weight: 800 !important;
         color: #0f172a;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
     }
     
     input[type=number]::-webkit-inner-spin-button, 
@@ -115,13 +115,14 @@ st.markdown("""
     }
     
     .large-label {
-        font-size: 20px !important;
+        font-size: 18px !important;
         font-weight: 700 !important;
-        color: #1e3a8a;
+        color: #0f172a;
         margin-top: 10px;
         margin-bottom: 5px;
     }
 
+    /* Card Status Styles */
     .card-base {
         background-color: #ffffff;
         padding: 18px;
@@ -186,12 +187,44 @@ st.markdown("""
         display: inline-block;
         background-color: #e0f2fe;
         color: #0369a1;
-        padding: 6px 14px;
+        padding: 8px 16px;
         border-radius: 20px;
         font-weight: 700;
         font-size: 15px;
-        margin-bottom: 12px;
         border: 1px solid #7dd3fc;
+    }
+
+    /* 🟡 Yellow Notice Card Style (สำหรับหน้าที่ยังไม่กรอกข้อมูล) */
+    .empty-state-card {
+        background-color: #fefce8;
+        border: 2px dashed #facc15;
+        border-radius: 18px;
+        padding: 40px 25px;
+        text-align: center;
+        margin-top: 10px;
+        box-shadow: 0 4px 12px rgba(250, 204, 21, 0.08);
+    }
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+    .empty-state-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #854d0e;
+        margin-bottom: 14px;
+    }
+    .empty-state-desc {
+        font-size: 17px;
+        font-weight: 700;
+        color: #a16207;
+        line-height: 1.8;
+    }
+    .empty-state-highlight {
+        margin-top: 25px;
+        font-size: 16px;
+        font-weight: 800;
+        color: #ca8a04;
     }
 
     /* Product Cost Card Style Inside Tab */
@@ -496,10 +529,18 @@ for tab, p_key in zip(tabs, keys_list):
 
         st.markdown(f'<div class="product-header">📦 ผลิตภัณฑ์: {p_info["name"]}</div>', unsafe_allow_html=True)
         
-        # Policy Badge
-        policy_desc = f"🎯 นโยบายที่เลือกใช้: <strong>{p_inv['policy']}</strong> " + \
-                      (f"(สั่งครั้งละ <strong>{p_inv['selected_lot']} ลิตร</strong>)" if p_inv['policy']=='EOQ' else f"(รอบสั่งซื้อ <strong>k = {p_inv['k']} เดือน</strong>)")
-        st.markdown(f'<div class="policy-tag">{policy_desc}</div>', unsafe_allow_html=True)
+        # Policy Badge & Rationale Expander (ส่วนหัว)
+        col_policy, col_expander = st.columns([2.5, 1.2])
+        with col_policy:
+            policy_desc = f"✨ นโยบายที่เหมาะสมที่สุด: <strong>{p_inv['policy']}</strong> " + \
+                          (f"(สั่งครั้งละ <strong>{p_inv['selected_lot']} ลิตร</strong>)" if p_inv['policy']=='EOQ' else f"(รอบสั่งซื้อ <strong>k = {p_inv['k']} เดือน</strong>)")
+            st.markdown(f'<div class="policy-tag">{policy_desc}</div>', unsafe_allow_html=True)
+        
+        with col_expander:
+            with st.expander("💡 เหตุผลการเลือกนโยบาย"):
+                st.write(f"**เหตุผลวิเคราะห์:** {p_inv['rationale']}")
+
+        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
         if f"success_msg_{p_key}" in st.session_state:
             st.success(st.session_state[f"success_msg_{p_key}"])
@@ -520,6 +561,7 @@ for tab, p_key in zip(tabs, keys_list):
                 label_visibility="collapsed", min_value=0.0, value=None, step=1.0, key=f"stock_{p_key}"
             )
 
+        # 🟢 กรณีที่ 1: กรอกข้อมูลครบถ้วน -> แสดงผลคำนวณ + กราฟ
         if last_usage is not None and stock_qty_input is not None:
             y_data = p_info["history"] + [last_usage]
             current_labels = p_info["labels"] + [input_month_label]
@@ -598,7 +640,26 @@ for tab, p_key in zip(tabs, keys_list):
                     on_click=cb_save_data, args=(p_key, last_usage, input_month_label)
                 )
 
+        # 🟡 กรณีที่ 2: ข้อมูลยังไม่ครบ -> แสดงกรอบเหลืองนวลแจ้งเตือน
+        else:
+            with c_results:
+                st.markdown(f"""
+                    <div class="empty-state-card">
+                        <div class="empty-state-icon">📝</div>
+                        <div class="empty-state-title">กรุณากรอกข้อมูลให้ครบทั้ง 2 ช่อง</div>
+                        <div class="empty-state-desc">
+                            1. ปริมาณการใช้งานของเดือนปัจจุบันนี้ (<b>{input_month_label}</b>)<br>
+                            2. ปริมาณคงเหลือ ณ ปัจจุบัน
+                        </div>
+                        <div class="empty-state-highlight">
+                            ⚡ เมื่อกรอกครบแล้ว ระบบจะคำนวณผลพยากรณ์สำหรับเดือน (<b>{forecast_month_label}</b>) ให้ทันที
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
+
         st.markdown("---")
+        
+        # แสดงกราฟเมื่อมีข้อมูล
         if last_usage is not None and stock_qty_input is not None:
             st.subheader(f"📈 กราฟแสดงแนวโน้มประวัติการใช้งานและการพยากรณ์ ({forecast_month_label})")
             fig = go.Figure()
