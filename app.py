@@ -6,7 +6,7 @@ import math
 import copy
 from datetime import datetime, timedelta
 
-# --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่ง ---
+# --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่ง (พร้อม Responsive Support สำหรับมือถือ) ---
 st.set_page_config(
     page_title="ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์", 
     page_icon="📈", 
@@ -17,7 +17,7 @@ st.markdown("""
     <style>
     .main { background-color: #f8fafc; }
     
-    /* Header & Icon Style */
+    /* Header & Icon Style Default (Desktop) */
     .header-container {
         display: flex;
         align-items: center;
@@ -33,16 +33,17 @@ st.markdown("""
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
     }
     .header-title-text {
-        font-size: 30px !important;
+        font-size: 28px !important;
         font-weight: 800 !important;
         color: #0f172a;
         margin: 0;
-        line-height: 1.2;
+        line-height: 1.25;
     }
     .header-subtitle-text {
-        font-size: 16px !important;
+        font-size: 15px !important;
         color: #64748b;
         margin-top: 4px;
         margin-bottom: 0;
@@ -50,7 +51,7 @@ st.markdown("""
     
     /* Sidebar Styling & Font Sizes */
     .reset-category-header {
-        font-size: 18px !important;
+        font-size: 17px !important;
         font-weight: 800 !important;
         color: #1e293b;
         margin-top: 14px;
@@ -69,17 +70,20 @@ st.markdown("""
         padding: 6px 12px !important;
     }
 
-    /* Tabs Styling */
-    .stTabs [data-baseweb="tab-list"] { gap: 10px; }
+    /* Tabs Styling Default */
+    .stTabs [data-baseweb="tab-list"] { 
+        gap: 8px; 
+        overflow-x: auto;
+    }
     .stTabs [data-baseweb="tab"] {
-        height: 60px;
-        white-space: pre-wrap;
+        height: 54px;
+        white-space: nowrap;
         background-color: #ffffff;
         border-radius: 12px 12px 0 0;
         border: 2px solid #cbd5e1;
-        padding: 10px 24px;
+        padding: 8px 18px;
         font-weight: 700;
-        font-size: 20px !important;
+        font-size: 18px !important;
         color: #334155;
     }
     .stTabs [aria-selected="true"] {
@@ -95,6 +99,7 @@ st.markdown("""
         margin-bottom: 12px;
     }
     
+    /* Number Input Styles Default */
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { 
         -webkit-appearance: none; 
@@ -102,9 +107,9 @@ st.markdown("""
     }
     input[type=number] { 
         -moz-appearance: textfield; 
-        font-size: 26px !important;
+        font-size: 24px !important;
         font-weight: bold !important;
-        height: 60px !important;
+        height: 54px !important;
         color: #0f172a !important;
         background-color: #ffffff !important;
         border: 2px solid #94a3b8 !important;
@@ -115,7 +120,7 @@ st.markdown("""
     }
     
     .large-label {
-        font-size: 18px !important;
+        font-size: 17px !important;
         font-weight: 700 !important;
         color: #0f172a;
         margin-top: 10px;
@@ -125,38 +130,38 @@ st.markdown("""
     /* Card Status Styles */
     .card-base {
         background-color: #ffffff;
-        padding: 18px;
+        padding: 16px;
         border-radius: 14px;
         border: 2px solid #e2e8f0;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         margin-bottom: 10px;
-        min-height: 160px;
+        min-height: 140px;
     }
-    .card-title { font-size: 16px; color: #475569; font-weight: 700; }
-    .card-value { font-size: 28px; color: #0f172a; font-weight: 800; margin-top: 4px; }
+    .card-title { font-size: 15px; color: #475569; font-weight: 700; }
+    .card-value { font-size: 26px; color: #0f172a; font-weight: 800; margin-top: 4px; }
     
     .card-recommend {
         background-color: #f0fdf4;
-        padding: 20px;
+        padding: 18px;
         border-radius: 14px;
         border: 3px solid #16a34a;
         box-shadow: 0 4px 10px rgba(22, 163, 74, 0.15);
         margin-bottom: 10px;
-        min-height: 160px;
+        min-height: 140px;
     }
-    .card-recommend-title { font-size: 18px; color: #15803d; font-weight: 800; }
-    .card-recommend-value { font-size: 34px; color: #15803d; font-weight: 900; margin-top: 5px; }
+    .card-recommend-title { font-size: 16px; color: #15803d; font-weight: 800; }
+    .card-recommend-value { font-size: 30px; color: #15803d; font-weight: 900; margin-top: 4px; }
 
     .card-tanks {
         background-color: #eff6ff;
-        padding: 18px;
+        padding: 16px;
         border-radius: 14px;
         border: 3px solid #2563eb;
         box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
         margin-bottom: 10px;
-        min-height: 160px;
+        min-height: 140px;
     }
-    .card-tanks-title { font-size: 18px; color: #1d4ed8; font-weight: 800; margin-bottom: 6px; }
+    .card-tanks-title { font-size: 16px; color: #1d4ed8; font-weight: 800; margin-bottom: 6px; }
 
     .tank-table {
         width: 100%;
@@ -166,63 +171,64 @@ st.markdown("""
     .tank-table th {
         border-bottom: 2px solid #93c5fd;
         padding: 4px 8px;
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 700;
         color: #1e40af;
         text-align: left;
     }
     .tank-table td {
         padding: 4px 8px;
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 800;
         color: #1e3a8a;
     }
     .tank-table td.qty-col {
         text-align: right;
         color: #2563eb;
-        font-size: 20px;
+        font-size: 18px;
     }
 
     .policy-tag {
         display: inline-block;
         background-color: #e0f2fe;
         color: #0369a1;
-        padding: 8px 16px;
-        border-radius: 20px;
+        padding: 8px 14px;
+        border-radius: 16px;
         font-weight: 700;
-        font-size: 15px;
+        font-size: 14px;
         border: 1px solid #7dd3fc;
+        line-height: 1.4;
     }
 
-    /* 🟡 Yellow Notice Card Style (สำหรับหน้าที่ยังไม่กรอกข้อมูล) */
+    /* Yellow Notice Card Style */
     .empty-state-card {
         background-color: #fefce8;
         border: 2px dashed #facc15;
-        border-radius: 18px;
-        padding: 40px 25px;
+        border-radius: 16px;
+        padding: 30px 20px;
         text-align: center;
         margin-top: 10px;
         box-shadow: 0 4px 12px rgba(250, 204, 21, 0.08);
     }
     .empty-state-icon {
-        font-size: 48px;
-        margin-bottom: 10px;
+        font-size: 40px;
+        margin-bottom: 8px;
     }
     .empty-state-title {
-        font-size: 24px;
+        font-size: 22px;
         font-weight: 800;
         color: #854d0e;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
     }
     .empty-state-desc {
-        font-size: 17px;
+        font-size: 16px;
         font-weight: 700;
         color: #a16207;
-        line-height: 1.8;
+        line-height: 1.7;
     }
     .empty-state-highlight {
-        margin-top: 25px;
-        font-size: 16px;
+        margin-top: 18px;
+        font-size: 15px;
         font-weight: 800;
         color: #ca8a04;
     }
@@ -232,26 +238,26 @@ st.markdown("""
         background: #ffffff;
         border: 2px solid #cbd5e1;
         border-radius: 16px;
-        padding: 20px;
-        margin-top: 25px;
+        padding: 18px;
+        margin-top: 20px;
         margin-bottom: 15px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
     .prod-cost-title {
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 800;
         color: #0f172a;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
         border-bottom: 2px solid #f1f5f9;
         padding-bottom: 8px;
     }
     .cost-box {
-        padding: 14px;
-        border-radius: 12px;
+        padding: 12px;
+        border-radius: 10px;
         text-align: center;
     }
-    .cost-box-title { font-size: 14px; font-weight: 700; color: #64748b; }
-    .cost-box-val { font-size: 22px; font-weight: 800; margin-top: 4px; }
+    .cost-box-title { font-size: 13px; font-weight: 700; color: #64748b; }
+    .cost-box-val { font-size: 20px; font-weight: 800; margin-top: 2px; }
     
     .cost-winner {
         background-color: #f0fdf4;
@@ -266,6 +272,111 @@ st.markdown("""
         border: 1px solid #cbd5e1;
     }
     .cost-normal .cost-box-val { color: #334155; }
+
+    /* ========================================================= */
+    /* 📱📱📱 MOBILE RESPONSIVE CSS FIXES (สำหรับโทรศัพท์มือถือ) 📱📱📱 */
+    /* ========================================================= */
+    @media (max-width: 768px) {
+        .header-container {
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .header-icon-box {
+            padding: 10px;
+            border-radius: 14px;
+        }
+        .header-icon-box svg {
+            width: 26px;
+            height: 26px;
+        }
+        .header-title-text {
+            font-size: 19px !important;
+        }
+        .header-subtitle-text {
+            font-size: 12px !important;
+        }
+
+        /* Tabs UI on Mobile */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 4px;
+            padding-bottom: 4px;
+        }
+        .stTabs [data-baseweb="tab"] {
+            height: 44px !important;
+            padding: 6px 12px !important;
+            font-size: 14px !important;
+            border-radius: 8px 8px 0 0 !important;
+        }
+
+        .product-header {
+            font-size: 18px !important;
+            margin-bottom: 8px !important;
+        }
+
+        /* Badge and Policy Info */
+        .policy-tag {
+            font-size: 12px !important;
+            padding: 6px 12px !important;
+            display: block !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            text-align: center !important;
+            margin-bottom: 6px !important;
+        }
+
+        /* Inputs on Mobile */
+        input[type=number] {
+            font-size: 18px !important;
+            height: 46px !important;
+            border-radius: 8px !important;
+        }
+        .large-label {
+            font-size: 14px !important;
+        }
+
+        /* Cards on Mobile */
+        .card-base, .card-recommend, .card-tanks {
+            padding: 12px !important;
+            min-height: auto !important;
+            margin-bottom: 8px !important;
+            border-width: 2px !important;
+        }
+        .card-title, .card-recommend-title, .card-tanks-title {
+            font-size: 13px !important;
+        }
+        .card-value, .card-recommend-value {
+            font-size: 22px !important;
+        }
+
+        /* Yellow Notice Card on Mobile */
+        .empty-state-card {
+            padding: 20px 12px !important;
+            margin-top: 8px !important;
+            border-radius: 12px !important;
+        }
+        .empty-state-icon { font-size: 32px !important; margin-bottom: 4px !important; }
+        .empty-state-title { font-size: 17px !important; margin-bottom: 8px !important; }
+        .empty-state-desc { font-size: 13px !important; line-height: 1.5 !important; }
+        .empty-state-highlight { font-size: 13px !important; margin-top: 12px !important; }
+
+        /* Cost Cards Grid layout fix for mobile */
+        .prod-cost-card {
+            padding: 12px !important;
+            margin-top: 15px !important;
+            border-radius: 12px !important;
+        }
+        .prod-cost-title {
+            font-size: 15px !important;
+            margin-bottom: 10px !important;
+        }
+        .cost-grid-mobile {
+            grid-template-columns: 1fr !important; /* Stack vertically on small screens */
+            gap: 8px !important;
+        }
+        .cost-box-val {
+            font-size: 17px !important;
+        }
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -273,7 +384,7 @@ st.markdown("""
 st.markdown("""
     <div class="header-container">
         <div class="header-icon-box">
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="20" x2="18" y2="10"></line>
                 <line x1="12" y1="20" x2="12" y2="4"></line>
                 <line x1="6" y1="20" x2="6" y2="14"></line>
@@ -529,7 +640,7 @@ for tab, p_key in zip(tabs, keys_list):
 
         st.markdown(f'<div class="product-header">📦 ผลิตภัณฑ์: {p_info["name"]}</div>', unsafe_allow_html=True)
         
-        # Policy Badge & Rationale Expander (ส่วนหัว)
+        # Policy Badge & Expander
         col_policy, col_expander = st.columns([2.5, 1.2])
         with col_policy:
             policy_desc = f"✨ นโยบายที่เหมาะสมที่สุด: <strong>{p_inv['policy']}</strong> " + \
@@ -538,9 +649,9 @@ for tab, p_key in zip(tabs, keys_list):
         
         with col_expander:
             with st.expander("💡 เหตุผลการเลือกนโยบาย"):
-                st.write(f"**เหตุผลวิเคราะห์:** {p_inv['rationale']}")
+                st.write(f"{p_inv['rationale']}")
 
-        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
 
         if f"success_msg_{p_key}" in st.session_state:
             st.success(st.session_state[f"success_msg_{p_key}"])
@@ -603,14 +714,14 @@ for tab, p_key in zip(tabs, keys_list):
                     <thead><tr><th>ขนาดถัง</th><th style="text-align:right;">จำนวนสั่ง</th></tr></thead>
                     <tbody>{table_html_rows}</tbody>
                 </table>
-                <div style="margin-top: 10px; padding-top: 6px; border-top: 2px dashed #93c5fd; font-size: 15px; font-weight: 800; color: #1e3a8a;">
-                    💳 รวมประมาณการค่าใช้จ่าย: <span style="color:#16a34a; font-size:19px;">{est_cost:,.2f}</span> บาท
+                <div style="margin-top: 10px; padding-top: 6px; border-top: 2px dashed #93c5fd; font-size: 14px; font-weight: 800; color: #1e3a8a;">
+                    💳 รวมประมาณการค่าใช้จ่าย: <span style="color:#16a34a; font-size:18px;">{est_cost:,.2f}</span> บาท
                 </div>
                 """
             else:
                 tanks_display_html = f"""
-                <div style='font-size:20px; font-weight:800; color:#1e40af; margin-top:6px;'>ไม่ต้องสั่งซื้อ</div>
-                <div style='font-size:14px; font-weight:600; color:#1e3a8a; margin-top:8px; background:#dbeafe; padding:6px 10px; border-radius:8px;'>
+                <div style='font-size:18px; font-weight:800; color:#1e40af; margin-top:4px;'>ไม่ต้องสั่งซื้อ</div>
+                <div style='font-size:13px; font-weight:600; color:#1e3a8a; margin-top:6px; background:#dbeafe; padding:6px 10px; border-radius:8px;'>
                     📈 ยอดพยากรณ์การใช้ ({forecast_month_label}): <b>{next_f:.2f} ลิตร</b>
                 </div>
                 """
@@ -623,15 +734,15 @@ for tab, p_key in zip(tabs, keys_list):
                 
                 r1, r2 = st.columns(2)
                 with r1:
-                    st.markdown(f'<div class="card-recommend"><div class="card-recommend-title">1. ปริมาณสั่งซื้อแนะนำ ({p_inv["policy"]})</div><div class="card-recommend-value">{recommended_qty} <small style="font-size:18px">ลิตร</small></div></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="card-recommend"><div class="card-recommend-title">1. ปริมาณสั่งซื้อแนะนำ ({p_inv["policy"]})</div><div class="card-recommend-value">{recommended_qty} <small style="font-size:16px">ลิตร</small></div></div>', unsafe_allow_html=True)
                 with r2:
                     st.markdown(f'<div class="card-tanks"><div class="card-tanks-title">2. จำนวนถังที่ต้องสั่งซื้อ</div>{tanks_display_html}</div>', unsafe_allow_html=True)
 
                 r3, r4 = st.columns(2)
                 with r3:
-                    st.markdown(f'<div class="card-base"><div class="card-title">3. ผลการพยากรณ์ ({forecast_month_label})</div><div class="card-value" style="color:#2563eb;">{next_f:.2f} <small style="font-size:16px">ลิตร</small></div></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="card-base"><div class="card-title">3. ผลการพยากรณ์ ({forecast_month_label})</div><div class="card-value" style="color:#2563eb;">{next_f:.2f} <small style="font-size:15px">ลิตร</small></div></div>', unsafe_allow_html=True)
                 with r4:
-                    st.markdown(f'<div class="card-base"><div class="card-title">4. ค่าความคลาดเคลื่อน</div><div style="font-size: 17px; font-weight: 800; color: #16a34a; margin-top: 4px;">คลาดเคลื่อน (+): +{error_val:.2f} ลิตร</div><div style="font-size: 17px; font-weight: 800; color: #dc2626; margin-top: 2px;">คลาดเคลื่อน (-): -{error_val:.2f} ลิตร</div></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="card-base"><div class="card-title">4. ค่าความคลาดเคลื่อน</div><div style="font-size: 15px; font-weight: 800; color: #16a34a; margin-top: 4px;">คลาดเคลื่อน (+): +{error_val:.2f} ลิตร</div><div style="font-size: 15px; font-weight: 800; color: #dc2626; margin-top: 2px;">คลาดเคลื่อน (-): -{error_val:.2f} ลิตร</div></div>', unsafe_allow_html=True)
 
                 st.markdown("---")
                 st.button(
@@ -666,7 +777,7 @@ for tab, p_key in zip(tabs, keys_list):
             fig.add_trace(go.Scatter(x=current_labels, y=y_data, mode='lines+markers', name='ยอดใช้จริง (Actual)', line=dict(color='#0f172a', width=3)))
             fig.add_trace(go.Scatter(x=current_labels[12:], y=Forecast[12:], mode='lines+markers', name='HW-Forecast', line=dict(color='#2563eb', width=2, dash='dash')))
             fig.add_trace(go.Scatter(x=[forecast_month_label], y=[next_f], mode='markers+text', name=f'พยากรณ์ {next_f:.2f}L', marker=dict(color='#16a34a', size=14, symbol='star'), text=[f"{next_f:.2f} ลิตร"], textposition="top center"))
-            fig.update_layout(xaxis_title="เดือน/ปี", yaxis_title="ปริมาณการใช้ (ลิตร)", hovermode="x unified", template="plotly_white", height=380, margin=dict(l=20, r=20, t=30, b=20))
+            fig.update_layout(xaxis_title="เดือน/ปี", yaxis_title="ปริมาณการใช้ (ลิตร)", hovermode="x unified", template="plotly_white", height=350, margin=dict(l=10, r=10, t=20, b=10))
             st.plotly_chart(fig, use_container_width=True)
 
         # --- 12. ส่วนการเปรียบเทียบต้นทุนของน้ำยาแต่ละชนิด (อยู่ในหมวดหมู่/แท็บ ของน้ำยานั้นๆ) ---
@@ -677,7 +788,7 @@ for tab, p_key in zip(tabs, keys_list):
         st.markdown(f"""
             <div class="prod-cost-card">
                 <div class="prod-cost-title">💰 ตารางเปรียบเทียบต้นทุนทั้ง 3 วิธีของ {p_info['name']}</div>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 14px;">
+                <div class="cost-grid-mobile" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
                     <div class="cost-box {poq_cls}">
                         <div class="cost-box-title">1. นโยบาย POQ {'🏆 (เลือกใช้)' if p_inv['policy']=='POQ' else ''}</div>
                         <div class="cost-box-val">{p_inv['poq_cost']:,.2f} บาท</div>
@@ -691,7 +802,7 @@ for tab, p_key in zip(tabs, keys_list):
                         <div class="cost-box-val">{p_inv['fc_cost']:,.2f} บาท</div>
                     </div>
                 </div>
-                <div style="background-color: #f1f5f9; padding: 14px 18px; border-radius: 12px; font-size: 15px; color: #1e293b; line-height: 1.6; border-left: 5px solid #2563eb;">
+                <div style="background-color: #f1f5f9; padding: 12px 15px; border-radius: 10px; font-size: 14px; color: #1e293b; line-height: 1.6; border-left: 4px solid #2563eb;">
                     {p_inv['rationale']}
                 </div>
             </div>
@@ -703,22 +814,22 @@ total_eoq_all = sum(v["eoq_cost"] for v in inventory_params.values())
 total_hybrid_best = sum(v["best_cost"] for v in inventory_params.values())
 total_savings = total_eoq_all - total_hybrid_best
 
-st.markdown("<br><hr style='border: 2px solid #cbd5e1;'><br>", unsafe_allow_html=True)
+st.markdown("<br><hr style='border: 1px solid #cbd5e1;'><br>", unsafe_allow_html=True)
 st.markdown("""
-    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #ffffff; padding: 25px; border-radius: 18px;">
-        <h3 style="color: #38bdf8; margin-top:0; font-size:22px; font-weight:800;">🏆 ช่องสรุปภาพรวม: การบริหารจัดการด้วย Hybrid Policy</h3>
-        <p style="font-size: 16px; line-height: 1.7; color: #e2e8f0;">
+    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #ffffff; padding: 20px; border-radius: 16px;">
+        <h3 style="color: #38bdf8; margin-top:0; font-size:20px; font-weight:800;">🏆 ช่องสรุปภาพรวม: การบริหารจัดการด้วย Hybrid Policy</h3>
+        <p style="font-size: 15px; line-height: 1.6; color: #e2e8f0;">
             เมื่อเลือกใช้นโยบายที่เหมาะสมที่สุดกับน้ำยาแต่ละชนิด (<strong>EOQ สำหรับน้ำยาล้างรถ</strong> และ <strong>POQ สำหรับน้ำยาเคลือบภายใน, น้ำยาเช็ดกระจก, น้ำยาลงล้อ</strong>) 
             จะได้ต้นทุนรวมทั้งระบบที่ต่ำที่สุดเมื่อเทียบกับการใช้วิธีเดียวกับทุกสินค้า
         </p>
-        <div style="display: flex; gap: 20px; margin-top: 20px; border-top: 1px solid #334155; padding-top: 15px;">
-            <div>
-                <span style="font-size: 14px; color: #94a3b8;">ต้นทุนรวมนโยบายผสม (Hybrid Policy):</span><br>
-                <span style="font-size: 28px; font-weight: 900; color: #4ade80;">""" + f"{total_hybrid_best:,.2f}" + """ บาท</span>
+        <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; border-top: 1px solid #334155; padding-top: 12px;">
+            <div style="flex: 1; min-width: 200px;">
+                <span style="font-size: 13px; color: #94a3b8;">ต้นทุนรวมนโยบายผสม (Hybrid Policy):</span><br>
+                <span style="font-size: 24px; font-weight: 900; color: #4ade80;">""" + f"{total_hybrid_best:,.2f}" + """ บาท</span>
             </div>
-            <div style="border-left: 1px solid #334155; padding-left: 20px;">
-                <span style="font-size: 14px; color: #94a3b8;">ยอดประหยัดได้รวมทั้งหมด (เมื่อเทียบกับ EOQ ทั้งหมด):</span><br>
-                <span style="font-size: 28px; font-weight: 900; color: #38bdf8;">""" + f"ประหยัดได้ {total_savings:,.2f}" + """ บาท</span>
+            <div style="flex: 1; min-width: 200px;">
+                <span style="font-size: 13px; color: #94a3b8;">ยอดประหยัดได้รวมทั้งหมด (เทียบกับ EOQ):</span><br>
+                <span style="font-size: 24px; font-weight: 900; color: #38bdf8;">""" + f"ประหยัดได้ {total_savings:,.2f}" + """ บาท</span>
             </div>
         </div>
     </div>
