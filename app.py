@@ -273,9 +273,7 @@ st.markdown("""
     }
     .cost-normal .cost-box-val { color: #334155; }
 
-    /* ========================================================= */
-    /* 📱📱📱 MOBILE RESPONSIVE CSS FIXES (สำหรับโทรศัพท์มือถือ) 📱📱📱 */
-    /* ========================================================= */
+    /* MOBILE RESPONSIVE CSS FIXES */
     @media (max-width: 768px) {
         .header-container {
             gap: 10px;
@@ -296,7 +294,6 @@ st.markdown("""
             font-size: 12px !important;
         }
 
-        /* Tabs UI on Mobile */
         .stTabs [data-baseweb="tab-list"] {
             gap: 4px;
             padding-bottom: 4px;
@@ -313,7 +310,6 @@ st.markdown("""
             margin-bottom: 8px !important;
         }
 
-        /* Badge and Policy Info */
         .policy-tag {
             font-size: 12px !important;
             padding: 6px 12px !important;
@@ -324,7 +320,6 @@ st.markdown("""
             margin-bottom: 6px !important;
         }
 
-        /* Inputs on Mobile */
         input[type=number] {
             font-size: 18px !important;
             height: 46px !important;
@@ -334,7 +329,6 @@ st.markdown("""
             font-size: 14px !important;
         }
 
-        /* Cards on Mobile */
         .card-base, .card-recommend, .card-tanks {
             padding: 12px !important;
             min-height: auto !important;
@@ -348,7 +342,6 @@ st.markdown("""
             font-size: 22px !important;
         }
 
-        /* Yellow Notice Card on Mobile */
         .empty-state-card {
             padding: 20px 12px !important;
             margin-top: 8px !important;
@@ -359,7 +352,6 @@ st.markdown("""
         .empty-state-desc { font-size: 13px !important; line-height: 1.5 !important; }
         .empty-state-highlight { font-size: 13px !important; margin-top: 12px !important; }
 
-        /* Cost Cards Grid layout fix for mobile */
         .prod-cost-card {
             padding: 12px !important;
             margin-top: 15px !important;
@@ -370,7 +362,7 @@ st.markdown("""
             margin-bottom: 10px !important;
         }
         .cost-grid-mobile {
-            grid-template-columns: 1fr !important; /* Stack vertically on small screens */
+            grid-template-columns: 1fr !important;
             gap: 8px !important;
         }
         .cost-box-val {
@@ -640,7 +632,7 @@ for tab, p_key in zip(tabs, keys_list):
 
         st.markdown(f'<div class="product-header">📦 ผลิตภัณฑ์: {p_info["name"]}</div>', unsafe_allow_html=True)
         
-        # Policy Badge & Expander
+        # Policy Badge & Expander (แก้ไขปัญหาแท็ก <b> หลุดโชว์)
         col_policy, col_expander = st.columns([2.5, 1.2])
         with col_policy:
             policy_desc = f"✨ นโยบายที่เหมาะสมที่สุด: <strong>{p_inv['policy']}</strong> " + \
@@ -649,7 +641,7 @@ for tab, p_key in zip(tabs, keys_list):
         
         with col_expander:
             with st.expander("💡 เหตุผลการเลือกนโยบาย"):
-                st.write(f"{p_inv['rationale']}")
+                st.markdown(f"{p_inv['rationale']}", unsafe_allow_html=True)
 
         st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
 
