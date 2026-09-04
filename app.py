@@ -6,7 +6,7 @@ import math
 import copy
 from datetime import datetime, timedelta
 
-# --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่งสไตล์ Pastel Blue, White, Cream, Yellow ---
+# --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่งสไตล์ Ultra-Soft Pastel (ฟ้า ขาว ครีม เหลือง อ่อนพิเศษ) ---
 st.set_page_config(
     page_title="ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์", 
     page_icon="📈", 
@@ -16,39 +16,39 @@ st.set_page_config(
 st.markdown("""
     <style>
     /* Google Fonts - Prompt */
-    @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap');
     
     html, body, [class*="css"] {
         font-family: 'Prompt', sans-serif;
     }
     
-    /* Background พื้นหลังโทนครีม-ฟ้าพาสเทลอ่อนๆ */
+    /* Background พื้นหลังโทนครีมนวล ตัดฟ้าอ่อนละมุนที่สุด */
     .main { 
-        background: linear-gradient(135deg, #fefdf7 0%, #f0f9ff 50%, #e0f2fe 100%); 
+        background: linear-gradient(135deg, #fffdfa 0%, #f4f9ff 50%, #eef7ff 100%); 
     }
     
-    /* Hero Banner Header Style โทนฟ้าพาสเทล ตัดครีมเหลือง */
+    /* Hero Banner Header โทนฟ้าพาสเทลอ่อน (Soft Ice Blue) */
     .hero-banner {
-        background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+        background: linear-gradient(135deg, #c7d2fe 0%, #bae6fd 100%);
         border-radius: 24px;
-        padding: 24px 30px;
-        color: #ffffff;
-        box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.3);
-        margin-bottom: 22px;
+        padding: 22px 28px;
+        color: #0c4a6e;
+        box-shadow: 0 8px 20px -4px rgba(186, 230, 253, 0.5);
+        margin-bottom: 20px;
         position: relative;
         overflow: hidden;
-        border: 3px solid #ffffff;
+        border: 2px solid #ffffff;
     }
     .hero-container {
         display: flex;
         align-items: center;
-        gap: 18px;
+        gap: 16px;
     }
     .hero-icon-box {
-        background: #fef08a; /* สีเหลืองพาสเทลอ่อน */
-        padding: 14px;
-        border-radius: 20px;
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        background: #fef9c3; /* เหลืองครีมอ่อนพาสเทล */
+        padding: 12px;
+        border-radius: 18px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -56,87 +56,87 @@ st.markdown("""
         border: 2px solid #ffffff;
     }
     .hero-title {
-        font-size: 26px !important;
-        font-weight: 800 !important;
-        color: #ffffff;
+        font-size: 24px !important;
+        font-weight: 700 !important;
+        color: #0c4a6e;
         margin: 0;
         line-height: 1.25;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .hero-subtitle {
-        font-size: 14px !important;
-        color: #f0f9ff;
-        margin-top: 6px;
+        font-size: 13.5px !important;
+        color: #0369a1;
+        margin-top: 4px;
         margin-bottom: 0;
     }
     .hero-badge {
         display: inline-block;
-        background: rgba(254, 240, 138, 0.3);
+        background: rgba(255, 255, 255, 0.7);
         backdrop-filter: blur(8px);
-        color: #fef08a;
-        border: 1.5px solid rgba(254, 240, 138, 0.6);
-        padding: 4px 14px;
+        color: #0369a1;
+        border: 1px solid #7dd3fc;
+        padding: 3px 12px;
         border-radius: 20px;
-        font-size: 12px;
+        font-size: 11.5px;
         font-weight: 700;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
 
-    /* Input Container Card โทนขาว-ฟ้าครีม */
+    /* Input Container Card โทนขาวขอบฟ้าพาสเทลอ่อน */
     .input-card-container {
         background: #ffffff;
-        border-radius: 22px;
-        padding: 22px;
-        border: 2px solid #bae6fd;
-        box-shadow: 0 6px 18px rgba(224, 242, 254, 0.6);
+        border-radius: 20px;
+        padding: 20px;
+        border: 1.5px solid #e0f2fe;
+        box-shadow: 0 4px 15px rgba(224, 242, 254, 0.4);
         margin-bottom: 16px;
     }
     .input-card-header {
-        font-size: 17px;
-        font-weight: 800;
-        color: #0369a1;
-        margin-bottom: 16px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        border-bottom: 2px dashed #bae6fd;
-        padding-bottom: 10px;
-    }
-
-    /* Tabs Styling สไตล์ฟ้าพาสเทล-ครีม */
-    .stTabs [data-baseweb="tab-list"] { 
-        gap: 8px; 
-        overflow-x: auto;
-        padding-bottom: 6px;
-    }
-    .stTabs [data-baseweb="tab"] {
-        height: 50px;
-        white-space: nowrap;
-        background-color: #fefae0; /* สีครีมพาสเทล */
-        border-radius: 18px;
-        border: 2px solid #bae6fd; /* ฟ้าพาสเทล */
-        padding: 8px 22px;
+        font-size: 16px;
         font-weight: 700;
-        font-size: 16px !important;
-        color: #0369a1;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
-        transition: all 0.2s ease;
-    }
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%) !important;
-        color: #ffffff !important;
-        border-color: #0284c7 !important;
-        box-shadow: 0 6px 16px rgba(56, 189, 248, 0.35) !important;
-    }
-
-    .product-header {
-        font-size: 22px !important;
-        font-weight: 800 !important;
         color: #0369a1;
         margin-bottom: 14px;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
+        border-bottom: 1.5px dashed #e0f2fe;
+        padding-bottom: 8px;
+    }
+
+    /* Tabs Styling สีครีมอ่อนสลับฟ้าพาสเทล */
+    .stTabs [data-baseweb="tab-list"] { 
+        gap: 8px; 
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 48px;
+        white-space: nowrap;
+        background-color: #fffdf5; /* สีครีมนวลอ่อน */
+        border-radius: 16px;
+        border: 1.5px solid #e0f2fe;
+        padding: 6px 20px;
+        font-weight: 600;
+        font-size: 15px !important;
+        color: #0369a1;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+        transition: all 0.2s ease;
+    }
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%) !important;
+        color: #0c4a6e !important;
+        border-color: #7dd3fc !important;
+        font-weight: 700 !important;
+        box-shadow: 0 4px 12px rgba(186, 230, 253, 0.4) !important;
+    }
+
+    .product-header {
+        font-size: 20px !important;
+        font-weight: 700 !important;
+        color: #0369a1;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
     
     /* Number Input Styling ละมุนตา */
@@ -147,232 +147,232 @@ st.markdown("""
     }
     input[type=number] { 
         -moz-appearance: textfield; 
-        font-size: 22px !important;
+        font-size: 20px !important;
         font-weight: bold !important;
-        height: 52px !important;
-        color: #0369a1 !important;
-        background-color: #f8fafc !important;
-        border: 2px solid #bae6fd !important;
-        border-radius: 14px !important;
+        height: 48px !important;
+        color: #0c4a6e !important;
+        background-color: #fafcfd !important;
+        border: 1.5px solid #bae6fd !important;
+        border-radius: 12px !important;
         transition: all 0.2s ease;
     }
     input[type=number]:focus {
-        border-color: #38bdf8 !important;
+        border-color: #7dd3fc !important;
         background-color: #ffffff !important;
-        box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.18) !important;
+        box-shadow: 0 0 0 3px rgba(186, 230, 253, 0.3) !important;
     }
     div[data-testid="stNumberInputStepDown"], div[data-testid="stNumberInputStepUp"] {
         display: none !important;
     }
     
     .large-label {
-        font-size: 15px !important;
-        font-weight: 700 !important;
-        color: #0f172a;
-        margin-top: 8px;
-        margin-bottom: 6px;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        color: #334155;
+        margin-top: 6px;
+        margin-bottom: 4px;
     }
 
-    /* Cards Status สไตล์ฟ้า ขาว ครีม เหลือง */
+    /* Cards Status สไตล์นวลตา */
     .card-base {
         background: #ffffff;
-        padding: 18px;
-        border-radius: 20px;
-        border: 2px solid #e0f2fe;
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.03);
-        margin-bottom: 12px;
-        min-height: 135px;
+        padding: 16px;
+        border-radius: 18px;
+        border: 1.5px solid #f0f9ff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        margin-bottom: 10px;
+        min-height: 125px;
     }
-    .card-title { font-size: 14px; color: #0284c7; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-    .card-value { font-size: 26px; color: #0f172a; font-weight: 800; margin-top: 6px; }
+    .card-title { font-size: 13.5px; color: #0284c7; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .card-value { font-size: 24px; color: #0c4a6e; font-weight: 700; margin-top: 4px; }
     
     .card-recommend {
-        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-        padding: 20px;
-        border-radius: 20px;
-        border: 2.5px solid #4ade80;
-        box-shadow: 0 8px 20px rgba(74, 222, 128, 0.18);
-        margin-bottom: 12px;
-        min-height: 135px;
+        background: linear-gradient(135deg, #f0fdf4 0%, #e8f5e9 100%);
+        padding: 18px;
+        border-radius: 18px;
+        border: 2px solid #86efac;
+        box-shadow: 0 6px 15px rgba(134, 239, 172, 0.2);
+        margin-bottom: 10px;
+        min-height: 125px;
     }
-    .card-recommend-title { font-size: 15px; color: #14532d; font-weight: 800; display: flex; align-items: center; gap: 6px; }
-    .card-recommend-value { font-size: 32px; color: #15803d; font-weight: 900; margin-top: 4px; }
+    .card-recommend-title { font-size: 14px; color: #166534; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    .card-recommend-value { font-size: 28px; color: #15803d; font-weight: 800; margin-top: 2px; }
 
     .card-tanks {
-        background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
-        padding: 18px;
-        border-radius: 20px;
-        border: 2.5px solid #38bdf8;
-        box-shadow: 0 8px 20px rgba(56, 189, 248, 0.18);
-        margin-bottom: 12px;
-        min-height: 135px;
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        padding: 16px;
+        border-radius: 18px;
+        border: 2px solid #7dd3fc;
+        box-shadow: 0 6px 15px rgba(125, 211, 252, 0.2);
+        margin-bottom: 10px;
+        min-height: 125px;
     }
-    .card-tanks-title { font-size: 15px; color: #0c4a6e; font-weight: 800; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .card-tanks-title { font-size: 14px; color: #0c4a6e; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
 
     .tank-table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 5px;
+        margin-top: 4px;
     }
     .tank-table th {
-        border-bottom: 2px solid #7dd3fc;
-        padding: 4px 6px;
-        font-size: 13px;
-        font-weight: 700;
+        border-bottom: 1.5px solid #bae6fd;
+        padding: 3px 5px;
+        font-size: 12.5px;
+        font-weight: 600;
         color: #0369a1;
         text-align: left;
     }
     .tank-table td {
-        padding: 4px 6px;
-        font-size: 15px;
-        font-weight: 800;
+        padding: 3px 5px;
+        font-size: 14px;
+        font-weight: 700;
         color: #0c4a6e;
     }
     .tank-table td.qty-col {
         text-align: right;
         color: #0284c7;
-        font-size: 17px;
+        font-size: 16px;
     }
 
     .policy-tag {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
-        color: #854d0e;
-        padding: 8px 18px;
+        background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
+        color: #713f12;
+        padding: 6px 16px;
         border-radius: 30px;
-        font-weight: 700;
-        font-size: 14px;
-        border: 2px solid #ffffff;
-        box-shadow: 0 4px 12px rgba(234, 179, 8, 0.2);
+        font-weight: 600;
+        font-size: 13.5px;
+        border: 1.5px solid #ffffff;
+        box-shadow: 0 3px 10px rgba(254, 240, 138, 0.4);
     }
 
-    /* Yellow Notice Empty State Card (โทนครีม-เหลืองพาสเทล) */
+    /* Empty State Card (โทนครีม-เหลืองอ่อนมาก) */
     .empty-state-card {
-        background: linear-gradient(135deg, #fffbeb 0%, #fef9c3 100%);
-        border: 2.5px dashed #fde047;
-        border-radius: 22px;
-        padding: 30px 20px;
+        background: linear-gradient(135deg, #fffdf0 0%, #fefce8 100%);
+        border: 2px dashed #fef08a;
+        border-radius: 20px;
+        padding: 26px 18px;
         text-align: center;
-        margin-top: 4px;
-        box-shadow: 0 8px 20px rgba(254, 240, 138, 0.3);
+        margin-top: 2px;
+        box-shadow: 0 6px 16px rgba(254, 240, 138, 0.2);
     }
     .empty-state-icon {
-        font-size: 42px;
-        margin-bottom: 6px;
+        font-size: 38px;
+        margin-bottom: 4px;
     }
     .empty-state-title {
-        font-size: 20px;
-        font-weight: 800;
+        font-size: 18px;
+        font-weight: 700;
         color: #854d0e;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
     }
     .empty-state-desc {
-        font-size: 15px;
-        font-weight: 700;
+        font-size: 14px;
+        font-weight: 600;
         color: #a16207;
-        line-height: 1.7;
+        line-height: 1.6;
     }
     .empty-state-highlight {
-        margin-top: 14px;
-        font-size: 14px;
-        font-weight: 800;
+        margin-top: 12px;
+        font-size: 13px;
+        font-weight: 700;
         color: #ca8a04;
         background: #ffffff;
-        padding: 8px 18px;
+        padding: 6px 16px;
         border-radius: 20px;
         display: inline-block;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     }
 
     /* Product Cost Card Inside Tab */
     .prod-cost-card {
         background: #ffffff;
-        border: 2px solid #e0f2fe;
-        border-radius: 22px;
-        padding: 22px;
-        margin-top: 24px;
-        margin-bottom: 15px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
+        border: 1.5px solid #f0f9ff;
+        border-radius: 20px;
+        padding: 20px;
+        margin-top: 20px;
+        margin-bottom: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
     }
     .prod-cost-title {
-        font-size: 18px;
-        font-weight: 800;
+        font-size: 16.5px;
+        font-weight: 700;
         color: #0369a1;
-        margin-bottom: 14px;
-        border-bottom: 2px dashed #bae6fd;
-        padding-bottom: 10px;
+        margin-bottom: 12px;
+        border-bottom: 1.5px dashed #bae6fd;
+        padding-bottom: 8px;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
     }
     .cost-box {
-        padding: 14px;
-        border-radius: 16px;
+        padding: 12px;
+        border-radius: 14px;
         text-align: center;
     }
-    .cost-box-title { font-size: 13px; font-weight: 700; color: #64748b; }
-    .cost-box-val { font-size: 20px; font-weight: 800; margin-top: 4px; }
+    .cost-box-title { font-size: 12.5px; font-weight: 600; color: #64748b; }
+    .cost-box-val { font-size: 18px; font-weight: 700; margin-top: 2px; }
     
     .cost-winner {
-        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-        border: 2px solid #22c55e;
-        box-shadow: 0 6px 15px rgba(34, 197, 94, 0.15);
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border: 1.5px solid #86efac;
+        box-shadow: 0 4px 12px rgba(134, 239, 172, 0.2);
     }
-    .cost-winner .cost-box-title { color: #14532d; }
+    .cost-winner .cost-box-title { color: #166534; }
     .cost-winner .cost-box-val { color: #15803d; }
     
     .cost-normal {
-        background-color: #f8fafc;
-        border: 1.5px solid #cbd5e1;
+        background-color: #fafcfd;
+        border: 1px solid #e2e8f0;
     }
     .cost-normal .cost-box-val { color: #334155; }
 
-    /* ปุ่มพาสเทล */
+    /* ปุ่มกดสไตล์นุ่มนวล */
     .stButton>button {
-        border-radius: 16px !important;
-        font-weight: 700 !important;
+        border-radius: 14px !important;
+        font-weight: 600 !important;
         transition: all 0.2s ease !important;
     }
 
     /* 📱 MOBILE RESPONSIVE FIXES */
     @media (max-width: 768px) {
         .hero-banner {
-            padding: 18px 16px !important;
+            padding: 16px 14px !important;
             border-radius: 18px !important;
         }
         .hero-container {
-            gap: 12px !important;
+            gap: 10px !important;
         }
         .hero-icon-box {
-            padding: 10px !important;
-            border-radius: 14px !important;
+            padding: 8px !important;
+            border-radius: 12px !important;
         }
         .hero-title {
-            font-size: 18px !important;
+            font-size: 17px !important;
         }
         .hero-subtitle {
-            font-size: 12px !important;
+            font-size: 11.5px !important;
         }
 
         .stTabs [data-baseweb="tab-list"] {
             gap: 4px;
         }
         .stTabs [data-baseweb="tab"] {
-            height: 44px !important;
-            padding: 6px 12px !important;
-            font-size: 14px !important;
+            height: 42px !important;
+            padding: 4px 10px !important;
+            font-size: 13.5px !important;
             border-radius: 12px !important;
         }
 
         .product-header {
-            font-size: 18px !important;
+            font-size: 17px !important;
         }
 
         .policy-tag {
-            font-size: 12px !important;
-            padding: 6px 14px !important;
+            font-size: 11.5px !important;
+            padding: 5px 12px !important;
             display: block !important;
             width: 100% !important;
             text-align: center !important;
@@ -380,16 +380,16 @@ st.markdown("""
         }
 
         input[type=number] {
-            font-size: 18px !important;
-            height: 46px !important;
+            font-size: 17px !important;
+            height: 44px !important;
         }
         
         .empty-state-card {
-            padding: 20px 14px !important;
+            padding: 18px 12px !important;
             border-radius: 16px !important;
         }
-        .empty-state-title { font-size: 17px !important; }
-        .empty-state-desc { font-size: 13px !important; }
+        .empty-state-title { font-size: 16px !important; }
+        .empty-state-desc { font-size: 12.5px !important; }
 
         .cost-grid-mobile {
             grid-template-columns: 1fr !important;
@@ -399,13 +399,13 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 2. Hero Banner Header (ไอคอนพยากรณ์รูปเดิม ปรับสีเหลือง/ฟ้า) ---
+# --- 2. Hero Banner Header (ไอคอนพยากรณ์รูปแบบเดิม เปลี่ยนโทนสีฟ้าพาสเทลอ่อน) ---
 st.markdown("""
     <div class="hero-banner">
         <div class="hero-badge">⚡ HYBRID INVENTORY & FORECAST ENGINE</div>
         <div class="hero-container">
             <div class="hero-icon-box">
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="20" x2="18" y2="10"></line>
                     <line x1="12" y1="20" x2="12" y2="4"></line>
                     <line x1="6" y1="20" x2="6" y2="14"></line>
@@ -741,14 +741,14 @@ for tab, p_key in zip(tabs, keys_list):
                     <thead><tr><th>ขนาดถัง</th><th style="text-align:right;">จำนวนสั่ง</th></tr></thead>
                     <tbody>{table_html_rows}</tbody>
                 </table>
-                <div style="margin-top: 8px; padding-top: 6px; border-top: 2px dashed #7dd3fc; font-size: 13px; font-weight: 800; color: #0c4a6e;">
-                    💳 รวมประมาณการค่าใช้จ่าย: <span style="color:#15803d; font-size:17px;">{est_cost:,.2f}</span> บาท
+                <div style="margin-top: 8px; padding-top: 6px; border-top: 1.5px dashed #bae6fd; font-size: 13px; font-weight: 700; color: #0c4a6e;">
+                    💳 รวมประมาณการค่าใช้จ่าย: <span style="color:#15803d; font-size:16px;">{est_cost:,.2f}</span> บาท
                 </div>
                 """
             else:
                 tanks_display_html = f"""
-                <div style='font-size:17px; font-weight:800; color:#0284c7; margin-top:4px;'>ไม่ต้องสั่งซื้อเพิ่มเติม</div>
-                <div style='font-size:12px; font-weight:600; color:#0369a1; margin-top:6px; background:#e0f2fe; padding:4px 8px; border-radius:8px;'>
+                <div style='font-size:16px; font-weight:700; color:#0284c7; margin-top:4px;'>ไม่ต้องสั่งซื้อเพิ่มเติม</div>
+                <div style='font-size:12px; font-weight:500; color:#0369a1; margin-top:4px; background:#f0f9ff; padding:4px 8px; border-radius:6px;'>
                     📈 ยอดพยากรณ์ ({forecast_month_label}): <b>{next_f:.2f} ลิตร</b>
                 </div>
                 """
@@ -761,15 +761,15 @@ for tab, p_key in zip(tabs, keys_list):
                 
                 r1, r2 = st.columns(2)
                 with r1:
-                    st.markdown(f'<div class="card-recommend"><div class="card-recommend-title">🎯 1. ปริมาณสั่งซื้อแนะนำ ({p_inv["policy"]})</div><div class="card-recommend-value">{recommended_qty} <small style="font-size:16px">ลิตร</small></div></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="card-recommend"><div class="card-recommend-title">🎯 1. ปริมาณสั่งซื้อแนะนำ ({p_inv["policy"]})</div><div class="card-recommend-value">{recommended_qty} <small style="font-size:15px">ลิตร</small></div></div>', unsafe_allow_html=True)
                 with r2:
                     st.markdown(f'<div class="card-tanks"><div class="card-tanks-title">📦 2. จำนวนถังที่ต้องสั่งซื้อ</div>{tanks_display_html}</div>', unsafe_allow_html=True)
 
                 r3, r4 = st.columns(2)
                 with r3:
-                    st.markdown(f'<div class="card-base"><div class="card-title">📊 3. ผลการพยากรณ์ ({forecast_month_label})</div><div class="card-value" style="color:#0284c7;">{next_f:.2f} <small style="font-size:15px">ลิตร</small></div></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="card-base"><div class="card-title">📊 3. ผลการพยากรณ์ ({forecast_month_label})</div><div class="card-value" style="color:#0284c7;">{next_f:.2f} <small style="font-size:14px">ลิตร</small></div></div>', unsafe_allow_html=True)
                 with r4:
-                    st.markdown(f'<div class="card-base"><div class="card-title">⚖️ 4. ค่าความคลาดเคลื่อน</div><div style="font-size: 14px; font-weight: 800; color: #16a34a; margin-top: 4px;">คลาดเคลื่อน (+): +{error_val:.2f} ลิตร</div><div style="font-size: 14px; font-weight: 800; color: #dc2626; margin-top: 2px;">คลาดเคลื่อน (-): -{error_val:.2f} ลิตร</div></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="card-base"><div class="card-title">⚖️ 4. ค่าความคลาดเคลื่อน</div><div style="font-size: 13.5px; font-weight: 700; color: #16a34a; margin-top: 4px;">คลาดเคลื่อน (+): +{error_val:.2f} ลิตร</div><div style="font-size: 13.5px; font-weight: 700; color: #dc2626; margin-top: 2px;">คลาดเคลื่อน (-): -{error_val:.2f} ลิตร</div></div>', unsafe_allow_html=True)
 
                 st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
                 st.button(
@@ -778,7 +778,7 @@ for tab, p_key in zip(tabs, keys_list):
                     on_click=cb_save_data, args=(p_key, last_usage, input_month_label)
                 )
 
-        # 🟡 กรณีที่ 2: ข้อมูลยังไม่ครบ -> กรอบครีม-เหลืองพาสเทล
+        # 🟡 กรณีที่ 2: ข้อมูลยังไม่ครบ -> กรอบครีม-เหลืองอ่อนมาก
         else:
             with c_results:
                 st.markdown(f"""
@@ -801,10 +801,10 @@ for tab, p_key in zip(tabs, keys_list):
         if last_usage is not None and stock_qty_input is not None:
             st.subheader(f"📈 กราฟแสดงแนวโน้มประวัติการใช้งานและการพยากรณ์ ({forecast_month_label})")
             fig = go.Figure()
-            fig.add_trace(go.Scatter(x=current_labels, y=y_data, mode='lines+markers', name='ยอดใช้จริง (Actual)', line=dict(color='#0369a1', width=3)))
+            fig.add_trace(go.Scatter(x=current_labels, y=y_data, mode='lines+markers', name='ยอดใช้จริง (Actual)', line=dict(color='#0369a1', width=2.5)))
             fig.add_trace(go.Scatter(x=current_labels[12:], y=Forecast[12:], mode='lines+markers', name='HW-Forecast', line=dict(color='#38bdf8', width=2, dash='dash')))
-            fig.add_trace(go.Scatter(x=[forecast_month_label], y=[next_f], mode='markers+text', name=f'พยากรณ์ {next_f:.2f}L', marker=dict(color='#16a34a', size=14, symbol='star'), text=[f"{next_f:.2f} ลิตร"], textposition="top center"))
-            fig.update_layout(xaxis_title="เดือน/ปี", yaxis_title="ปริมาณการใช้ (ลิตร)", hovermode="x unified", template="plotly_white", height=350, margin=dict(l=10, r=10, t=20, b=10))
+            fig.add_trace(go.Scatter(x=[forecast_month_label], y=[next_f], mode='markers+text', name=f'พยากรณ์ {next_f:.2f}L', marker=dict(color='#16a34a', size=13, symbol='star'), text=[f"{next_f:.2f} ลิตร"], textposition="top center"))
+            fig.update_layout(xaxis_title="เดือน/ปี", yaxis_title="ปริมาณการใช้ (ลิตร)", hovermode="x unified", template="plotly_white", height=340, margin=dict(l=10, r=10, t=20, b=10))
             st.plotly_chart(fig, use_container_width=True)
 
         # --- 12. ส่วนการเปรียบเทียบต้นทุนของน้ำยาแต่ละชนิด ---
@@ -829,7 +829,7 @@ for tab, p_key in zip(tabs, keys_list):
                         <div class="cost-box-val">{p_inv['fc_cost']:,.2f} บาท</div>
                     </div>
                 </div>
-                <div style="background-color: #f0f9ff; padding: 12px 15px; border-radius: 12px; font-size: 14px; color: #0c4a6e; line-height: 1.6; border-left: 4px solid #38bdf8;">
+                <div style="background-color: #f0f9ff; padding: 12px 15px; border-radius: 12px; font-size: 13.5px; color: #0c4a6e; line-height: 1.6; border-left: 3.5px solid #7dd3fc;">
                     {p_inv['rationale']}
                 </div>
             </div>
@@ -841,24 +841,24 @@ total_eoq_all = sum(v["eoq_cost"] for v in inventory_params.values())
 total_hybrid_best = sum(v["best_cost"] for v in inventory_params.values())
 total_savings = total_eoq_all - total_hybrid_best
 
-st.markdown("<br><hr style='border: 0; height: 2px; background: #bae6fd;'><br>", unsafe_allow_html=True)
+st.markdown("<br><hr style='border: 0; height: 1.5px; background: #e0f2fe;'><br>", unsafe_allow_html=True)
 st.markdown("""
-    <div style="background: linear-gradient(135deg, #0c4a6e 0%, #0369a1 100%); color: #ffffff; padding: 24px; border-radius: 22px; box-shadow: 0 10px 25px rgba(3, 105, 161, 0.25); border: 2px solid #38bdf8;">
-        <h3 style="color: #fef08a; margin-top:0; font-size:20px; font-weight:800; display:flex; align-items:center; gap:8px;">
+    <div style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); color: #0c4a6e; padding: 22px; border-radius: 20px; box-shadow: 0 8px 20px rgba(186, 230, 253, 0.3); border: 2px solid #ffffff;">
+        <h3 style="color: #0369a1; margin-top:0; font-size:19px; font-weight:700; display:flex; align-items:center; gap:8px;">
             🏆 ช่องสรุปภาพรวม: การบริหารจัดการด้วย Hybrid Policy
         </h3>
-        <p style="font-size: 15px; line-height: 1.6; color: #f0f9ff;">
+        <p style="font-size: 14.5px; line-height: 1.6; color: #0369a1;">
             เมื่อเลือกใช้นโยบายที่เหมาะสมที่สุดกับน้ำยาแต่ละชนิด (<strong>EOQ สำหรับน้ำยาล้างรถ</strong> และ <strong>POQ สำหรับน้ำยาเคลือบภายใน, น้ำยาเช็ดกระจก, น้ำยาลงล้อ</strong>) 
             จะได้ต้นทุนรวมทั้งระบบที่ต่ำที่สุดเมื่อเทียบกับการใช้วิธีเดียวกับทุกสินค้า
         </p>
-        <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; border-top: 1px dashed #0284c7; padding-top: 14px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 14px; border-top: 1.5px dashed #7dd3fc; padding-top: 12px;">
             <div style="flex: 1; min-width: 200px;">
-                <span style="font-size: 13px; color: #bae6fd;">ต้นทุนรวมนโยบายผสม (Hybrid Policy):</span><br>
-                <span style="font-size: 26px; font-weight: 900; color: #4ade80;">""" + f"{total_hybrid_best:,.2f}" + """ บาท</span>
+                <span style="font-size: 12.5px; color: #0369a1;">ต้นทุนรวมนโยบายผสม (Hybrid Policy):</span><br>
+                <span style="font-size: 24px; font-weight: 800; color: #15803d;">""" + f"{total_hybrid_best:,.2f}" + """ บาท</span>
             </div>
             <div style="flex: 1; min-width: 200px;">
-                <span style="font-size: 13px; color: #bae6fd;">ยอดประหยัดได้รวมทั้งหมด (เทียบกับ EOQ):</span><br>
-                <span style="font-size: 26px; font-weight: 900; color: #fef08a;">""" + f"ประหยัดได้ {total_savings:,.2f}" + """ บาท</span>
+                <span style="font-size: 12.5px; color: #0369a1;">ยอดประหยัดได้รวมทั้งหมด (เทียบกับ EOQ):</span><br>
+                <span style="font-size: 24px; font-weight: 800; color: #0284c7;">""" + f"ประหยัดได้ {total_savings:,.2f}" + """ บาท</span>
             </div>
         </div>
     </div>
