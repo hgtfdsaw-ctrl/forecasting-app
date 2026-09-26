@@ -6,7 +6,7 @@ import math
 import copy
 from datetime import datetime, timedelta
 
-# --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่งสไตล์ Ultra-Soft Pastel (ฟ้า ขาว ครีม เหลือง อ่อนพิเศษ) ---
+# --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่งสไตล์ Ultra-Soft Pastel ---
 st.set_page_config(
     page_title="ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์", 
     page_icon="📈", 
@@ -27,7 +27,7 @@ st.markdown("""
         background: linear-gradient(135deg, #fffdfa 0%, #f4f9ff 50%, #eef7ff 100%); 
     }
     
-    /* Hero Banner Header โทนฟ้าพาสเทลอ่อน (Soft Ice Blue) */
+    /* Hero Banner Header โทนฟ้าพาสเทลอ่อน */
     .hero-banner {
         background: linear-gradient(135deg, #c7d2fe 0%, #bae6fd 100%);
         border-radius: 24px;
@@ -45,7 +45,7 @@ st.markdown("""
         gap: 16px;
     }
     .hero-icon-box {
-        background: #fef9c3; /* เหลืองครีมอ่อนพาสเทล */
+        background: #fef9c3;
         padding: 12px;
         border-radius: 18px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
@@ -102,7 +102,7 @@ st.markdown("""
         padding-bottom: 8px;
     }
 
-    /* Tabs Styling สีครีมอ่อนสลับฟ้าพาสเทล */
+    /* Tabs Styling */
     .stTabs [data-baseweb="tab-list"] { 
         gap: 8px; 
         overflow-x: auto;
@@ -111,7 +111,7 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] {
         height: 48px;
         white-space: nowrap;
-        background-color: #fffdf5; /* สีครีมนวลอ่อน */
+        background-color: #fffdf5;
         border-radius: 16px;
         border: 1.5px solid #e0f2fe;
         padding: 6px 20px;
@@ -139,7 +139,7 @@ st.markdown("""
         gap: 8px;
     }
     
-    /* Number Input Styling ละมุนตา */
+    /* Number Input Styling */
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { 
         -webkit-appearance: none; 
@@ -248,7 +248,6 @@ st.markdown("""
         box-shadow: 0 3px 10px rgba(254, 240, 138, 0.4);
     }
 
-    /* Empty State Card (โทนครีม-เหลืองอ่อนมาก) */
     .empty-state-card {
         background: linear-gradient(135deg, #fffdf0 0%, #fefce8 100%);
         border: 2px dashed #fef08a;
@@ -399,7 +398,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 2. Hero Banner Header (ไอคอนพยากรณ์รูปแบบเดิม เปลี่ยนโทนสีฟ้าพาสเทลอ่อน) ---
+# --- 2. Hero Banner Header ---
 st.markdown("""
     <div class="hero-banner">
         <div class="hero-badge">⚡ HYBRID INVENTORY & FORECAST ENGINE</div>
@@ -471,7 +470,7 @@ inventory_params = {
     }
 }
 
-# --- 5. ค่าตั้งต้นประวัติ 35 เดือน ---
+# --- 5. ค่าตั้งต้นประวัติ 35 เดือน (ม.ค. 66 ถึง พ.ย. 68) ---
 base_labels_35 = [f"{m} 66" for m in months_base] + \
                  [f"{m} 67" for m in months_base] + \
                  [f"{m} 68" for m in months_base[:11]]
@@ -700,7 +699,7 @@ for tab, p_key in zip(tabs, keys_list):
             
             st.markdown('</div>', unsafe_allow_html=True)
 
-        # 🟢 กรณีที่ 1: กรอกข้อมูลครบถ้วน -> แสดงผลคำนวณ + กราฟ
+        # 🟢 กรณีที่ 1: กรอกข้อมูลครบถ้วน -> แสดงผลคำนวณ + กราฟ + ตารางสรุปข้อมูล
         if last_usage is not None and stock_qty_input is not None:
             y_data = p_info["history"] + [last_usage]
             current_labels = p_info["labels"] + [input_month_label]
@@ -778,7 +777,47 @@ for tab, p_key in zip(tabs, keys_list):
                     on_click=cb_save_data, args=(p_key, last_usage, input_month_label)
                 )
 
-        # 🟡 กรณีที่ 2: ข้อมูลยังไม่ครบ -> กรอบครีม-เหลืองอ่อนมาก
+            # --- ✨ เพิ่มใหม่: ช่องตารางสรุปข้อมูลย้อนหลังและการคำนวณ ---
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.subheader("📋 ตารางสรุปข้อมูลประวัติการใช้งานและการคำนวณทั้งหมด")
+
+            # 1. ตารางสรุปงวดปัจจุบัน
+            status_text = "🚨 วิกฤต (ต่ำกว่า SS)" if stock_qty_input <= p_inv["ss"] else ("⚠️ เตือนสั่งซื้อ (แตะ ROP)" if stock_qty_input <= p_inv["rop"] else "✅ ปกติ")
+            df_current_summary = pd.DataFrame([{
+                "เดือนปัจจุบัน": input_month_label,
+                "ยอดใช้งานจริง (ลิตร)": f"{last_usage:,.2f}",
+                "ยอดคงเหลือในคลัง (ลิตร)": f"{stock_qty_input:,.2f}",
+                "เดือนพยากรณ์": forecast_month_label,
+                "ยอดพยากรณ์ HW (ลิตร)": f"{next_f:,.2f}",
+                "ยอดสั่งซื้อแนะนำ (ลิตร)": f"{recommended_qty:,}",
+                "สถานะคลังสินค้า": status_text
+            }])
+            
+            st.markdown("**1️⃣ สรุปสถานะงวดปัจจุบัน**")
+            st.dataframe(df_current_summary, use_container_width=True, hide_index=True)
+
+            # 2. ตารางประวัติข้อมูล ม.ค. 66 ถึงปัจจุบัน
+            hw_forecast_history = [np.nan]*12 + list(Forecast[12:])
+            df_full_history = pd.DataFrame({
+                "ลำดับ": range(1, len(current_labels) + 1),
+                "เดือน/ปี": current_labels,
+                "ยอดใช้งานจริง (ลิตร)": [round(v, 2) for v in y_data],
+                "ยอดพยากรณ์ HW (ลิตร)": [round(v, 2) if not np.isnan(v) else "-" for v in hw_forecast_history]
+            })
+
+            # เพิ่มบรรทัดพยากรณ์งวดถัดไป
+            next_row = pd.DataFrame([{
+                "ลำดับ": len(current_labels) + 1,
+                "เดือน/ปี": f"{forecast_month_label} (พยากรณ์)",
+                "ยอดใช้งานจริง (ลิตร)": "-",
+                "ยอดพยากรณ์ HW (ลิตร)": round(next_f, 2)
+            }])
+            df_full_history = pd.concat([df_full_history, next_row], ignore_index=True)
+
+            st.markdown("**2️⃣ ประวัติสถิติการใช้งานจริงและการพยากรณ์ (เริ่มต้น ม.ค. 66 - ปัจจุบัน)**")
+            st.dataframe(df_full_history, use_container_width=True, hide_index=True, height=280)
+
+        # 🟡 กรณีที่ 2: ข้อมูลยังไม่ครบ
         else:
             with c_results:
                 st.markdown(f"""
@@ -794,6 +833,16 @@ for tab, p_key in zip(tabs, keys_list):
                         </div>
                     </div>
                 """, unsafe_allow_html=True)
+
+            # แสดงตารางประวัติเบื้องต้นก่อนกรอกข้อมูลปัจจุบัน
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.subheader("📋 ตารางประวัติการใช้งานย้อนหลัง (ม.ค. 66 - ปัจจุบัน)")
+            df_base_history = pd.DataFrame({
+                "ลำดับ": range(1, len(p_info["labels"]) + 1),
+                "เดือน/ปี": p_info["labels"],
+                "ยอดใช้งานจริง (ลิตร)": [round(v, 2) for v in p_info["history"]]
+            })
+            st.dataframe(df_base_history, use_container_width=True, hide_index=True, height=250)
 
         st.markdown("<br>", unsafe_allow_html=True)
         
@@ -836,7 +885,7 @@ for tab, p_key in zip(tabs, keys_list):
         """, unsafe_allow_html=True)
 
 
-# --- 13. ช่องสรุปภาพรวมคำตอบท้ายสุด (Overall Hybrid Policy Summary Banner) ---
+# --- 13. ช่องสรุปภาพรวมคำตอบท้ายสุด ---
 total_eoq_all = sum(v["eoq_cost"] for v in inventory_params.values())
 total_hybrid_best = sum(v["best_cost"] for v in inventory_params.values())
 total_savings = total_eoq_all - total_hybrid_best
