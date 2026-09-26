@@ -470,7 +470,7 @@ inventory_params = {
     }
 }
 
-# --- 5. ค่าตั้งต้นประวัติ 36 เดือนเต็ม (ม.ค. 66 ถึง ธ.ค. 68) ---
+# --- 5. ค่าตั้งต้นประวัติ 36 เดือนเต็ม (ม.ค. 66 ถึง ธ.ค. 68) ตรงตามเอกสารงานวิจัย 100% ---
 base_labels_36 = [f"{m} 66" for m in months_base] + \
                  [f"{m} 67" for m in months_base] + \
                  [f"{m} 68" for m in months_base]
@@ -481,7 +481,7 @@ default_products = {
         "alpha": 0.5, "beta": 0.01, "gamma": 0.99,
         "history": [20.00, 25.00, 40.00, 50.00, 45.00, 40.00, 20.00, 15.00, 5.00, 10.00, 10.00, 25.00,
                     25.00, 30.00, 50.00, 65.00, 55.00, 50.00, 25.00, 15.00, 8.00, 12.00, 15.00, 30.00,
-                    35.00, 40.00, 60.00, 80.00, 70.00, 65.00, 30.00, 20.00, 10.00, 15.00, 15.00, 35.00],
+                    35.00, 40.00, 60.00, 80.00, 70.00, 65.00, 30.00, 20.00, 10.00, 15.00, 15.00, 40.00],
         "labels": base_labels_36.copy()
     },
     "interior": {
@@ -655,7 +655,7 @@ for tab, p_key in zip(tabs, keys_list):
         p_info = st.session_state.product_store[p_key]
         p_inv = inventory_params[p_key]
         
-        last_recorded_month = p_info["labels"][-1] # จะได้ ธ.ค. 68
+        last_recorded_month = p_info["labels"][-1] # ธ.ค. 68
         input_month_label = get_next_month_label(last_recorded_month) # ม.ค. 69
         forecast_month_label = get_next_month_label(input_month_label) # ก.พ. 69
 
