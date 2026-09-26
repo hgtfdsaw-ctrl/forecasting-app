@@ -27,6 +27,12 @@ st.markdown("""
         background: linear-gradient(135deg, #fffdfa 0%, #f4f9ff 50%, #eef7ff 100%); 
     }
     
+    /* 🚫 ซ่อนปุ่มเครื่องมือลอยบนตาราง Dataframe (ปุ่มดู, ดาวน์โหลด, ค้นหา) */
+    [data-testid="stElementToolbar"],
+    div[data-testid="stElementToolbar"] {
+        display: none !important;
+    }
+    
     /* Hero Banner Header โทนฟ้าพาสเทลอ่อน */
     .hero-banner {
         background: linear-gradient(135deg, #c7d2fe 0%, #bae6fd 100%);
@@ -305,7 +311,7 @@ st.markdown("""
         transition: all 0.2s ease !important;
     }
 
-    /* 📱📱📱 MOBILE RESPONSIVE FIXES - ปรับ POP-UP MODAL และ ตัวหนังสือให้ใหญ่เต็มตา 📱📱📱 */
+    /* 📱 POP-UP MODAL สไตล์ขยายเต็มจอสำหรับมือถือ */
     div[role="dialog"] {
         width: 98vw !important;
         max-width: 98vw !important;
@@ -316,20 +322,17 @@ st.markdown("""
         border-radius: 18px !important;
     }
 
-    /* ปรับหัวข้อของ Dialog ให้ใหญ่ ชัดเจน */
     div[role="dialog"] h1, div[role="dialog"] h2, div[role="dialog"] h3, div[role="dialog"] [data-testid="stHeader"] {
         font-size: 20px !important;
         font-weight: 700 !important;
     }
 
-    /* ปรับขนาดตัวหนังสือแท็บใน Dialog ให้ใหญ่ */
     div[role="dialog"] .stTabs [data-baseweb="tab"] {
         font-size: 16px !important;
         height: 46px !important;
         padding: 6px 14px !important;
     }
 
-    /* ปรับความสูงและขนาดตัวหนังสือตาราง DataFrame ใน Dialog ใหญ่จุใจ (18px) */
     div[role="dialog"] div[data-testid="stDataFrame"] {
         height: 72vh !important;
     }
