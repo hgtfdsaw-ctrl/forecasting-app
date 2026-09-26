@@ -92,15 +92,6 @@ st.markdown("""
         border-bottom: 1.5px dashed #bae6fd;
     }
 
-    /* ปรับแต่งขนาดตัวอักษรใน ตาราง Dataframe ให้ใหญ่ ชัดเจน อ่านง่าย */
-    div[data-testid="stDataFrame"] {
-        font-size: 16px !important;
-    }
-    div[data-testid="stDataFrame"] td, div[data-testid="stDataFrame"] th {
-        font-size: 16px !important;
-        padding: 10px !important;
-    }
-
     /* Input Container Card โทนขาวขอบฟ้าพาสเทลอ่อน */
     .input-card-container {
         background: #ffffff;
@@ -314,7 +305,42 @@ st.markdown("""
         transition: all 0.2s ease !important;
     }
 
-    /* 📱📱📱 MOBILE RESPONSIVE FIXES - ปรับ POP-UP MODAL ให้เต็มจอในมือถือ 📱📱📱 */
+    /* 📱📱📱 MOBILE RESPONSIVE FIXES - ปรับ POP-UP MODAL และ ตัวหนังสือให้ใหญ่เต็มตา 📱📱📱 */
+    div[role="dialog"] {
+        width: 98vw !important;
+        max-width: 98vw !important;
+        height: 94vh !important;
+        max-height: 94vh !important;
+        margin: 0 auto !important;
+        padding: 10px !important;
+        border-radius: 18px !important;
+    }
+
+    /* ปรับหัวข้อของ Dialog ให้ใหญ่ ชัดเจน */
+    div[role="dialog"] h1, div[role="dialog"] h2, div[role="dialog"] h3, div[role="dialog"] [data-testid="stHeader"] {
+        font-size: 20px !important;
+        font-weight: 700 !important;
+    }
+
+    /* ปรับขนาดตัวหนังสือแท็บใน Dialog ให้ใหญ่ */
+    div[role="dialog"] .stTabs [data-baseweb="tab"] {
+        font-size: 16px !important;
+        height: 46px !important;
+        padding: 6px 14px !important;
+    }
+
+    /* ปรับความสูงและขนาดตัวหนังสือตาราง DataFrame ใน Dialog ใหญ่จุใจ (18px) */
+    div[role="dialog"] div[data-testid="stDataFrame"] {
+        height: 72vh !important;
+    }
+    div[role="dialog"] div[data-testid="stDataFrame"] td, 
+    div[role="dialog"] div[data-testid="stDataFrame"] th,
+    div[role="dialog"] div[data-testid="stDataFrame"] [role="columnheader"] {
+        font-size: 18px !important;
+        font-weight: 600 !important;
+        padding: 12px 8px !important;
+    }
+
     @media (max-width: 768px) {
         .hero-banner { padding: 16px 14px !important; border-radius: 18px !important; }
         .hero-title { font-size: 17px !important; }
@@ -322,22 +348,6 @@ st.markdown("""
         .stTabs [data-baseweb="tab"] { height: 42px !important; padding: 4px 10px !important; font-size: 13.5px !important; }
         .product-header { font-size: 17px !important; }
         input[type=number] { font-size: 17px !important; height: 44px !important; }
-
-        /* ขยาย Pop-up Modal ให้เต็มความกว้างและสูงของมือถือ */
-        div[role="dialog"] {
-            width: 96vw !important;
-            max-width: 96vw !important;
-            height: 90vh !important;
-            max-height: 90vh !important;
-            margin: 0 auto !important;
-            padding: 12px !important;
-            border-radius: 18px !important;
-        }
-
-        /* ให้ตารางใน Pop-up ยืดความสูงเต็มหน้าจอ */
-        div[role="dialog"] div[data-testid="stDataFrame"] {
-            height: 65vh !important;
-        }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -484,7 +494,7 @@ def show_history_modal():
                 df_modal,
                 use_container_width=True,
                 hide_index=True,
-                height=500
+                height=520
             )
 
 # --- 9. Sidebar จัดการรีเซ็ต และ ปุุ่มกดดูประวัติ ---
