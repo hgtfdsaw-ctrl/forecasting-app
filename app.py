@@ -5,14 +5,21 @@ import plotly.graph_objects as go
 import math
 import copy
 from datetime import datetime, timedelta
+from PIL import Image
 
-# --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่งสไตล์ Ultra-Soft Pastel & Fullscreen Mobile Dialog ---
+# --- 1. โหลดไอคอนและตั้งค่าหน้าจอ ---
+try:
+    app_icon = Image.open("ไอคอน.jpg")
+except Exception:
+    app_icon = "📈"
+
 st.set_page_config(
     page_title="ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์", 
-    page_icon="📈", 
+    page_icon=app_icon,
     layout="wide"
 )
 
+# --- 2. CSS ตกแต่งสไตล์ Ultra-Soft Pastel, ซ่อนปุ่มตาราง และ ปรับ Pop-up เต็มจอ ---
 st.markdown("""
     <style>
     /* Google Fonts - Prompt */
@@ -311,7 +318,7 @@ st.markdown("""
         transition: all 0.2s ease !important;
     }
 
-    /* 📱 POP-UP MODAL สไตล์ขยายเต็มจอสำหรับมือถือ */
+    /* 📱 POP-UP MODAL สไตล์ขยายเต็มจอสำหรับมือถือ ตัวหนังสือใหญ่ 18px */
     div[role="dialog"] {
         width: 98vw !important;
         max-width: 98vw !important;
@@ -355,7 +362,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 2. Hero Banner Header ---
+# --- 3. Hero Banner Header ---
 st.markdown("""
     <div class="hero-banner">
         <div class="hero-badge">⚡ HYBRID INVENTORY & FORECAST ENGINE</div>
@@ -377,7 +384,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- 3. ฟังก์ชันช่วยคำนวณชื่อเดือนถัดไปอัตโนมัติ ---
+# --- 4. ฟังก์ชันช่วยคำนวณชื่อเดือนถัดไปอัตโนมัติ ---
 months_base = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."]
 
 def get_next_month_label(last_label):
@@ -391,7 +398,7 @@ def get_next_month_label(last_label):
     else:
         return f"{months_base[m_idx + 1]} {y_num}"
 
-# --- 4. ข้อมูลพารามิเตอร์โมเดลคลังสินค้า ---
+# --- 5. ข้อมูลพารามิเตอร์โมเดลคลังสินค้า ---
 inventory_params = {
     "carwash": {
         "policy": "EOQ", "k": 1, "d_avg": 43.07, "h": 1.50, "eoq": 33.89, "ss": 9.35, "rop": 12.94,
@@ -427,7 +434,7 @@ inventory_params = {
     }
 }
 
-# --- 5. ค่าตั้งต้นประวัติ 36 เดือนเต็ม (ม.ค. 66 ถึง ธ.ค. 68) ตรงตามงานวิจัย 100% ---
+# --- 6. ค่าตั้งต้นประวัติ 36 เดือนเต็ม (ม.ค. 66 ถึง ธ.ค. 68) ตรงตามงานวิจัย 100% ---
 base_labels_36 = [f"{m} 66" for m in months_base] + \
                  [f"{m} 67" for m in months_base] + \
                  [f"{m} 68" for m in months_base]
@@ -467,11 +474,11 @@ default_products = {
     }
 }
 
-# --- 6. สร้าง Session State ---
+# --- 7. สร้าง Session State ---
 if "product_store" not in st.session_state:
     st.session_state.product_store = copy.deepcopy(default_products)
 
-# --- 7. Callback Function บันทึกข้อมูล ---
+# --- 8. Callback Function บันทึกข้อมูล ---
 def cb_save_data(p_key, usage_val, label_val):
     st.session_state.product_store[p_key]["history"].append(usage_val)
     st.session_state.product_store[p_key]["labels"].append(label_val)
@@ -479,7 +486,7 @@ def cb_save_data(p_key, usage_val, label_val):
     st.session_state[f"stock_{p_key}"] = None
     st.session_state[f"success_msg_{p_key}"] = f"✅ บันทึกยอดใช้จริงของเดือน {label_val} เรียบร้อยแล้ว!"
 
-# --- 8. ฟังก์ชัน POP-UP MODAL DIALOG แสดงตารางประวัติย้อนหลัง ---
+# --- 9. ฟังก์ชัน POP-UP MODAL DIALOG แสดงตารางประวัติย้อนหลัง ---
 @st.dialog("📋 ตารางประวัติการใช้งานย้อนหลัง (ม.ค. 66 - ปัจจุบัน)", width="large")
 def show_history_modal():
     p_tabs = st.tabs([p["name"] for p in st.session_state.product_store.values()])
@@ -500,7 +507,7 @@ def show_history_modal():
                 height=520
             )
 
-# --- 9. Sidebar จัดการรีเซ็ต และ ปุุ่มกดดูประวัติ ---
+# --- 10. Sidebar จัดการรีเซ็ต และ ปุุ่มกดดูประวัติ ---
 with st.sidebar:
     st.header("⚙️ ระบบควบคุมแอป")
     
@@ -552,7 +559,7 @@ with st.sidebar:
         st.session_state.clear()
         st.rerun()
 
-# --- 10. ฟังก์ชันคำนวณ Holt-Winters ---
+# --- 11. ฟังก์ชันคำนวณ Holt-Winters ---
 def run_holt_winters(y, alpha, beta, gamma, L=12):
     n = len(y)
     Level = [np.nan] * n
@@ -578,7 +585,7 @@ def run_holt_winters(y, alpha, beta, gamma, L=12):
     next_forecast = (Level[-1] + Trend[-1]) * Season[n - 12]
     return Level, Trend, Season[:n], Forecast, next_forecast
 
-# --- 11. ฟังก์ชันคำนวณถังและยอดเงิน ---
+# --- 12. ฟังก์ชันคำนวณถังและยอดเงิน ---
 def get_tank_rows_and_cost(product_key, order_qty):
     if order_qty <= 0:
         return [], 0.0
@@ -629,7 +636,7 @@ def get_tank_rows_and_cost(product_key, order_qty):
             rows.append(("ถัง 10 ลิตร", f"{t10} ถัง"))
         return rows, total_cost
 
-# --- 12. แสดง 4 แท็บผลิตภัณฑ์หลัก ---
+# --- 13. แสดง 4 แท็บผลิตภัณฑ์หลัก ---
 tabs = st.tabs([p["name"] for p in st.session_state.product_store.values()])
 keys_list = list(st.session_state.product_store.keys())
 
@@ -789,7 +796,7 @@ for tab, p_key in zip(tabs, keys_list):
             fig.update_layout(xaxis_title="เดือน/ปี", yaxis_title="ปริมาณการใช้ (ลิตร)", hovermode="x unified", template="plotly_white", height=340, margin=dict(l=10, r=10, t=20, b=10))
             st.plotly_chart(fig, use_container_width=True)
 
-        # --- 13. ส่วนการเปรียบเทียบต้นทุนของน้ำยาแต่ละชนิด ---
+        # --- 14. ส่วนการเปรียบเทียบต้นทุนของน้ำยาแต่ละชนิด ---
         poq_cls = "cost-winner" if p_inv["policy"] == "POQ" else "cost-normal"
         eoq_cls = "cost-winner" if p_inv["policy"] == "EOQ" else "cost-normal"
         fc_cls = "cost-normal"
@@ -818,7 +825,7 @@ for tab, p_key in zip(tabs, keys_list):
         """, unsafe_allow_html=True)
 
 
-# --- 14. ช่องสรุปภาพรวมคำตอบท้ายสุด ---
+# --- 15. ช่องสรุปภาพรวมคำตอบท้ายสุด ---
 total_eoq_all = sum(v["eoq_cost"] for v in inventory_params.values())
 total_hybrid_best = sum(v["best_cost"] for v in inventory_params.values())
 total_savings = total_eoq_all - total_hybrid_best
