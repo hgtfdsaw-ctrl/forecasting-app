@@ -6,7 +6,7 @@ import math
 import copy
 from datetime import datetime, timedelta
 
-# --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่งสไตล์ Ultra-Soft Pastel ---
+# --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่งสไตล์ Ultra-Soft Pastel & Mobile-Friendly ---
 st.set_page_config(
     page_title="ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์", 
     page_icon="📈", 
@@ -79,6 +79,56 @@ st.markdown("""
         font-size: 11.5px;
         font-weight: 700;
         margin-bottom: 8px;
+    }
+
+    /* Sidebar Headings */
+    .sidebar-category-header {
+        font-size: 14.5px;
+        font-weight: 700;
+        color: #0369a1;
+        margin-top: 14px;
+        margin-bottom: 6px;
+        padding-bottom: 4px;
+        border-bottom: 1.5px dashed #bae6fd;
+    }
+
+    /* Mobile Friendly Table Inside Modal Dialog */
+    div[role="dialog"] {
+        border-radius: 20px !important;
+        padding: 15px !important;
+    }
+    .mobile-table-container {
+        max-height: 65vh;
+        overflow-y: auto;
+        border-radius: 14px;
+        border: 1.5px solid #bae6fd;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+    .mobile-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: 'Prompt', sans-serif;
+    }
+    .mobile-table th {
+        background-color: #0284c7;
+        color: #ffffff;
+        padding: 12px 8px;
+        font-size: 16px !important; /* ขนาดใหญ่ ชัดเจน อ่านง่ายในมือถือ */
+        font-weight: 700;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .mobile-table td {
+        padding: 11px 10px;
+        font-size: 16px !important; /* ตัวหนังสือใหญ่ ไม่ต้องหรี่ตา */
+        font-weight: 600;
+        color: #0c4a6e;
+        border-bottom: 1px solid #e0f2fe;
+    }
+    .mobile-table tr:nth-child(even) {
+        background-color: #f8fafc;
     }
 
     /* Input Container Card โทนขาวขอบฟ้าพาสเทลอ่อน */
@@ -173,7 +223,7 @@ st.markdown("""
         margin-bottom: 4px;
     }
 
-    /* Cards Status สไตล์นวลตา */
+    /* Cards Status */
     .card-base {
         background: #ffffff;
         padding: 16px;
@@ -257,35 +307,14 @@ st.markdown("""
         margin-top: 2px;
         box-shadow: 0 6px 16px rgba(254, 240, 138, 0.2);
     }
-    .empty-state-icon {
-        font-size: 38px;
-        margin-bottom: 4px;
-    }
-    .empty-state-title {
-        font-size: 18px;
-        font-weight: 700;
-        color: #854d0e;
-        margin-bottom: 6px;
-    }
-    .empty-state-desc {
-        font-size: 14px;
-        font-weight: 600;
-        color: #a16207;
-        line-height: 1.6;
-    }
+    .empty-state-icon { font-size: 38px; margin-bottom: 4px; }
+    .empty-state-title { font-size: 18px; font-weight: 700; color: #854d0e; margin-bottom: 6px; }
+    .empty-state-desc { font-size: 14px; font-weight: 600; color: #a16207; line-height: 1.6; }
     .empty-state-highlight {
-        margin-top: 12px;
-        font-size: 13px;
-        font-weight: 700;
-        color: #ca8a04;
-        background: #ffffff;
-        padding: 6px 16px;
-        border-radius: 20px;
-        display: inline-block;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        margin-top: 12px; font-size: 13px; font-weight: 700; color: #ca8a04;
+        background: #ffffff; padding: 6px 16px; border-radius: 20px; display: inline-block;
     }
 
-    /* Product Cost Card Inside Tab */
     .prod-cost-card {
         background: #ffffff;
         border: 1.5px solid #f0f9ff;
@@ -296,104 +325,33 @@ st.markdown("""
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
     }
     .prod-cost-title {
-        font-size: 16.5px;
-        font-weight: 700;
-        color: #0369a1;
-        margin-bottom: 12px;
-        border-bottom: 1.5px dashed #bae6fd;
-        padding-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
+        font-size: 16.5px; font-weight: 700; color: #0369a1; margin-bottom: 12px;
+        border-bottom: 1.5px dashed #bae6fd; padding-bottom: 8px; display: flex; align-items: center; gap: 6px;
     }
-    .cost-box {
-        padding: 12px;
-        border-radius: 14px;
-        text-align: center;
-    }
+    .cost-box { padding: 12px; border-radius: 14px; text-align: center; }
     .cost-box-title { font-size: 12.5px; font-weight: 600; color: #64748b; }
     .cost-box-val { font-size: 18px; font-weight: 700; margin-top: 2px; }
     
-    .cost-winner {
-        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-        border: 1.5px solid #86efac;
-        box-shadow: 0 4px 12px rgba(134, 239, 172, 0.2);
-    }
+    .cost-winner { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; }
     .cost-winner .cost-box-title { color: #166534; }
     .cost-winner .cost-box-val { color: #15803d; }
-    
-    .cost-normal {
-        background-color: #fafcfd;
-        border: 1px solid #e2e8f0;
-    }
+    .cost-normal { background-color: #fafcfd; border: 1px solid #e2e8f0; }
     .cost-normal .cost-box-val { color: #334155; }
 
-    /* ปุ่มกดสไตล์นุ่มนวล */
     .stButton>button {
         border-radius: 14px !important;
         font-weight: 600 !important;
         transition: all 0.2s ease !important;
     }
 
-    /* 📱 MOBILE RESPONSIVE FIXES */
     @media (max-width: 768px) {
-        .hero-banner {
-            padding: 16px 14px !important;
-            border-radius: 18px !important;
-        }
-        .hero-container {
-            gap: 10px !important;
-        }
-        .hero-icon-box {
-            padding: 8px !important;
-            border-radius: 12px !important;
-        }
-        .hero-title {
-            font-size: 17px !important;
-        }
-        .hero-subtitle {
-            font-size: 11.5px !important;
-        }
-
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 4px;
-        }
-        .stTabs [data-baseweb="tab"] {
-            height: 42px !important;
-            padding: 4px 10px !important;
-            font-size: 13.5px !important;
-            border-radius: 12px !important;
-        }
-
-        .product-header {
-            font-size: 17px !important;
-        }
-
-        .policy-tag {
-            font-size: 11.5px !important;
-            padding: 5px 12px !important;
-            display: block !important;
-            width: 100% !important;
-            text-align: center !important;
-            box-sizing: border-box !important;
-        }
-
-        input[type=number] {
-            font-size: 17px !important;
-            height: 44px !important;
-        }
-        
-        .empty-state-card {
-            padding: 18px 12px !important;
-            border-radius: 16px !important;
-        }
-        .empty-state-title { font-size: 16px !important; }
-        .empty-state-desc { font-size: 12.5px !important; }
-
-        .cost-grid-mobile {
-            grid-template-columns: 1fr !important;
-            gap: 8px !important;
-        }
+        .hero-banner { padding: 16px 14px !important; border-radius: 18px !important; }
+        .hero-title { font-size: 17px !important; }
+        .hero-subtitle { font-size: 11.5px !important; }
+        .stTabs [data-baseweb="tab"] { height: 42px !important; padding: 4px 10px !important; font-size: 13.5px !important; }
+        .product-header { font-size: 17px !important; }
+        input[type=number] { font-size: 17px !important; height: 44px !important; }
+        .mobile-table th, .mobile-table td { font-size: 15px !important; padding: 10px 6px; }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -470,7 +428,7 @@ inventory_params = {
     }
 }
 
-# --- 5. ค่าตั้งต้นประวัติ 36 เดือนเต็ม (ม.ค. 66 ถึง ธ.ค. 68) ตรงตามเอกสารงานวิจัย 100% ---
+# --- 5. ค่าตั้งต้นประวัติ 36 เดือนเต็ม (ม.ค. 66 ถึง ธ.ค. 68) ตรงตามงานวิจัย 100% ---
 base_labels_36 = [f"{m} 66" for m in months_base] + \
                  [f"{m} 67" for m in months_base] + \
                  [f"{m} 68" for m in months_base]
@@ -520,12 +478,53 @@ def cb_save_data(p_key, usage_val, label_val):
     st.session_state.product_store[p_key]["labels"].append(label_val)
     st.session_state[f"usage_{p_key}"] = None
     st.session_state[f"stock_{p_key}"] = None
-    st.session_state[f"success_msg_{p_key}"] = f"✅ บันทึกยอดใช้จริงของเดือน {label_val} เรียบร้อยแล้ว! ระบบร่นไปงวดถัดไปแล้วครับ"
+    st.session_state[f"success_msg_{p_key}"] = f"✅ บันทึกยอดใช้จริงของเดือน {label_val} เรียบร้อยแล้ว!"
 
-# --- 8. Sidebar จัดการรีเซ็ต ---
+# --- 8. ฟังก์ชัน POP-UP MODAL DIALOG แสดงตารางประวัติย้อนหลังสไตล์ Mobile-Friendly ---
+@st.dialog("📋 ตารางประวัติการใช้งานย้อนหลัง (ม.ค. 66 - ปัจจุบัน)", width="large")
+def show_history_modal():
+    p_tabs = st.tabs([p["name"] for p in st.session_state.product_store.values()])
+    for p_tab, p_k in zip(p_tabs, st.session_state.product_store.keys()):
+        with p_tab:
+            p_data = st.session_state.product_store[p_k]
+            
+            rows_html = ""
+            for idx, (lbl, val) in enumerate(zip(p_data["labels"], p_data["history"]), start=1):
+                rows_html += f"""
+                <tr>
+                    <td style="text-align: center; width: 20%;">{idx}</td>
+                    <td style="text-align: center; width: 40%; font-weight:700; color:#0369a1;">{lbl}</td>
+                    <td style="text-align: right; width: 40%; font-weight:700; color:#15803d;">{val:,.2f}</td>
+                </tr>
+                """
+            
+            table_html = f"""
+            <div class="mobile-table-container">
+                <table class="mobile-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">ลำดับ</th>
+                            <th style="text-align: center;">เดือน/ปี</th>
+                            <th style="text-align: right;">ยอดใช้งานจริง (ลิตร)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows_html}
+                    </tbody>
+                </table>
+            </div>
+            """
+            st.markdown(table_html, unsafe_allow_html=True)
+
+# --- 9. Sidebar จัดการรีเซ็ต และ ปุุ่มกดดูประวัติ ---
 with st.sidebar:
     st.header("⚙️ ระบบควบคุมแอป")
-    st.markdown('<div class="reset-category-header">📊 ปริมาณใช้งาน</div>', unsafe_allow_html=True)
+    
+    st.markdown('<div class="sidebar-category-header">📋 รายงานสถิติ</div>', unsafe_allow_html=True)
+    if st.button("📊 ดูประวัติใช้งานย้อนหลัง (ม.ค. 66 - ปัจจุบัน)", type="primary", use_container_width=True):
+        show_history_modal()
+
+    st.markdown('<div class="sidebar-category-header">📊 ปริมาณใช้งาน</div>', unsafe_allow_html=True)
     if st.button("↩️ รีเซ็ตปริมาณใช้งานเดือนก่อน", type="secondary", use_container_width=True):
         for p_key in st.session_state.product_store:
             if len(st.session_state.product_store[p_key]["history"]) > 36:
@@ -543,7 +542,7 @@ with st.sidebar:
                 st.session_state[f"usage_{p_key}"] = None
         st.rerun()
 
-    st.markdown('<div class="reset-category-header">📦 ปริมาณคงเหลือ</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-category-header">📦 ปริมาณคงเหลือ</div>', unsafe_allow_html=True)
     if st.button("↩️ รีเซ็ตปริมาณคงเหลือเดือนก่อน", type="secondary", use_container_width=True):
         for k in list(st.session_state.keys()):
             if k.startswith("stock_"):
@@ -556,7 +555,7 @@ with st.sidebar:
                 st.session_state[k] = None
         st.rerun()
 
-    st.markdown('<div class="reset-category-header">🚨 รีเซ็ตระบบทั้งหมด</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-category-header">🚨 รีเซ็ตระบบทั้งหมด</div>', unsafe_allow_html=True)
     if st.button("🔄 รีเซ็ตข้อมูลทั้งหมด", type="secondary", use_container_width=True):
         st.session_state.product_store = copy.deepcopy(default_products)
         for k in list(st.session_state.keys()):
@@ -569,7 +568,7 @@ with st.sidebar:
         st.session_state.clear()
         st.rerun()
 
-# --- 9. ฟังก์ชันคำนวณ Holt-Winters ---
+# --- 10. ฟังก์ชันคำนวณ Holt-Winters ---
 def run_holt_winters(y, alpha, beta, gamma, L=12):
     n = len(y)
     Level = [np.nan] * n
@@ -595,7 +594,7 @@ def run_holt_winters(y, alpha, beta, gamma, L=12):
     next_forecast = (Level[-1] + Trend[-1]) * Season[n - 12]
     return Level, Trend, Season[:n], Forecast, next_forecast
 
-# --- 10. ฟังก์ชันคำนวณถังและยอดเงิน ---
+# --- 11. ฟังก์ชันคำนวณถังและยอดเงิน ---
 def get_tank_rows_and_cost(product_key, order_qty):
     if order_qty <= 0:
         return [], 0.0
@@ -646,7 +645,7 @@ def get_tank_rows_and_cost(product_key, order_qty):
             rows.append(("ถัง 10 ลิตร", f"{t10} ถัง"))
         return rows, total_cost
 
-# --- 11. แสดง 4 แท็บผลิตภัณฑ์หลัก ---
+# --- 12. แสดง 4 แท็บผลิตภัณฑ์หลัก ---
 tabs = st.tabs([p["name"] for p in st.session_state.product_store.values()])
 keys_list = list(st.session_state.product_store.keys())
 
@@ -655,9 +654,9 @@ for tab, p_key in zip(tabs, keys_list):
         p_info = st.session_state.product_store[p_key]
         p_inv = inventory_params[p_key]
         
-        last_recorded_month = p_info["labels"][-1] # ธ.ค. 68
-        input_month_label = get_next_month_label(last_recorded_month) # ม.ค. 69
-        forecast_month_label = get_next_month_label(input_month_label) # ก.พ. 69
+        last_recorded_month = p_info["labels"][-1]
+        input_month_label = get_next_month_label(last_recorded_month)
+        forecast_month_label = get_next_month_label(input_month_label)
 
         st.markdown(f'<div class="product-header">📦 ผลิตภัณฑ์: {p_info["name"]}</div>', unsafe_allow_html=True)
         
@@ -699,7 +698,7 @@ for tab, p_key in zip(tabs, keys_list):
             
             st.markdown('</div>', unsafe_allow_html=True)
 
-        # 🟢 กรณีที่ 1: กรอกข้อมูลครบถ้วน -> แสดงผลคำนวณ + กราฟ + ตารางสรุปข้อมูล
+        # 🟢 กรณีที่ 1: กรอกข้อมูลครบถ้วน -> แสดงผลคำนวณ + กราฟ
         if last_usage is not None and stock_qty_input is not None:
             y_data = p_info["history"] + [last_usage]
             current_labels = p_info["labels"] + [input_month_label]
@@ -777,46 +776,6 @@ for tab, p_key in zip(tabs, keys_list):
                     on_click=cb_save_data, args=(p_key, last_usage, input_month_label)
                 )
 
-            # --- ตารางสรุปข้อมูลย้อนหลังและการคำนวณ ---
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.subheader("📋 ตารางสรุปข้อมูลประวัติการใช้งานและการคำนวณทั้งหมด")
-
-            # 1. ตารางสรุปงวดปัจจุบัน
-            status_text = "🚨 วิกฤต (ต่ำกว่า SS)" if stock_qty_input <= p_inv["ss"] else ("⚠️ เตือนสั่งซื้อ (แตะ ROP)" if stock_qty_input <= p_inv["rop"] else "✅ ปกติ")
-            df_current_summary = pd.DataFrame([{
-                "เดือนปัจจุบัน": input_month_label,
-                "ยอดใช้งานจริง (ลิตร)": f"{last_usage:,.2f}",
-                "ยอดคงเหลือในคลัง (ลิตร)": f"{stock_qty_input:,.2f}",
-                "เดือนพยากรณ์": forecast_month_label,
-                "ยอดพยากรณ์ HW (ลิตร)": f"{next_f:,.2f}",
-                "ยอดสั่งซื้อแนะนำ (ลิตร)": f"{recommended_qty:,}",
-                "สถานะคลังสินค้า": status_text
-            }])
-            
-            st.markdown("**1️⃣ สรุปสถานะงวดปัจจุบัน**")
-            st.dataframe(df_current_summary, use_container_width=True, hide_index=True)
-
-            # 2. ตารางประวัติข้อมูล ม.ค. 66 ถึงปัจจุบัน
-            hw_forecast_history = [np.nan]*12 + list(Forecast[12:])
-            df_full_history = pd.DataFrame({
-                "ลำดับ": range(1, len(current_labels) + 1),
-                "เดือน/ปี": current_labels,
-                "ยอดใช้งานจริง (ลิตร)": [round(v, 2) for v in y_data],
-                "ยอดพยากรณ์ HW (ลิตร)": [round(v, 2) if not np.isnan(v) else "-" for v in hw_forecast_history]
-            })
-
-            # เพิ่มบรรทัดพยากรณ์งวดถัดไป
-            next_row = pd.DataFrame([{
-                "ลำดับ": len(current_labels) + 1,
-                "เดือน/ปี": f"{forecast_month_label} (พยากรณ์)",
-                "ยอดใช้งานจริง (ลิตร)": "-",
-                "ยอดพยากรณ์ HW (ลิตร)": round(next_f, 2)
-            }])
-            df_full_history = pd.concat([df_full_history, next_row], ignore_index=True)
-
-            st.markdown("**2️⃣ ประวัติสถิติการใช้งานจริงและการพยากรณ์ (เริ่มต้น ม.ค. 66 - ปัจจุบัน)**")
-            st.dataframe(df_full_history, use_container_width=True, hide_index=True, height=280)
-
         # 🟡 กรณีที่ 2: ข้อมูลยังไม่ครบ
         else:
             with c_results:
@@ -834,16 +793,6 @@ for tab, p_key in zip(tabs, keys_list):
                     </div>
                 """, unsafe_allow_html=True)
 
-            # แสดงตารางประวัติเบื้องต้นก่อนกรอกข้อมูลปัจจุบัน
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.subheader("📋 ตารางประวัติการใช้งานย้อนหลัง (ม.ค. 66 - ปัจจุบัน)")
-            df_base_history = pd.DataFrame({
-                "ลำดับ": range(1, len(p_info["labels"]) + 1),
-                "เดือน/ปี": p_info["labels"],
-                "ยอดใช้งานจริง (ลิตร)": [round(v, 2) for v in p_info["history"]]
-            })
-            st.dataframe(df_base_history, use_container_width=True, hide_index=True, height=250)
-
         st.markdown("<br>", unsafe_allow_html=True)
         
         # แสดงกราฟเมื่อมีข้อมูล
@@ -856,7 +805,7 @@ for tab, p_key in zip(tabs, keys_list):
             fig.update_layout(xaxis_title="เดือน/ปี", yaxis_title="ปริมาณการใช้ (ลิตร)", hovermode="x unified", template="plotly_white", height=340, margin=dict(l=10, r=10, t=20, b=10))
             st.plotly_chart(fig, use_container_width=True)
 
-        # --- 12. ส่วนการเปรียบเทียบต้นทุนของน้ำยาแต่ละชนิด ---
+        # --- 13. ส่วนการเปรียบเทียบต้นทุนของน้ำยาแต่ละชนิด ---
         poq_cls = "cost-winner" if p_inv["policy"] == "POQ" else "cost-normal"
         eoq_cls = "cost-winner" if p_inv["policy"] == "EOQ" else "cost-normal"
         fc_cls = "cost-normal"
@@ -885,7 +834,7 @@ for tab, p_key in zip(tabs, keys_list):
         """, unsafe_allow_html=True)
 
 
-# --- 13. ช่องสรุปภาพรวมคำตอบท้ายสุด ---
+# --- 14. ช่องสรุปภาพรวมคำตอบท้ายสุด ---
 total_eoq_all = sum(v["eoq_cost"] for v in inventory_params.values())
 total_hybrid_best = sum(v["best_cost"] for v in inventory_params.values())
 total_savings = total_eoq_all - total_hybrid_best
