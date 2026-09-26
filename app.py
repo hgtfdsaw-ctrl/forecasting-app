@@ -470,10 +470,10 @@ inventory_params = {
     }
 }
 
-# --- 5. ค่าตั้งต้นประวัติ 35 เดือน (ม.ค. 66 ถึง พ.ย. 68) ---
-base_labels_35 = [f"{m} 66" for m in months_base] + \
+# --- 5. ค่าตั้งต้นประวัติ 36 เดือนเต็ม (ม.ค. 66 ถึง ธ.ค. 68) ---
+base_labels_36 = [f"{m} 66" for m in months_base] + \
                  [f"{m} 67" for m in months_base] + \
-                 [f"{m} 68" for m in months_base[:11]]
+                 [f"{m} 68" for m in months_base]
 
 default_products = {
     "carwash": {
@@ -481,32 +481,32 @@ default_products = {
         "alpha": 0.5, "beta": 0.01, "gamma": 0.99,
         "history": [20.00, 25.00, 40.00, 50.00, 45.00, 40.00, 20.00, 15.00, 5.00, 10.00, 10.00, 25.00,
                     25.00, 30.00, 50.00, 65.00, 55.00, 50.00, 25.00, 15.00, 8.00, 12.00, 15.00, 30.00,
-                    35.00, 40.00, 60.00, 80.00, 70.00, 65.00, 30.00, 20.00, 10.00, 15.00, 15.00],
-        "labels": base_labels_35.copy()
+                    35.00, 40.00, 60.00, 80.00, 70.00, 65.00, 30.00, 20.00, 10.00, 15.00, 15.00, 35.00],
+        "labels": base_labels_36.copy()
     },
     "interior": {
         "name": "✨ น้ำยาเคลือบภายใน",
         "alpha": 0.5, "beta": 0.01, "gamma": 0.99,
         "history": [14.88, 13.44, 18.60, 19.80, 18.60, 16.20, 3.72, 1.86, 0.90, 2.76, 12.60, 16.74,
                     18.60, 16.80, 22.32, 23.40, 22.32, 19.80, 5.58, 2.76, 1.32, 3.72, 16.20, 20.46,
-                    22.32, 20.16, 26.04, 27.00, 26.04, 23.40, 7.44, 3.72, 1.80, 5.58, 19.80],
-        "labels": base_labels_35.copy()
+                    22.32, 20.16, 26.04, 27.00, 26.04, 23.40, 7.44, 3.72, 1.80, 5.58, 19.80, 24.18],
+        "labels": base_labels_36.copy()
     },
     "glass": {
         "name": "🪟 น้ำยาเช็ดกระจก",
         "alpha": 0.5, "beta": 0.01, "gamma": 0.99,
         "history": [9.92, 8.96, 12.40, 13.20, 12.40, 10.80, 2.48, 1.24, 0.60, 1.84, 8.40, 11.16,
                     12.40, 11.20, 14.88, 15.60, 14.88, 13.20, 3.72, 1.84, 0.88, 2.48, 10.80, 13.64,
-                    14.88, 13.44, 17.36, 18.00, 17.36, 15.60, 4.96, 2.48, 1.20, 3.72, 13.20],
-        "labels": base_labels_35.copy()
+                    14.88, 13.44, 17.36, 18.00, 17.36, 15.60, 4.96, 2.48, 1.20, 3.72, 13.20, 16.12],
+        "labels": base_labels_36.copy()
     },
     "wheel": {
         "name": "🛞 น้ำยาลงล้อ",
         "alpha": 0.9, "beta": 0.99, "gamma": 0.99,
         "history": [4.96, 4.48, 6.20, 6.60, 6.20, 5.40, 1.24, 0.62, 0.30, 0.92, 4.20, 5.58,
                     6.20, 5.60, 7.44, 7.80, 7.44, 6.60, 1.86, 0.92, 0.44, 1.24, 5.40, 6.82,
-                    7.44, 6.72, 8.68, 9.00, 8.68, 7.80, 2.48, 1.24, 0.60, 1.86, 6.60],
-        "labels": base_labels_35.copy()
+                    7.44, 6.72, 8.68, 9.00, 8.68, 7.80, 2.48, 1.24, 0.60, 1.86, 6.60, 8.06],
+        "labels": base_labels_36.copy()
     }
 }
 
@@ -528,7 +528,7 @@ with st.sidebar:
     st.markdown('<div class="reset-category-header">📊 ปริมาณใช้งาน</div>', unsafe_allow_html=True)
     if st.button("↩️ รีเซ็ตปริมาณใช้งานเดือนก่อน", type="secondary", use_container_width=True):
         for p_key in st.session_state.product_store:
-            if len(st.session_state.product_store[p_key]["history"]) > 35:
+            if len(st.session_state.product_store[p_key]["history"]) > 36:
                 st.session_state.product_store[p_key]["history"].pop()
                 st.session_state.product_store[p_key]["labels"].pop()
             if f"usage_{p_key}" in st.session_state:
@@ -655,9 +655,9 @@ for tab, p_key in zip(tabs, keys_list):
         p_info = st.session_state.product_store[p_key]
         p_inv = inventory_params[p_key]
         
-        last_recorded_month = p_info["labels"][-1]
-        input_month_label = get_next_month_label(last_recorded_month)
-        forecast_month_label = get_next_month_label(input_month_label)
+        last_recorded_month = p_info["labels"][-1] # จะได้ ธ.ค. 68
+        input_month_label = get_next_month_label(last_recorded_month) # ม.ค. 69
+        forecast_month_label = get_next_month_label(input_month_label) # ก.พ. 69
 
         st.markdown(f'<div class="product-header">📦 ผลิตภัณฑ์: {p_info["name"]}</div>', unsafe_allow_html=True)
         
@@ -777,7 +777,7 @@ for tab, p_key in zip(tabs, keys_list):
                     on_click=cb_save_data, args=(p_key, last_usage, input_month_label)
                 )
 
-            # --- ✨ เพิ่มใหม่: ช่องตารางสรุปข้อมูลย้อนหลังและการคำนวณ ---
+            # --- ตารางสรุปข้อมูลย้อนหลังและการคำนวณ ---
             st.markdown("<br>", unsafe_allow_html=True)
             st.subheader("📋 ตารางสรุปข้อมูลประวัติการใช้งานและการคำนวณทั้งหมด")
 
