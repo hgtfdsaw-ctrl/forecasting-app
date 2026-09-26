@@ -6,7 +6,7 @@ import math
 import copy
 from datetime import datetime, timedelta
 
-# --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่งสไตล์ Ultra-Soft Pastel & Mobile-Friendly ---
+# --- 1. การตั้งค่าหน้าจอและ CSS ตกแต่งสไตล์ Ultra-Soft Pastel & Fullscreen Mobile Dialog ---
 st.set_page_config(
     page_title="ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์", 
     page_icon="📈", 
@@ -92,7 +92,7 @@ st.markdown("""
         border-bottom: 1.5px dashed #bae6fd;
     }
 
-    /* ปรับแต่งขนาดตัวอักษรใน ตาราง Dataframe ให้ใหญ่ ชัดเจน อ่านง่ายบนมือถือ */
+    /* ปรับแต่งขนาดตัวอักษรใน ตาราง Dataframe ให้ใหญ่ ชัดเจน อ่านง่าย */
     div[data-testid="stDataFrame"] {
         font-size: 16px !important;
     }
@@ -314,6 +314,7 @@ st.markdown("""
         transition: all 0.2s ease !important;
     }
 
+    /* 📱📱📱 MOBILE RESPONSIVE FIXES - ปรับ POP-UP MODAL ให้เต็มจอในมือถือ 📱📱📱 */
     @media (max-width: 768px) {
         .hero-banner { padding: 16px 14px !important; border-radius: 18px !important; }
         .hero-title { font-size: 17px !important; }
@@ -321,6 +322,22 @@ st.markdown("""
         .stTabs [data-baseweb="tab"] { height: 42px !important; padding: 4px 10px !important; font-size: 13.5px !important; }
         .product-header { font-size: 17px !important; }
         input[type=number] { font-size: 17px !important; height: 44px !important; }
+
+        /* ขยาย Pop-up Modal ให้เต็มความกว้างและสูงของมือถือ */
+        div[role="dialog"] {
+            width: 96vw !important;
+            max-width: 96vw !important;
+            height: 90vh !important;
+            max-height: 90vh !important;
+            margin: 0 auto !important;
+            padding: 12px !important;
+            border-radius: 18px !important;
+        }
+
+        /* ให้ตารางใน Pop-up ยืดความสูงเต็มหน้าจอ */
+        div[role="dialog"] div[data-testid="stDataFrame"] {
+            height: 65vh !important;
+        }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -449,7 +466,7 @@ def cb_save_data(p_key, usage_val, label_val):
     st.session_state[f"stock_{p_key}"] = None
     st.session_state[f"success_msg_{p_key}"] = f"✅ บันทึกยอดใช้จริงของเดือน {label_val} เรียบร้อยแล้ว!"
 
-# --- 8. ฟังก์ชัน POP-UP MODAL DIALOG แสดงตารางประวัติย้อนหลังผ่าน st.dataframe ---
+# --- 8. ฟังก์ชัน POP-UP MODAL DIALOG แสดงตารางประวัติย้อนหลัง ---
 @st.dialog("📋 ตารางประวัติการใช้งานย้อนหลัง (ม.ค. 66 - ปัจจุบัน)", width="large")
 def show_history_modal():
     p_tabs = st.tabs([p["name"] for p in st.session_state.product_store.values()])
@@ -457,19 +474,17 @@ def show_history_modal():
         with p_tab:
             p_data = st.session_state.product_store[p_k]
             
-            # สร้าง DataFrame
             df_modal = pd.DataFrame({
                 "ลำดับ": range(1, len(p_data["labels"]) + 1),
                 "เดือน/ปี": p_data["labels"],
                 "ยอดใช้งานจริง (ลิตร)": [f"{val:,.2f}" for val in p_data["history"]]
             })
             
-            # แสดงตารางด้วย st.dataframe ชัวร์ 100% ไม่ขึ้นโค้ดแน่นอน
             st.dataframe(
                 df_modal,
                 use_container_width=True,
                 hide_index=True,
-                height=420
+                height=500
             )
 
 # --- 9. Sidebar จัดการรีเซ็ต และ ปุุ่มกดดูประวัติ ---
