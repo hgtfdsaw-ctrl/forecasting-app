@@ -92,43 +92,13 @@ st.markdown("""
         border-bottom: 1.5px dashed #bae6fd;
     }
 
-    /* Mobile Friendly Table Inside Modal Dialog */
-    div[role="dialog"] {
-        border-radius: 20px !important;
-        padding: 15px !important;
+    /* ปรับแต่งขนาดตัวอักษรใน ตาราง Dataframe ให้ใหญ่ ชัดเจน อ่านง่ายบนมือถือ */
+    div[data-testid="stDataFrame"] {
+        font-size: 16px !important;
     }
-    .mobile-table-container {
-        max-height: 65vh;
-        overflow-y: auto;
-        border-radius: 14px;
-        border: 1.5px solid #bae6fd;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    }
-    .mobile-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-family: 'Prompt', sans-serif;
-    }
-    .mobile-table th {
-        background-color: #0284c7;
-        color: #ffffff;
-        padding: 12px 8px;
-        font-size: 16px !important; /* ขนาดใหญ่ ชัดเจน อ่านง่ายในมือถือ */
-        font-weight: 700;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-    .mobile-table td {
-        padding: 11px 10px;
-        font-size: 16px !important; /* ตัวหนังสือใหญ่ ไม่ต้องหรี่ตา */
-        font-weight: 600;
-        color: #0c4a6e;
-        border-bottom: 1px solid #e0f2fe;
-    }
-    .mobile-table tr:nth-child(even) {
-        background-color: #f8fafc;
+    div[data-testid="stDataFrame"] td, div[data-testid="stDataFrame"] th {
+        font-size: 16px !important;
+        padding: 10px !important;
     }
 
     /* Input Container Card โทนขาวขอบฟ้าพาสเทลอ่อน */
@@ -351,7 +321,6 @@ st.markdown("""
         .stTabs [data-baseweb="tab"] { height: 42px !important; padding: 4px 10px !important; font-size: 13.5px !important; }
         .product-header { font-size: 17px !important; }
         input[type=number] { font-size: 17px !important; height: 44px !important; }
-        .mobile-table th, .mobile-table td { font-size: 15px !important; padding: 10px 6px; }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -480,7 +449,7 @@ def cb_save_data(p_key, usage_val, label_val):
     st.session_state[f"stock_{p_key}"] = None
     st.session_state[f"success_msg_{p_key}"] = f"✅ บันทึกยอดใช้จริงของเดือน {label_val} เรียบร้อยแล้ว!"
 
-# --- 8. ฟังก์ชัน POP-UP MODAL DIALOG แสดงตารางประวัติย้อนหลังสไตล์ Mobile-Friendly ---
+# --- 8. ฟังก์ชัน POP-UP MODAL DIALOG แสดงตารางประวัติย้อนหลังผ่าน st.dataframe ---
 @st.dialog("📋 ตารางประวัติการใช้งานย้อนหลัง (ม.ค. 66 - ปัจจุบัน)", width="large")
 def show_history_modal():
     p_tabs = st.tabs([p["name"] for p in st.session_state.product_store.values()])
@@ -488,33 +457,20 @@ def show_history_modal():
         with p_tab:
             p_data = st.session_state.product_store[p_k]
             
-            rows_html = ""
-            for idx, (lbl, val) in enumerate(zip(p_data["labels"], p_data["history"]), start=1):
-                rows_html += f"""
-                <tr>
-                    <td style="text-align: center; width: 20%;">{idx}</td>
-                    <td style="text-align: center; width: 40%; font-weight:700; color:#0369a1;">{lbl}</td>
-                    <td style="text-align: right; width: 40%; font-weight:700; color:#15803d;">{val:,.2f}</td>
-                </tr>
-                """
+            # สร้าง DataFrame
+            df_modal = pd.DataFrame({
+                "ลำดับ": range(1, len(p_data["labels"]) + 1),
+                "เดือน/ปี": p_data["labels"],
+                "ยอดใช้งานจริง (ลิตร)": [f"{val:,.2f}" for val in p_data["history"]]
+            })
             
-            table_html = f"""
-            <div class="mobile-table-container">
-                <table class="mobile-table">
-                    <thead>
-                        <tr>
-                            <th style="text-align: center;">ลำดับ</th>
-                            <th style="text-align: center;">เดือน/ปี</th>
-                            <th style="text-align: right;">ยอดใช้งานจริง (ลิตร)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rows_html}
-                    </tbody>
-                </table>
-            </div>
-            """
-            st.markdown(table_html, unsafe_allow_html=True)
+            # แสดงตารางด้วย st.dataframe ชัวร์ 100% ไม่ขึ้นโค้ดแน่นอน
+            st.dataframe(
+                df_modal,
+                use_container_width=True,
+                hide_index=True,
+                height=420
+            )
 
 # --- 9. Sidebar จัดการรีเซ็ต และ ปุุ่มกดดูประวัติ ---
 with st.sidebar:
