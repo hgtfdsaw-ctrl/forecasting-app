@@ -5,17 +5,11 @@ import plotly.graph_objects as go
 import math
 import copy
 from datetime import datetime, timedelta
-from PIL import Image
 
-# --- 1. โหลดไอคอนและตั้งค่าหน้าจอ ---
-try:
-    app_icon = Image.open("ไอคอน.jpg")
-except Exception:
-    app_icon = "📈"
-
+# --- 1. การตั้งค่าหน้าจอและไอคอน ---
 st.set_page_config(
     page_title="ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์", 
-    page_icon=app_icon,
+    page_icon="icon.jpg", 
     layout="wide"
 )
 
@@ -398,10 +392,10 @@ def get_next_month_label(last_label):
     else:
         return f"{months_base[m_idx + 1]} {y_num}"
 
-# --- 5. ข้อมูลพารามิเตอร์โมเดลคลังสินค้า ---
+# --- 5. ข้อมูลพารามิเตอร์โมเดลคลังสินค้า (อัปเดตตรงตามตารางเป๊ะ 100%) ---
 inventory_params = {
     "carwash": {
-        "policy": "EOQ", "k": 1, "d_avg": 43.07, "h": 1.50, "eoq": 33.89, "ss": 9.35, "rop": 12.94,
+        "policy": "EOQ", "k": 1, "d_avg": 43.07, "h": 1.50, "eoq": 40.00, "ss": 10.00, "rop": 13.00,
         "selected_lot": 40, "poq_cost": 16236.66, "eoq_cost": 13506.66, "fc_cost": 17901.66, "best_cost": 13506.66,
         "lead_time_days": 2.5, "vc": 0.37,
         "price_per_liter": 30,
@@ -409,7 +403,7 @@ inventory_params = {
         "rationale": "<b>ทำไม EOQ ถึงประหยัดที่สุด?</b> เนื่องจากน้ำยาล้างรถมีอุปสงค์สูงและค่อนข้างสม่ำเสมอ (VC = 0.37 ≤ 0.5) การสั่งซื้อแบบล็อตประหยัดขนาดคงที่ <b>EOQ (ครั้งละ 40 ลิตร)</b> จะช่วยถัวเฉลี่ยค่าสั่งซื้อและค่าถือครองคลังสินค้าได้สมดุลที่สุด <b>ประหยัดกว่าการสั่งตามพยากรณ์ 4,395.00 บาท/ปี</b> และ<b>ถูกกว่าวิธี POQ ถึง 2,730.00 บาท/ปี</b>"
     },
     "interior": {
-        "policy": "POQ", "k": 1, "d_avg": 20.03, "h": 1.50, "eoq": 23.11, "ss": 3.71, "rop": 5.38,
+        "policy": "POQ", "k": 1, "d_avg": 20.03, "h": 1.50, "eoq": 30.00, "ss": 4.00, "rop": 6.00,
         "selected_lot": 30, "poq_cost": 7093.70, "eoq_cost": 11316.20, "fc_cost": 9474.95, "best_cost": 7093.70,
         "lead_time_days": 2.5, "vc": 0.48,
         "price_per_liter": 30,
@@ -417,7 +411,7 @@ inventory_params = {
         "rationale": "<b>ทำไม POQ (k=1) ถึงประหยัดที่สุด?</b> สินค้ามีความผันผวนระดับปานกลาง (VC = 0.48) การใช้นโยบายรอบเวลาสั่งซื้อรายเดือน <b>POQ (k=1)</b> จะสั่งซื้อตามปริมาณที่คาดว่าต้องใช้จริงในแต่ละงวด ป้องกันไม่ให้มีสต็อกเหลือค้างคลังเกินจำเป็น <b>ประหยัดกว่าวิธี EOQ ถึง 4,222.50 บาท/ปี</b> และ<b>ถูกกว่าวิธีพยากรณ์ 2,381.25 บาท/ปี</b>"
     },
     "glass": {
-        "policy": "POQ", "k": 1, "d_avg": 13.35, "h": 2.00, "eoq": 16.34, "ss": 2.21, "rop": 3.32,
+        "policy": "POQ", "k": 1, "d_avg": 13.35, "h": 2.00, "eoq": 20.00, "ss": 3.00, "rop": 4.00,
         "selected_lot": 20, "poq_cost": 6175.13, "eoq_cost": 10021.13, "fc_cost": 9654.88, "best_cost": 6175.13,
         "lead_time_days": 2.0, "vc": 0.52,
         "price_per_liter": 40,
@@ -425,7 +419,7 @@ inventory_params = {
         "rationale": "<b>ทำไม POQ (k=1) ถึงประหยัดที่สุด?</b> น้ำยาเช็ดกระจกมีราคาต่อหน่วยสูงกว่ากลุ่ม (40 บาท/ลิตร) และมีค่าถือครองสูง (h = 2.00 บาท) การใช้ <b>POQ (k=1)</b> ช่วยดึงระดับสต็อกเฉลี่ยลงมาให้ต่ำที่สุด จึงตัดค่าเก็บรักษาที่ไม่จำเป็นออกไปได้มหาศาล <b>ประหยัดกว่าวิธี EOQ ถึง 3,846.00 บาท/ปี</b> และ<b>ถูกกว่าวิธีพยากรณ์ 3,479.75 บาท/ปี</b>"
     },
     "wheel": {
-        "policy": "POQ", "k": 3, "d_avg": 2.76, "h": 1.50, "eoq": 8.58, "ss": 0.44, "rop": 0.67,
+        "policy": "POQ", "k": 3, "d_avg": 2.76, "h": 1.50, "eoq": 10.00, "ss": 1.00, "rop": 1.00,
         "selected_lot": 10, "poq_cost": 2066.39, "eoq_cost": 4062.89, "fc_cost": 4062.89, "best_cost": 2066.39,
         "lead_time_days": 3.0, "vc": 0.65,
         "price_per_liter": 30,
@@ -716,11 +710,11 @@ for tab, p_key in zip(tabs, keys_list):
 
             with c_input:
                 if stock_qty_input <= p_inv["ss"]:
-                    st.error(f"🚨 **สถานะวิกฤต (Below Safety Stock):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) ต่ำกว่าระดับความปลอดภัย SS ({p_inv['ss']} ลิตร){fc_info_msg}{lead_info_msg}")
+                    st.error(f"🚨 **สถานะวิกฤต (Below Safety Stock):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) ต่ำกว่าระดับความปลอดภัย SS ({p_inv['ss']:.2f} ลิตร){fc_info_msg}{lead_info_msg}")
                 elif stock_qty_input <= p_inv["rop"]:
-                    st.warning(f"⚠️ **เตือนจุดสั่งซื้อ (Reorder Point):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) แตะจุดสั่งซื้อ ROP ({p_inv['rop']} ลิตร) แล้ว{fc_info_msg}{lead_info_msg}")
+                    st.warning(f"⚠️ **เตือนจุดสั่งซื้อ (Reorder Point):** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) แตะจุดสั่งซื้อ ROP ({p_inv['rop']:.2f} ลิตร) แล้ว{fc_info_msg}{lead_info_msg}")
                 else:
-                    st.success(f"✅ **สถานะปกติ:** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) สูงกว่าจุดสั่งซื้อ ROP ({p_inv['rop']} ลิตร){fc_info_msg}{lead_info_msg}")
+                    st.success(f"✅ **สถานะปกติ:** สต็อกคงเหลือ ({stock_qty_input:.2f} ลิตร) สูงกว่าจุดสั่งซื้อ ROP ({p_inv['rop']:.2f} ลิตร){fc_info_msg}{lead_info_msg}")
 
             tank_rows, est_cost = get_tank_rows_and_cost(p_key, recommended_qty)
             if tank_rows:
