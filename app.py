@@ -15,377 +15,377 @@ st.set_page_config(
 
 # --- 2. CSS ตกแต่งสไตล์ Ultra-Soft Pastel, ซ่อนปุ่มตาราง และ ปรับ Pop-up เต็มจอ ---
 st.markdown("""
-    <style>
-    /* Google Fonts - Prompt */
-    @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap');
-    
-    html, body, [class*="css"] {
-        font-family: 'Prompt', sans-serif;
-    }
-    
-    /* Background พื้นหลังโทนครีมนวล ตัดฟ้าอ่อนละมุนที่สุด */
-    .main { 
-        background: linear-gradient(135deg, #fffdfa 0%, #f4f9ff 50%, #eef7ff 100%); 
-    }
-    
-    /* 🚫 ซ่อนปุ่มเครื่องมือลอยบนตาราง Dataframe */
-    [data-testid="stElementToolbar"],
-    div[data-testid="stElementToolbar"] {
-        display: none !important;
-    }
-    
-    /* Hero Banner Header โทนฟ้าพาสเทลอ่อน */
-    .hero-banner {
-        background: linear-gradient(135deg, #c7d2fe 0%, #bae6fd 100%);
-        border-radius: 24px;
-        padding: 22px 28px;
-        color: #0c4a6e;
-        box-shadow: 0 8px 20px -4px rgba(186, 230, 253, 0.5);
-        margin-bottom: 20px;
-        position: relative;
-        overflow: hidden;
-        border: 2px solid #ffffff;
-    }
-    .hero-container {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-    .hero-icon-box {
-        background: #fef9c3;
-        padding: 12px;
-        border-radius: 18px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        border: 2px solid #ffffff;
-    }
-    .hero-title {
-        font-size: 24px !important;
-        font-weight: 700 !important;
-        color: #0c4a6e;
-        margin: 0;
-        line-height: 1.25;
-    }
-    .hero-subtitle {
-        font-size: 13.5px !important;
-        color: #0369a1;
-        margin-top: 4px;
-        margin-bottom: 0;
-    }
-    .hero-badge {
-        display: inline-block;
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(8px);
-        color: #0369a1;
-        border: 1px solid #7dd3fc;
-        padding: 3px 12px;
-        border-radius: 20px;
-        font-size: 11.5px;
-        font-weight: 700;
-        margin-bottom: 8px;
-    }
+<style>
+/* Google Fonts - Prompt */
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap');
 
-    /* Sidebar Headings */
-    .sidebar-category-header {
-        font-size: 14.5px;
-        font-weight: 700;
-        color: #0369a1;
-        margin-top: 14px;
-        margin-bottom: 6px;
-        padding-bottom: 4px;
-        border-bottom: 1.5px dashed #bae6fd;
-    }
+html, body, [class*="css"] {
+    font-family: 'Prompt', sans-serif;
+}
 
-    /* Input Container Card โทนขาวขอบฟ้าพาสเทลอ่อน */
-    .input-card-container {
-        background: #ffffff;
-        border-radius: 20px;
-        padding: 20px;
-        border: 1.5px solid #e0f2fe;
-        box-shadow: 0 4px 15px rgba(224, 242, 254, 0.4);
-        margin-bottom: 16px;
-    }
-    .input-card-header {
-        font-size: 16px;
-        font-weight: 700;
-        color: #0369a1;
-        margin-bottom: 14px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        border-bottom: 1.5px dashed #e0f2fe;
-        padding-bottom: 8px;
-    }
+/* Background พื้นหลังโทนครีมนวล ตัดฟ้าอ่อนละมุนที่สุด */
+.main { 
+    background: linear-gradient(135deg, #fffdfa 0%, #f4f9ff 50%, #eef7ff 100%); 
+}
 
-    /* Tabs Styling */
-    .stTabs [data-baseweb="tab-list"] { 
-        gap: 8px; 
-        overflow-x: auto;
-        padding-bottom: 4px;
-    }
-    .stTabs [data-baseweb="tab"] {
-        height: 48px;
-        white-space: nowrap;
-        background-color: #fffdf5;
-        border-radius: 16px;
-        border: 1.5px solid #e0f2fe;
-        padding: 6px 20px;
-        font-weight: 600;
-        font-size: 15px !important;
-        color: #0369a1;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-        transition: all 0.2s ease;
-    }
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%) !important;
-        color: #0c4a6e !important;
-        border-color: #7dd3fc !important;
-        font-weight: 700 !important;
-        box-shadow: 0 4px 12px rgba(186, 230, 253, 0.4) !important;
-    }
+/* 🚫 ซ่อนปุ่มเครื่องมือลอยบนตาราง Dataframe */
+[data-testid="stElementToolbar"],
+div[data-testid="stElementToolbar"] {
+    display: none !important;
+}
 
-    .product-header {
-        font-size: 20px !important;
-        font-weight: 700 !important;
-        color: #0369a1;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    /* Number Input Styling */
-    input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { 
-        -webkit-appearance: none; 
-        margin: 0; 
-    }
-    input[type=number] { 
-        -moz-appearance: textfield; 
-        font-size: 20px !important;
-        font-weight: bold !important;
-        height: 48px !important;
-        color: #0c4a6e !important;
-        background-color: #fafcfd !important;
-        border: 1.5px solid #bae6fd !important;
-        border-radius: 12px !important;
-        transition: all 0.2s ease;
-    }
-    input[type=number]:focus {
-        border-color: #7dd3fc !important;
-        background-color: #ffffff !important;
-        box-shadow: 0 0 0 3px rgba(186, 230, 253, 0.3) !important;
-    }
-    div[data-testid="stNumberInputStepDown"], div[data-testid="stNumberInputStepUp"] {
-        display: none !important;
-    }
-    
-    .large-label {
-        font-size: 14px !important;
-        font-weight: 600 !important;
-        color: #334155;
-        margin-top: 6px;
-        margin-bottom: 4px;
-    }
+/* Hero Banner Header โทนฟ้าพาสเทลอ่อน */
+.hero-banner {
+    background: linear-gradient(135deg, #c7d2fe 0%, #bae6fd 100%);
+    border-radius: 24px;
+    padding: 22px 28px;
+    color: #0c4a6e;
+    box-shadow: 0 8px 20px -4px rgba(186, 230, 253, 0.5);
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid #ffffff;
+}
+.hero-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.hero-icon-box {
+    background: #fef9c3;
+    padding: 12px;
+    border-radius: 18px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 2px solid #ffffff;
+}
+.hero-title {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: #0c4a6e;
+    margin: 0;
+    line-height: 1.25;
+}
+.hero-subtitle {
+    font-size: 13.5px !important;
+    color: #0369a1;
+    margin-top: 4px;
+    margin-bottom: 0;
+}
+.hero-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    color: #0369a1;
+    border: 1px solid #7dd3fc;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
 
-    /* Cards Status */
-    .card-base {
-        background: #ffffff;
-        padding: 16px;
-        border-radius: 18px;
-        border: 1.5px solid #f0f9ff;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-        margin-bottom: 10px;
-        min-height: 125px;
-    }
-    .card-title { font-size: 13.5px; color: #0284c7; font-weight: 600; display: flex; align-items: center; gap: 6px; }
-    .card-value { font-size: 24px; color: #0c4a6e; font-weight: 700; margin-top: 4px; }
-    
-    .card-recommend {
-        background: linear-gradient(135deg, #f0fdf4 0%, #e8f5e9 100%);
-        padding: 18px;
-        border-radius: 18px;
-        border: 2px solid #86efac;
-        box-shadow: 0 6px 15px rgba(134, 239, 172, 0.2);
-        margin-bottom: 10px;
-        min-height: 125px;
-    }
-    .card-recommend-title { font-size: 14px; color: #166534; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-    .card-recommend-value { font-size: 28px; color: #15803d; font-weight: 800; margin-top: 2px; }
+/* Sidebar Headings */
+.sidebar-category-header {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #0369a1;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1.5px dashed #bae6fd;
+}
 
-    .card-tanks {
-        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-        padding: 16px;
-        border-radius: 18px;
-        border: 2px solid #7dd3fc;
-        box-shadow: 0 6px 15px rgba(125, 211, 252, 0.2);
-        margin-bottom: 10px;
-        min-height: 125px;
-    }
-    .card-tanks-title { font-size: 14px; color: #0c4a6e; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+/* Input Container Card โทนขาวขอบฟ้าพาสเทลอ่อน */
+.input-card-container {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 20px;
+    border: 1.5px solid #e0f2fe;
+    box-shadow: 0 4px 15px rgba(224, 242, 254, 0.4);
+    margin-bottom: 16px;
+}
+.input-card-header {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0369a1;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1.5px dashed #e0f2fe;
+    padding-bottom: 8px;
+}
 
-    .tank-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 4px;
-    }
-    .tank-table th {
-        border-bottom: 1.5px solid #bae6fd;
-        padding: 3px 5px;
-        font-size: 12.5px;
-        font-weight: 600;
-        color: #0369a1;
-        text-align: left;
-    }
-    .tank-table td {
-        padding: 3px 5px;
-        font-size: 14px;
-        font-weight: 700;
-        color: #0c4a6e;
-    }
-    .tank-table td.qty-col {
-        text-align: right;
-        color: #0284c7;
-        font-size: 16px;
-    }
+/* Tabs Styling */
+.stTabs [data-baseweb="tab-list"] { 
+    gap: 8px; 
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+.stTabs [data-baseweb="tab"] {
+    height: 48px;
+    white-space: nowrap;
+    background-color: #fffdf5;
+    border-radius: 16px;
+    border: 1.5px solid #e0f2fe;
+    padding: 6px 20px;
+    font-weight: 600;
+    font-size: 15px !important;
+    color: #0369a1;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
+}
+.stTabs [aria-selected="true"] {
+    background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%) !important;
+    color: #0c4a6e !important;
+    border-color: #7dd3fc !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 12px rgba(186, 230, 253, 0.4) !important;
+}
 
-    .policy-tag {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
-        color: #713f12;
-        padding: 6px 16px;
-        border-radius: 30px;
-        font-weight: 600;
-        font-size: 13.5px;
-        border: 1.5px solid #ffffff;
-        box-shadow: 0 3px 10px rgba(254, 240, 138, 0.4);
-    }
+.product-header {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: #0369a1;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 
-    .empty-state-card {
-        background: linear-gradient(135deg, #fffdf0 0%, #fefce8 100%);
-        border: 2px dashed #fef08a;
-        border-radius: 20px;
-        padding: 26px 18px;
-        text-align: center;
-        margin-top: 2px;
-        box-shadow: 0 6px 16px rgba(254, 240, 138, 0.2);
-    }
-    .empty-state-icon { font-size: 38px; margin-bottom: 4px; }
-    .empty-state-title { font-size: 18px; font-weight: 700; color: #854d0e; margin-bottom: 6px; }
-    .empty-state-desc { font-size: 14px; font-weight: 600; color: #a16207; line-height: 1.6; }
-    .empty-state-highlight {
-        margin-top: 12px; font-size: 13px; font-weight: 700; color: #ca8a04;
-        background: #ffffff; padding: 6px 16px; border-radius: 20px; display: inline-block;
-    }
+/* Number Input Styling */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+}
+input[type=number] { 
+    -moz-appearance: textfield; 
+    font-size: 20px !important;
+    font-weight: bold !important;
+    height: 48px !important;
+    color: #0c4a6e !important;
+    background-color: #fafcfd !important;
+    border: 1.5px solid #bae6fd !important;
+    border-radius: 12px !important;
+    transition: all 0.2s ease;
+}
+input[type=number]:focus {
+    border-color: #7dd3fc !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(186, 230, 253, 0.3) !important;
+}
+div[data-testid="stNumberInputStepDown"], div[data-testid="stNumberInputStepUp"] {
+    display: none !important;
+}
 
-    .prod-cost-card {
-        background: #ffffff;
-        border: 1.5px solid #f0f9ff;
-        border-radius: 20px;
-        padding: 20px;
-        margin-top: 20px;
-        margin-bottom: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
-    }
-    .prod-cost-title {
-        font-size: 16.5px; font-weight: 700; color: #0369a1; margin-bottom: 12px;
-        border-bottom: 1.5px dashed #bae6fd; padding-bottom: 8px; display: flex; align-items: center; gap: 6px;
-    }
-    .cost-box { padding: 12px; border-radius: 14px; text-align: center; }
-    .cost-box-title { font-size: 12.5px; font-weight: 600; color: #64748b; }
-    .cost-box-val { font-size: 18px; font-weight: 700; margin-top: 2px; }
-    
-    .cost-winner { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; }
-    .cost-winner .cost-box-title { color: #166534; }
-    .cost-winner .cost-box-val { color: #15803d; }
-    .cost-normal { background-color: #fafcfd; border: 1px solid #e2e8f0; }
-    .cost-normal .cost-box-val { color: #334155; }
+.large-label {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #334155;
+    margin-top: 6px;
+    margin-bottom: 4px;
+}
 
-    .summary-card-orig {
-        background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 18px; padding: 16px; text-align: center;
-    }
-    .summary-card-new {
-        background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 18px; padding: 16px; text-align: center;
-    }
-    .summary-card-save {
-        background: #f0f9ff; border: 1.5px solid #7dd3fc; border-radius: 18px; padding: 16px; text-align: center;
-    }
+/* Cards Status */
+.card-base {
+    background: #ffffff;
+    padding: 16px;
+    border-radius: 18px;
+    border: 1.5px solid #f0f9ff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    margin-bottom: 10px;
+    min-height: 125px;
+}
+.card-title { font-size: 13.5px; color: #0284c7; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.card-value { font-size: 24px; color: #0c4a6e; font-weight: 700; margin-top: 4px; }
 
-    .stButton>button {
-        border-radius: 14px !important;
-        font-weight: 600 !important;
-        transition: all 0.2s ease !important;
-    }
+.card-recommend {
+    background: linear-gradient(135deg, #f0fdf4 0%, #e8f5e9 100%);
+    padding: 18px;
+    border-radius: 18px;
+    border: 2px solid #86efac;
+    box-shadow: 0 6px 15px rgba(134, 239, 172, 0.2);
+    margin-bottom: 10px;
+    min-height: 125px;
+}
+.card-recommend-title { font-size: 14px; color: #166534; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.card-recommend-value { font-size: 28px; color: #15803d; font-weight: 800; margin-top: 2px; }
 
-    /* 📱 POP-UP MODAL สไตล์ขยายเต็มจอสำหรับมือถือ */
-    div[role="dialog"] {
-        width: 98vw !important;
-        max-width: 98vw !important;
-        height: 94vh !important;
-        max-height: 94vh !important;
-        margin: 0 auto !important;
-        padding: 10px !important;
-        border-radius: 18px !important;
-    }
+.card-tanks {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    padding: 16px;
+    border-radius: 18px;
+    border: 2px solid #7dd3fc;
+    box-shadow: 0 6px 15px rgba(125, 211, 252, 0.2);
+    margin-bottom: 10px;
+    min-height: 125px;
+}
+.card-tanks-title { font-size: 14px; color: #0c4a6e; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
 
-    div[role="dialog"] h1, div[role="dialog"] h2, div[role="dialog"] h3, div[role="dialog"] [data-testid="stHeader"] {
-        font-size: 20px !important;
-        font-weight: 700 !important;
-    }
+.tank-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4px;
+}
+.tank-table th {
+    border-bottom: 1.5px solid #bae6fd;
+    padding: 3px 5px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #0369a1;
+    text-align: left;
+}
+.tank-table td {
+    padding: 3px 5px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0c4a6e;
+}
+.tank-table td.qty-col {
+    text-align: right;
+    color: #0284c7;
+    font-size: 16px;
+}
 
-    div[role="dialog"] .stTabs [data-baseweb="tab"] {
-        font-size: 16px !important;
-        height: 46px !important;
-        padding: 6px 14px !important;
-    }
+.policy-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
+    color: #713f12;
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 13.5px;
+    border: 1.5px solid #ffffff;
+    box-shadow: 0 3px 10px rgba(254, 240, 138, 0.4);
+}
 
-    div[role="dialog"] div[data-testid="stDataFrame"] {
-        height: 72vh !important;
-    }
-    div[role="dialog"] div[data-testid="stDataFrame"] td, 
-    div[role="dialog"] div[data-testid="stDataFrame"] th,
-    div[role="dialog"] div[data-testid="stDataFrame"] [role="columnheader"] {
-        font-size: 18px !important;
-        font-weight: 600 !important;
-        padding: 12px 8px !important;
-    }
+.empty-state-card {
+    background: linear-gradient(135deg, #fffdf0 0%, #fefce8 100%);
+    border: 2px dashed #fef08a;
+    border-radius: 20px;
+    padding: 26px 18px;
+    text-align: center;
+    margin-top: 2px;
+    box-shadow: 0 6px 16px rgba(254, 240, 138, 0.2);
+}
+.empty-state-icon { font-size: 38px; margin-bottom: 4px; }
+.empty-state-title { font-size: 18px; font-weight: 700; color: #854d0e; margin-bottom: 6px; }
+.empty-state-desc { font-size: 14px; font-weight: 600; color: #a16207; line-height: 1.6; }
+.empty-state-highlight {
+    margin-top: 12px; font-size: 13px; font-weight: 700; color: #ca8a04;
+    background: #ffffff; padding: 6px 16px; border-radius: 20px; display: inline-block;
+}
 
-    @media (max-width: 768px) {
-        .hero-banner { padding: 16px 14px !important; border-radius: 18px !important; }
-        .hero-title { font-size: 17px !important; }
-        .hero-subtitle { font-size: 11.5px !important; }
-        .stTabs [data-baseweb="tab"] { height: 42px !important; padding: 4px 10px !important; font-size: 13.5px !important; }
-        .product-header { font-size: 17px !important; }
-        input[type=number] { font-size: 17px !important; height: 44px !important; }
-    }
-    </style>
+.prod-cost-card {
+    background: #ffffff;
+    border: 1.5px solid #f0f9ff;
+    border-radius: 20px;
+    padding: 20px;
+    margin-top: 20px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+}
+.prod-cost-title {
+    font-size: 16.5px; font-weight: 700; color: #0369a1; margin-bottom: 12px;
+    border-bottom: 1.5px dashed #bae6fd; padding-bottom: 8px; display: flex; align-items: center; gap: 6px;
+}
+.cost-box { padding: 12px; border-radius: 14px; text-align: center; }
+.cost-box-title { font-size: 12.5px; font-weight: 600; color: #64748b; }
+.cost-box-val { font-size: 18px; font-weight: 700; margin-top: 2px; }
+
+.cost-winner { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; }
+.cost-winner .cost-box-title { color: #166534; }
+.cost-winner .cost-box-val { color: #15803d; }
+.cost-normal { background-color: #fafcfd; border: 1px solid #e2e8f0; }
+.cost-normal .cost-box-val { color: #334155; }
+
+.summary-card-orig {
+    background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 18px; padding: 16px; text-align: center;
+}
+.summary-card-new {
+    background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 18px; padding: 16px; text-align: center;
+}
+.summary-card-save {
+    background: #f0f9ff; border: 1.5px solid #7dd3fc; border-radius: 18px; padding: 16px; text-align: center;
+}
+
+.stButton>button {
+    border-radius: 14px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+}
+
+/* 📱 POP-UP MODAL สไตล์ขยายเต็มจอสำหรับมือถือ */
+div[role="dialog"] {
+    width: 98vw !important;
+    max-width: 98vw !important;
+    height: 94vh !important;
+    max-height: 94vh !important;
+    margin: 0 auto !important;
+    padding: 10px !important;
+    border-radius: 18px !important;
+}
+
+div[role="dialog"] h1, div[role="dialog"] h2, div[role="dialog"] h3, div[role="dialog"] [data-testid="stHeader"] {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+}
+
+div[role="dialog"] .stTabs [data-baseweb="tab"] {
+    font-size: 16px !important;
+    height: 46px !important;
+    padding: 6px 14px !important;
+}
+
+div[role="dialog"] div[data-testid="stDataFrame"] {
+    height: 72vh !important;
+}
+div[role="dialog"] div[data-testid="stDataFrame"] td, 
+div[role="dialog"] div[data-testid="stDataFrame"] th,
+div[role="dialog"] div[data-testid="stDataFrame"] [role="columnheader"] {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    padding: 12px 8px !important;
+}
+
+@media (max-width: 768px) {
+    .hero-banner { padding: 16px 14px !important; border-radius: 18px !important; }
+    .hero-title { font-size: 17px !important; }
+    .hero-subtitle { font-size: 11.5px !important; }
+    .stTabs [data-baseweb="tab"] { height: 42px !important; padding: 4px 10px !important; font-size: 13.5px !important; }
+    .product-header { font-size: 17px !important; }
+    input[type=number] { font-size: 17px !important; height: 44px !important; }
+}
+</style>
 """, unsafe_allow_html=True)
 
 # --- 3. Hero Banner Header ---
 st.markdown("""
-    <div class="hero-banner">
-        <div class="hero-badge">⚡ HYBRID INVENTORY & FORECAST ENGINE</div>
-        <div class="hero-container">
-            <div class="hero-icon-box">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="20" x2="18" y2="10"></line>
-                    <line x1="12" y1="20" x2="12" y2="4"></line>
-                    <line x1="6" y1="20" x2="6" y2="14"></line>
-                    <path d="M3 3l7 7 4-4 7 7"></path>
-                    <polyline points="14 6 21 6 21 13"></polyline>
-                </svg>
-            </div>
-            <div>
-                <h1 class="hero-title">ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์</h1>
-                <p class="hero-subtitle">วิเคราะห์การพยากรณ์ Holt-Winters โครงสร้างแบบจำลองคลังสินค้า EOQ / POQ / ROP / SS</p>
-            </div>
+<div class="hero-banner">
+    <div class="hero-badge">⚡ HYBRID INVENTORY & FORECAST ENGINE</div>
+    <div class="hero-container">
+        <div class="hero-icon-box">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+                <path d="M3 3l7 7 4-4 7 7"></path>
+                <polyline points="14 6 21 6 21 13"></polyline>
+            </svg>
+        </div>
+        <div>
+            <h1 class="hero-title">ระบบพยากรณ์และบริหารการสั่งซื้อผลิตภัณฑ์</h1>
+            <p class="hero-subtitle">วิเคราะห์การพยากรณ์ Holt-Winters โครงสร้างแบบจำลองคลังสินค้า EOQ / POQ / ROP / SS</p>
         </div>
     </div>
+</div>
 """, unsafe_allow_html=True)
 
 # --- 4. ฟังก์ชันช่วยคำนวณชื่อเดือนถัดไปอัตโนมัติ ---
@@ -402,7 +402,7 @@ def get_next_month_label(last_label):
     else:
         return f"{months_base[m_idx + 1]} {y_num}"
 
-# --- 5. ข้อมูลพารามิเตอร์โมเดลคลังสินค้า (อัปเดตข้อมูลการเปรียบเทียบต้นทุนก่อน-หลังตรงตามภาพสไลด์) ---
+# --- 5. ข้อมูลพารามิเตอร์โมเดลคลังสินค้า ---
 inventory_params = {
     "carwash": {
         "policy": "EOQ", "k": 1, "d_avg": 43.07, "h": 1.50, "eoq": 40.00, "ss": 10.00, "rop": 13.00,
@@ -674,10 +674,7 @@ for tab, p_key in zip(tabs, keys_list):
         c_input, c_results = st.columns([1.1, 1.9])
         
         with c_input:
-            st.markdown(f"""
-                <div class="input-card-container">
-                    <div class="input-card-header">📌 กรอกข้อมูลประจำงวด ({input_month_label})</div>
-            """, unsafe_allow_html=True)
+            st.markdown(f'<div class="input-card-container"><div class="input-card-header">📌 กรอกข้อมูลประจำงวด ({input_month_label})</div>', unsafe_allow_html=True)
             
             st.markdown(f'<div class="large-label">1. ปริมาณการใช้งานของเดือนปัจจุบัน ({input_month_label}) (ลิตร):</div>', unsafe_allow_html=True)
             last_usage = st.number_input(
@@ -730,21 +727,21 @@ for tab, p_key in zip(tabs, keys_list):
             if tank_rows:
                 table_html_rows = "".join([f"<tr><td>{size}</td><td class='qty-col'>{qty}</td></tr>" for size, qty in tank_rows])
                 tanks_display_html = f"""
-                <table class="tank-table">
-                    <thead><tr><th>ขนาดถัง</th><th style="text-align:right;">จำนวนสั่ง</th></tr></thead>
-                    <tbody>{table_html_rows}</tbody>
-                </table>
-                <div style="margin-top: 8px; padding-top: 6px; border-top: 1.5px dashed #bae6fd; font-size: 13px; font-weight: 700; color: #0c4a6e;">
-                    💳 รวมประมาณการค่าใช้จ่าย: <span style="color:#15803d; font-size:16px;">{est_cost:,.2f}</span> บาท
-                </div>
-                """
+<table class="tank-table">
+    <thead><tr><th>ขนาดถัง</th><th style="text-align:right;">จำนวนสั่ง</th></tr></thead>
+    <tbody>{table_html_rows}</tbody>
+</table>
+<div style="margin-top: 8px; padding-top: 6px; border-top: 1.5px dashed #bae6fd; font-size: 13px; font-weight: 700; color: #0c4a6e;">
+    💳 รวมประมาณการค่าใช้จ่าย: <span style="color:#15803d; font-size:16px;">{est_cost:,.2f}</span> บาท
+</div>
+"""
             else:
                 tanks_display_html = f"""
-                <div style='font-size:16px; font-weight:700; color:#0284c7; margin-top:4px;'>ไม่ต้องสั่งซื้อเพิ่มเติม</div>
-                <div style='font-size:12px; font-weight:500; color:#0369a1; margin-top:4px; background:#f0f9ff; padding:4px 8px; border-radius:6px;'>
-                    📈 ยอดพยากรณ์ ({forecast_month_label}): <b>{next_f:.2f} ลิตร</b>
-                </div>
-                """
+<div style='font-size:16px; font-weight:700; color:#0284c7; margin-top:4px;'>ไม่ต้องสั่งซื้อเพิ่มเติม</div>
+<div style='font-size:12px; font-weight:500; color:#0369a1; margin-top:4px; background:#f0f9ff; padding:4px 8px; border-radius:6px;'>
+    📈 ยอดพยากรณ์ ({forecast_month_label}): <b>{next_f:.2f} ลิตร</b>
+</div>
+"""
 
             with c_results:
                 st.info(f"💡 **สรุปผลพยากรณ์:** คาดการณ์ปริมาณการใช้น้ำยาในเดือน **{forecast_month_label}** เท่ากับ **{next_f:.2f} ลิตร** " + 
@@ -775,18 +772,18 @@ for tab, p_key in zip(tabs, keys_list):
         else:
             with c_results:
                 st.markdown(f"""
-                    <div class="empty-state-card">
-                        <div class="empty-state-icon">📝</div>
-                        <div class="empty-state-title">กรุณากรอกข้อมูลให้ครบทั้ง 2 ช่อง</div>
-                        <div class="empty-state-desc">
-                            1. ปริมาณการใช้งานของเดือนปัจจุบันนี้ (<b>{input_month_label}</b>)<br>
-                            2. ปริมาณคงเหลือ ณ ปัจจุบันในคลัง
-                        </div>
-                        <div class="empty-state-highlight">
-                            ⚡ เมื่อกรอกครบแล้ว ระบบจะคำนวณผลพยากรณ์สำหรับเดือน (<b>{forecast_month_label}</b>) ให้ทันที
-                        </div>
-                    </div>
-                """, unsafe_allow_html=True)
+<div class="empty-state-card">
+    <div class="empty-state-icon">📝</div>
+    <div class="empty-state-title">กรุณากรอกข้อมูลให้ครบทั้ง 2 ช่อง</div>
+    <div class="empty-state-desc">
+        1. ปริมาณการใช้งานของเดือนปัจจุบันนี้ (<b>{input_month_label}</b>)<br>
+        2. ปริมาณคงเหลือ ณ ปัจจุบันในคลัง
+    </div>
+    <div class="empty-state-highlight">
+        ⚡ เมื่อกรอกครบแล้ว ระบบจะคำนวณผลพยากรณ์สำหรับเดือน (<b>{forecast_month_label}</b>) ให้ทันที
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
         
@@ -805,74 +802,78 @@ for tab, p_key in zip(tabs, keys_list):
         eoq_cls = "cost-winner" if p_inv["policy"] == "EOQ" else "cost-normal"
         fc_cls = "cost-normal"
 
-        st.markdown(f"""
-            <div class="prod-cost-card">
-                <div class="prod-cost-title">💰 สรุปการเปรียบเทียบต้นทุนก่อน-หลังปรับปรุง และต้นทุนทั้ง 3 วิธี ({p_info['name']})</div>
-                
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
-                    <div class="summary-card-orig">
-                        <div style="font-size:12px; font-weight:600; color:#991b1b;">ต้นทุนเดิม (ก่อนปรับปรุง)</div>
-                        <div style="font-size:20px; font-weight:800; color:#dc2626; margin-top:2px;">{p_inv['orig_cost']:,.2f} บาท/ปี</div>
-                    </div>
-                    <div class="summary-card-new">
-                        <div style="font-size:12px; font-weight:600; color:#166534;">ต้นทุนต่ำสุดใหม่ ({p_inv['policy']})</div>
-                        <div style="font-size:20px; font-weight:800; color:#15803d; margin-top:2px;">{p_inv['best_cost']:,.2f} บาท/ปี</div>
-                    </div>
-                    <div class="summary-card-save">
-                        <div style="font-size:12px; font-weight:600; color:#075985;">ยอดประหยัดได้ต่อปี</div>
-                        <div style="font-size:20px; font-weight:800; color:#0284c7; margin-top:2px;">ลดลง {p_inv['savings']:,.2f} บาท/ปี</div>
-                    </div>
-                </div>
+        poq_badge = "🏆 (เลือกใช้)" if p_inv['policy']=='POQ' else ""
+        eoq_badge = "🏆 (เลือกใช้)" if p_inv['policy']=='EOQ' else ""
 
-                <div class="cost-grid-mobile" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
-                    <div class="cost-box {poq_cls}">
-                        <div class="cost-box-title">1. นโยบาย POQ {'🏆 (เลือกใช้)' if p_inv['policy']=='POQ' else ''}</div>
-                        <div class="cost-box-val">{p_inv['poq_cost']:,.2f} บาท</div>
-                    </div>
-                    <div class="cost-box {eoq_cls}">
-                        <div class="cost-box-title">2. นโยบาย EOQ {'🏆 (เลือกใช้)' if p_inv['policy']=='EOQ' else ''}</div>
-                        <div class="cost-box-val">{p_inv['eoq_cost']:,.2f} บาท</div>
-                    </div>
-                    <div class="cost-box {fc_cls}">
-                        <div class="cost-box-title">3. สั่งตามพยากรณ์ (Forecast)</div>
-                        <div class="cost-box-val">{p_inv['fc_cost']:,.2f} บาท</div>
-                    </div>
-                </div>
-                <div style="background-color: #f0f9ff; padding: 12px 15px; border-radius: 12px; font-size: 13.5px; color: #0c4a6e; line-height: 1.6; border-left: 3.5px solid #7dd3fc;">
-                    {p_inv['rationale']}
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-
-
-# --- 15. ช่องสรุปภาพรวมคำตอบท้ายสุด (ตรงตามสไลด์สรุปผลเชิงเศรษฐศาสตร์ 100%) ---
-st.markdown("<br><hr style='border: 0; height: 1.5px; background: #e0f2fe;'><br>", unsafe_allow_html=True)
-st.markdown("""
-    <div style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); color: #0c4a6e; padding: 24px; border-radius: 20px; box-shadow: 0 8px 20px rgba(186, 230, 253, 0.3); border: 2px solid #ffffff;">
-        <h3 style="color: #0369a1; margin-top:0; font-size:20px; font-weight:700; display:flex; align-items:center; gap:8px;">
-            🏆 สรุปผลเชิงเศรษฐศาสตร์: การเปรียบเทียบต้นทุนรวมก่อน–หลังปรับปรุง (Hybrid Policy)
-        </h3>
-        <p style="font-size: 14.5px; line-height: 1.6; color: #0369a1;">
-            เมื่อกำหนดการบริหารเป็น <b>"Hybrid Policy"</b> โดยเลือกใช้นโยบาย <b>EOQ สำหรับน้ำยาล้างรถ</b> และใช้นโยบาย <b>POQ สำหรับอีก 3 รายการ</b> (น้ำยาเคลือบภายใน, น้ำยาเช็ดกระจก, น้ำยาลงล้อ) จะให้ผลลัพธ์การลดต้นทุนที่มีประสิทธิภาพสูงสุด ดังนี้:
-        </p>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 16px;">
-            <div style="background: #ffffff; padding: 18px; border-radius: 16px; border: 2px solid #fca5a5; text-align: center;">
-                <span style="font-size: 13px; font-weight: 700; color: #991b1b;">1. ต้นทุนเดิม (ก่อนปรับปรุง)</span><br>
-                <span style="font-size: 26px; font-weight: 800; color: #dc2626;">51,036.00</span><br>
-                <span style="font-size: 12px; color: #64748b;">บาท/ปี (ข้อมูลปี 2568)</span>
-            </div>
-            <div style="background: #ffffff; padding: 18px; border-radius: 16px; border: 2px solid #86efac; text-align: center;">
-                <span style="font-size: 13px; font-weight: 700; color: #166534;">2. ต้นทุนหลังปรับ (Hybrid Policy)</span><br>
-                <span style="font-size: 26px; font-weight: 800; color: #15803d;">28,841.88</span><br>
-                <span style="font-size: 12px; color: #64748b;">บาท/ปี (ตามรอบสั่งซื้อที่เหมาะสม)</span>
-            </div>
-            <div style="background: #ffffff; padding: 18px; border-radius: 16px; border: 2px solid #7dd3fc; text-align: center;">
-                <span style="font-size: 13px; font-weight: 700; color: #0369a1;">3. ผลหลังปรับปรุง (ประหยัดได้)</span><br>
-                <span style="font-size: 26px; font-weight: 800; color: #0284c7;">22,194.12</span><br>
-                <span style="font-size: 13px; font-weight: 700; color: #16a34a;">ลดลง 43.49% อย่างเป็นรูปธรรม</span>
-            </div>
+        html_cost_card = f"""
+<div class="prod-cost-card">
+    <div class="prod-cost-title">💰 สรุปการเปรียบเทียบต้นทุนก่อน-หลังปรับปรุง และต้นทุนทั้ง 3 วิธี ({p_info['name']})</div>
+    
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+        <div class="summary-card-orig">
+            <div style="font-size:12px; font-weight:600; color:#991b1b;">ต้นทุนเดิม (ก่อนปรับปรุง)</div>
+            <div style="font-size:20px; font-weight:800; color:#dc2626; margin-top:2px;">{p_inv['orig_cost']:,.2f} บาท/ปี</div>
+        </div>
+        <div class="summary-card-new">
+            <div style="font-size:12px; font-weight:600; color:#166534;">ต้นทุนต่ำสุดใหม่ ({p_inv['policy']})</div>
+            <div style="font-size:20px; font-weight:800; color:#15803d; margin-top:2px;">{p_inv['best_cost']:,.2f} บาท/ปี</div>
+        </div>
+        <div class="summary-card-save">
+            <div style="font-size:12px; font-weight:600; color:#075985;">ยอดประหยัดได้ต่อปี</div>
+            <div style="font-size:20px; font-weight:800; color:#0284c7; margin-top:2px;">ลดลง {p_inv['savings']:,.2f} บาท/ปี</div>
         </div>
     </div>
+
+    <div class="cost-grid-mobile" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
+        <div class="cost-box {poq_cls}">
+            <div class="cost-box-title">1. นโยบาย POQ {poq_badge}</div>
+            <div class="cost-box-val">{p_inv['poq_cost']:,.2f} บาท</div>
+        </div>
+        <div class="cost-box {eoq_cls}">
+            <div class="cost-box-title">2. นโยบาย EOQ {eoq_badge}</div>
+            <div class="cost-box-val">{p_inv['eoq_cost']:,.2f} บาท</div>
+        </div>
+        <div class="cost-box {fc_cls}">
+            <div class="cost-box-title">3. สั่งตามพยากรณ์ (Forecast)</div>
+            <div class="cost-box-val">{p_inv['fc_cost']:,.2f} บาท</div>
+        </div>
+    </div>
+    <div style="background-color: #f0f9ff; padding: 12px 15px; border-radius: 12px; font-size: 13.5px; color: #0c4a6e; line-height: 1.6; border-left: 3.5px solid #7dd3fc;">
+        {p_inv['rationale']}
+    </div>
+</div>
+"""
+        st.markdown(html_cost_card, unsafe_allow_html=True)
+
+
+# --- 15. ช่องสรุปภาพรวมคำตอบท้ายสุด ---
+st.markdown("<br><hr style='border: 0; height: 1.5px; background: #e0f2fe;'><br>", unsafe_allow_html=True)
+st.markdown("""
+<div style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); color: #0c4a6e; padding: 24px; border-radius: 20px; box-shadow: 0 8px 20px rgba(186, 230, 253, 0.3); border: 2px solid #ffffff;">
+    <h3 style="color: #0369a1; margin-top:0; font-size:20px; font-weight:700; display:flex; align-items:center; gap:8px;">
+        🏆 สรุปผลเชิงเศรษฐศาสตร์: การเปรียบเทียบต้นทุนรวมก่อน–หลังปรับปรุง (Hybrid Policy)
+    </h3>
+    <p style="font-size: 14.5px; line-height: 1.6; color: #0369a1;">
+        เมื่อกำหนดการบริหารเป็น <b>"Hybrid Policy"</b> โดยเลือกใช้นโยบาย <b>EOQ สำหรับน้ำยาล้างรถ</b> และใช้นโยบาย <b>POQ สำหรับอีก 3 รายการ</b> (น้ำยาเคลือบภายใน, น้ำยาเช็ดกระจก, น้ำยาลงล้อ) จะให้ผลลัพธ์การลดต้นทุนที่มีประสิทธิภาพสูงสุด ดังนี้:
+    </p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 16px;">
+        <div style="background: #ffffff; padding: 18px; border-radius: 16px; border: 2px solid #fca5a5; text-align: center;">
+            <span style="font-size: 13px; font-weight: 700; color: #991b1b;">1. ต้นทุนเดิม (ก่อนปรับปรุง)</span><br>
+            <span style="font-size: 26px; font-weight: 800; color: #dc2626;">51,036.00</span><br>
+            <span style="font-size: 12px; color: #64748b;">บาท/ปี (ข้อมูลปี 2568)</span>
+        </div>
+        <div style="background: #ffffff; padding: 18px; border-radius: 16px; border: 2px solid #86efac; text-align: center;">
+            <span style="font-size: 13px; font-weight: 700; color: #166534;">2. ต้นทุนหลังปรับ (Hybrid Policy)</span><br>
+            <span style="font-size: 26px; font-weight: 800; color: #15803d;">28,841.88</span><br>
+            <span style="font-size: 12px; color: #64748b;">บาท/ปี (ตามรอบสั่งซื้อที่เหมาะสม)</span>
+        </div>
+        <div style="background: #ffffff; padding: 18px; border-radius: 16px; border: 2px solid #7dd3fc; text-align: center;">
+            <span style="font-size: 13px; font-weight: 700; color: #0369a1;">3. ผลหลังปรับปรุง (ประหยัดได้)</span><br>
+            <span style="font-size: 26px; font-weight: 800; color: #0284c7;">22,194.12</span><br>
+            <span style="font-size: 13px; font-weight: 700; color: #16a34a;">ลดลง 43.49% อย่างเป็นรูปธรรม</span>
+        </div>
+    </div>
+</div>
 """, unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
