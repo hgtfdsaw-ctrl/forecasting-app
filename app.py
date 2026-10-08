@@ -28,7 +28,7 @@ st.markdown("""
         background: linear-gradient(135deg, #fffdfa 0%, #f4f9ff 50%, #eef7ff 100%); 
     }
     
-    /* 🚫 ซ่อนปุ่มเครื่องมือลอยบนตาราง Dataframe (ปุ่มดู, ดาวน์โหลด, ค้นหา) */
+    /* 🚫 ซ่อนปุ่มเครื่องมือลอยบนตาราง Dataframe */
     [data-testid="stElementToolbar"],
     div[data-testid="stElementToolbar"] {
         display: none !important;
@@ -306,13 +306,23 @@ st.markdown("""
     .cost-normal { background-color: #fafcfd; border: 1px solid #e2e8f0; }
     .cost-normal .cost-box-val { color: #334155; }
 
+    .summary-card-orig {
+        background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 18px; padding: 16px; text-align: center;
+    }
+    .summary-card-new {
+        background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 18px; padding: 16px; text-align: center;
+    }
+    .summary-card-save {
+        background: #f0f9ff; border: 1.5px solid #7dd3fc; border-radius: 18px; padding: 16px; text-align: center;
+    }
+
     .stButton>button {
         border-radius: 14px !important;
         font-weight: 600 !important;
         transition: all 0.2s ease !important;
     }
 
-    /* 📱 POP-UP MODAL สไตล์ขยายเต็มจอสำหรับมือถือ ตัวหนังสือใหญ่ 18px */
+    /* 📱 POP-UP MODAL สไตล์ขยายเต็มจอสำหรับมือถือ */
     div[role="dialog"] {
         width: 98vw !important;
         max-width: 98vw !important;
@@ -392,43 +402,43 @@ def get_next_month_label(last_label):
     else:
         return f"{months_base[m_idx + 1]} {y_num}"
 
-# --- 5. ข้อมูลพารามิเตอร์โมเดลคลังสินค้า (อัปเดตตรงตามตารางเป๊ะ 100%) ---
+# --- 5. ข้อมูลพารามิเตอร์โมเดลคลังสินค้า (อัปเดตข้อมูลการเปรียบเทียบต้นทุนก่อน-หลังตรงตามภาพสไลด์) ---
 inventory_params = {
     "carwash": {
         "policy": "EOQ", "k": 1, "d_avg": 43.07, "h": 1.50, "eoq": 40.00, "ss": 10.00, "rop": 13.00,
-        "selected_lot": 40, "poq_cost": 16236.66, "eoq_cost": 13506.66, "fc_cost": 17901.66, "best_cost": 13506.66,
+        "selected_lot": 40, "orig_cost": 16410.00, "poq_cost": 16236.66, "eoq_cost": 13506.66, "fc_cost": 17901.66, "best_cost": 13506.66, "savings": 2903.34,
         "lead_time_days": 2.5, "vc": 0.37,
         "price_per_liter": 30,
         "tank_prices": {30: 900, 20: 600},
-        "rationale": "<b>ทำไม EOQ ถึงประหยัดที่สุด?</b> เนื่องจากน้ำยาล้างรถมีอุปสงค์สูงและค่อนข้างสม่ำเสมอ (VC = 0.37 ≤ 0.5) การสั่งซื้อแบบล็อตประหยัดขนาดคงที่ <b>EOQ (ครั้งละ 40 ลิตร)</b> จะช่วยถัวเฉลี่ยค่าสั่งซื้อและค่าถือครองคลังสินค้าได้สมดุลที่สุด <b>ประหยัดกว่าการสั่งตามพยากรณ์ 4,395.00 บาท/ปี</b> และ<b>ถูกกว่าวิธี POQ ถึง 2,730.00 บาท/ปี</b>"
+        "rationale": "<b>ทำไม EOQ ถึงประหยัดที่สุด?</b> เนื่องจากน้ำยาล้างรถมีอุปสงค์สูงและค่อนข้างสม่ำเสมอ (VC = 0.37 ≤ 0.5) การสั่งซื้อแบบล็อตประหยัดขนาดคงที่ <b>EOQ (ครั้งละ 40 ลิตร)</b> จะช่วยถัวเฉลี่ยค่าสั่งซื้อและค่าถือครองคลังสินค้าได้สมดุลที่สุด <b>ประหยัดกว่าต้นทุนเดิม 2,903.34 บาท/ปี</b>"
     },
     "interior": {
         "policy": "POQ", "k": 1, "d_avg": 20.03, "h": 1.50, "eoq": 30.00, "ss": 4.00, "rop": 6.00,
-        "selected_lot": 30, "poq_cost": 7093.70, "eoq_cost": 11316.20, "fc_cost": 9474.95, "best_cost": 7093.70,
+        "selected_lot": 30, "orig_cost": 12162.00, "poq_cost": 7093.70, "eoq_cost": 11316.20, "fc_cost": 9474.95, "best_cost": 7093.70, "savings": 5068.30,
         "lead_time_days": 2.5, "vc": 0.48,
         "price_per_liter": 30,
         "tank_prices": {30: 900, 20: 600, 10: 300},
-        "rationale": "<b>ทำไม POQ (k=1) ถึงประหยัดที่สุด?</b> สินค้ามีความผันผวนระดับปานกลาง (VC = 0.48) การใช้นโยบายรอบเวลาสั่งซื้อรายเดือน <b>POQ (k=1)</b> จะสั่งซื้อตามปริมาณที่คาดว่าต้องใช้จริงในแต่ละงวด ป้องกันไม่ให้มีสต็อกเหลือค้างคลังเกินจำเป็น <b>ประหยัดกว่าวิธี EOQ ถึง 4,222.50 บาท/ปี</b> และ<b>ถูกกว่าวิธีพยากรณ์ 2,381.25 บาท/ปี</b>"
+        "rationale": "<b>ทำไม POQ (k=1) ถึงประหยัดที่สุด?</b> สินค้ามีความผันผวนระดับปานกลาง (VC = 0.48) การใช้นโยบายรอบเวลาสั่งซื้อรายเดือน <b>POQ (k=1)</b> จะสั่งซื้อตามปริมาณที่คาดว่าต้องใช้จริงในแต่ละงวด ป้องกันไม่ให้มีสต็อกเหลือค้างคลังเกินจำเป็น <b>ประหยัดกว่าต้นทุนเดิม 5,068.30 บาท/ปี</b>"
     },
     "glass": {
         "policy": "POQ", "k": 1, "d_avg": 13.35, "h": 2.00, "eoq": 20.00, "ss": 3.00, "rop": 4.00,
-        "selected_lot": 20, "poq_cost": 6175.13, "eoq_cost": 10021.13, "fc_cost": 9654.88, "best_cost": 6175.13,
+        "selected_lot": 20, "orig_cost": 12336.00, "poq_cost": 6175.13, "eoq_cost": 10021.13, "fc_cost": 9654.88, "best_cost": 6175.13, "savings": 6160.87,
         "lead_time_days": 2.0, "vc": 0.52,
         "price_per_liter": 40,
         "tank_prices": {30: 1200, 20: 800, 10: 400},
-        "rationale": "<b>ทำไม POQ (k=1) ถึงประหยัดที่สุด?</b> น้ำยาเช็ดกระจกมีราคาต่อหน่วยสูงกว่ากลุ่ม (40 บาท/ลิตร) และมีค่าถือครองสูง (h = 2.00 บาท) การใช้ <b>POQ (k=1)</b> ช่วยดึงระดับสต็อกเฉลี่ยลงมาให้ต่ำที่สุด จึงตัดค่าเก็บรักษาที่ไม่จำเป็นออกไปได้มหาศาล <b>ประหยัดกว่าวิธี EOQ ถึง 3,846.00 บาท/ปี</b> และ<b>ถูกกว่าวิธีพยากรณ์ 3,479.75 บาท/ปี</b>"
+        "rationale": "<b>ทำไม POQ (k=1) ถึงประหยัดที่สุด?</b> น้ำยาเช็ดกระจกมีราคาต่อหน่วยสูงกว่ากลุ่ม (40 บาท/ลิตร) และมีค่าถือครองสูง (h = 2.00 บาท) การใช้ <b>POQ (k=1)</b> ช่วยดึงระดับสต็อกเฉลี่ยลงมาให้ต่ำที่สุด จึงตัดค่าเก็บรักษาที่ไม่จำเป็นออกไปได้มหาศาล <b>ประหยัดกว่าต้นทุนเดิม 6,160.87 บาท/ปี</b>"
     },
     "wheel": {
         "policy": "POQ", "k": 3, "d_avg": 2.76, "h": 1.50, "eoq": 10.00, "ss": 1.00, "rop": 1.00,
-        "selected_lot": 10, "poq_cost": 2066.39, "eoq_cost": 4062.89, "fc_cost": 4062.89, "best_cost": 2066.39,
+        "selected_lot": 10, "orig_cost": 10128.00, "poq_cost": 2066.39, "eoq_cost": 4062.89, "fc_cost": 4062.89, "best_cost": 2066.39, "savings": 8061.61,
         "lead_time_days": 3.0, "vc": 0.65,
         "price_per_liter": 30,
         "tank_prices": {30: 900, 20: 600, 10: 300},
-        "rationale": "<b>ทำไม POQ (k=3) ถึงประหยัดที่สุด?</b> สินค้ามีการใช้น้อยและผันผวนสูงมาก (VC = 0.65) การใช้นโยบาย <b>POQ (k=3)</b> หรือการรวบคำสั่งซื้อทุกๆ 3 เดือน ช่วยลดความถี่และต้นทุนในการออกคำสั่งซื้อบ่อยๆ ได้อย่างมีประสิทธิภาพ <b>ประหยัดกว่าทั้งวิธี EOQ และวิธีสั่งตามพยากรณ์ถึง 1,996.50 บาท/ปี</b>"
+        "rationale": "<b>ทำไม POQ (k=3) ถึงประหยัดที่สุด?</b> สินค้ามีการใช้น้อยและผันผวนสูงมาก (VC = 0.65) การใช้นโยบาย <b>POQ (k=3)</b> หรือการรวบคำสั่งซื้อทุกๆ 3 เดือน ช่วยลดความถี่และต้นทุนในการออกคำสั่งซื้อบ่อยๆ ได้อย่างมีประสิทธิภาพ <b>ประหยัดกว่าต้นทุนเดิม 8,061.61 บาท/ปี</b>"
     }
 }
 
-# --- 6. ค่าตั้งต้นประวัติ 36 เดือนเต็ม (ม.ค. 66 ถึง ธ.ค. 68) ตรงตามงานวิจัย 100% ---
+# --- 6. ค่าตั้งต้นประวัติ 36 เดือนเต็ม (ม.ค. 66 ถึง ธ.ค. 68) ---
 base_labels_36 = [f"{m} 66" for m in months_base] + \
                  [f"{m} 67" for m in months_base] + \
                  [f"{m} 68" for m in months_base]
@@ -790,21 +800,37 @@ for tab, p_key in zip(tabs, keys_list):
             fig.update_layout(xaxis_title="เดือน/ปี", yaxis_title="ปริมาณการใช้ (ลิตร)", hovermode="x unified", template="plotly_white", height=340, margin=dict(l=10, r=10, t=20, b=10))
             st.plotly_chart(fig, use_container_width=True)
 
-        # --- 14. ส่วนการเปรียบเทียบต้นทุนของน้ำยาแต่ละชนิด ---
+        # --- 14. ส่วนการเปรียบเทียบต้นทุนก่อน–หลังปรับปรุงของผลิตภัณฑ์นี้ ---
         poq_cls = "cost-winner" if p_inv["policy"] == "POQ" else "cost-normal"
         eoq_cls = "cost-winner" if p_inv["policy"] == "EOQ" else "cost-normal"
         fc_cls = "cost-normal"
 
         st.markdown(f"""
             <div class="prod-cost-card">
-                <div class="prod-cost-title">💰 ตารางเปรียบเทียบต้นทุนทั้ง 3 วิธีของ {p_info['name']}</div>
+                <div class="prod-cost-title">💰 สรุปการเปรียบเทียบต้นทุนก่อน-หลังปรับปรุง และต้นทุนทั้ง 3 วิธี ({p_info['name']})</div>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+                    <div class="summary-card-orig">
+                        <div style="font-size:12px; font-weight:600; color:#991b1b;">ต้นทุนเดิม (ก่อนปรับปรุง)</div>
+                        <div style="font-size:20px; font-weight:800; color:#dc2626; margin-top:2px;">{p_inv['orig_cost']:,.2f} บาท/ปี</div>
+                    </div>
+                    <div class="summary-card-new">
+                        <div style="font-size:12px; font-weight:600; color:#166534;">ต้นทุนต่ำสุดใหม่ ({p_inv['policy']})</div>
+                        <div style="font-size:20px; font-weight:800; color:#15803d; margin-top:2px;">{p_inv['best_cost']:,.2f} บาท/ปี</div>
+                    </div>
+                    <div class="summary-card-save">
+                        <div style="font-size:12px; font-weight:600; color:#075985;">ยอดประหยัดได้ต่อปี</div>
+                        <div style="font-size:20px; font-weight:800; color:#0284c7; margin-top:2px;">ลดลง {p_inv['savings']:,.2f} บาท/ปี</div>
+                    </div>
+                </div>
+
                 <div class="cost-grid-mobile" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
                     <div class="cost-box {poq_cls}">
-                        <div class="cost-box-title">1. นโยบาย POQ {'🏆 (แนะนำ)' if p_inv['policy']=='POQ' else ''}</div>
+                        <div class="cost-box-title">1. นโยบาย POQ {'🏆 (เลือกใช้)' if p_inv['policy']=='POQ' else ''}</div>
                         <div class="cost-box-val">{p_inv['poq_cost']:,.2f} บาท</div>
                     </div>
                     <div class="cost-box {eoq_cls}">
-                        <div class="cost-box-title">2. นโยบาย EOQ {'🏆 (แนะนำ)' if p_inv['policy']=='EOQ' else ''}</div>
+                        <div class="cost-box-title">2. นโยบาย EOQ {'🏆 (เลือกใช้)' if p_inv['policy']=='EOQ' else ''}</div>
                         <div class="cost-box-val">{p_inv['eoq_cost']:,.2f} บาท</div>
                     </div>
                     <div class="cost-box {fc_cls}">
@@ -819,29 +845,31 @@ for tab, p_key in zip(tabs, keys_list):
         """, unsafe_allow_html=True)
 
 
-# --- 15. ช่องสรุปภาพรวมคำตอบท้ายสุด ---
-total_eoq_all = sum(v["eoq_cost"] for v in inventory_params.values())
-total_hybrid_best = sum(v["best_cost"] for v in inventory_params.values())
-total_savings = total_eoq_all - total_hybrid_best
-
+# --- 15. ช่องสรุปภาพรวมคำตอบท้ายสุด (ตรงตามสไลด์สรุปผลเชิงเศรษฐศาสตร์ 100%) ---
 st.markdown("<br><hr style='border: 0; height: 1.5px; background: #e0f2fe;'><br>", unsafe_allow_html=True)
 st.markdown("""
-    <div style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); color: #0c4a6e; padding: 22px; border-radius: 20px; box-shadow: 0 8px 20px rgba(186, 230, 253, 0.3); border: 2px solid #ffffff;">
-        <h3 style="color: #0369a1; margin-top:0; font-size:19px; font-weight:700; display:flex; align-items:center; gap:8px;">
-            🏆 ช่องสรุปภาพรวม: การบริหารจัดการด้วย Hybrid Policy
+    <div style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); color: #0c4a6e; padding: 24px; border-radius: 20px; box-shadow: 0 8px 20px rgba(186, 230, 253, 0.3); border: 2px solid #ffffff;">
+        <h3 style="color: #0369a1; margin-top:0; font-size:20px; font-weight:700; display:flex; align-items:center; gap:8px;">
+            🏆 สรุปผลเชิงเศรษฐศาสตร์: การเปรียบเทียบต้นทุนรวมก่อน–หลังปรับปรุง (Hybrid Policy)
         </h3>
         <p style="font-size: 14.5px; line-height: 1.6; color: #0369a1;">
-            เมื่อเลือกใช้นโยบายที่เหมาะสมที่สุดกับน้ำยาแต่ละชนิด (<strong>EOQ สำหรับน้ำยาล้างรถ</strong> และ <strong>POQ สำหรับน้ำยาเคลือบภายใน, น้ำยาเช็ดกระจก, น้ำยาลงล้อ</strong>) 
-            จะได้ต้นทุนรวมทั้งระบบที่ต่ำที่สุดเมื่อเทียบกับการใช้วิธีเดียวกับทุกสินค้า
+            เมื่อกำหนดการบริหารเป็น <b>"Hybrid Policy"</b> โดยเลือกใช้นโยบาย <b>EOQ สำหรับน้ำยาล้างรถ</b> และใช้นโยบาย <b>POQ สำหรับอีก 3 รายการ</b> (น้ำยาเคลือบภายใน, น้ำยาเช็ดกระจก, น้ำยาลงล้อ) จะให้ผลลัพธ์การลดต้นทุนที่มีประสิทธิภาพสูงสุด ดังนี้:
         </p>
-        <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 14px; border-top: 1.5px dashed #7dd3fc; padding-top: 12px;">
-            <div style="flex: 1; min-width: 200px;">
-                <span style="font-size: 12.5px; color: #0369a1;">ต้นทุนรวมนโยบายผสม (Hybrid Policy):</span><br>
-                <span style="font-size: 24px; font-weight: 800; color: #15803d;">""" + f"{total_hybrid_best:,.2f}" + """ บาท</span>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 16px;">
+            <div style="background: #ffffff; padding: 18px; border-radius: 16px; border: 2px solid #fca5a5; text-align: center;">
+                <span style="font-size: 13px; font-weight: 700; color: #991b1b;">1. ต้นทุนเดิม (ก่อนปรับปรุง)</span><br>
+                <span style="font-size: 26px; font-weight: 800; color: #dc2626;">51,036.00</span><br>
+                <span style="font-size: 12px; color: #64748b;">บาท/ปี (ข้อมูลปี 2568)</span>
             </div>
-            <div style="flex: 1; min-width: 200px;">
-                <span style="font-size: 12.5px; color: #0369a1;">ยอดประหยัดได้รวมทั้งหมด (เทียบกับ EOQ):</span><br>
-                <span style="font-size: 24px; font-weight: 800; color: #0284c7;">""" + f"ประหยัดได้ {total_savings:,.2f}" + """ บาท</span>
+            <div style="background: #ffffff; padding: 18px; border-radius: 16px; border: 2px solid #86efac; text-align: center;">
+                <span style="font-size: 13px; font-weight: 700; color: #166534;">2. ต้นทุนหลังปรับ (Hybrid Policy)</span><br>
+                <span style="font-size: 26px; font-weight: 800; color: #15803d;">28,841.88</span><br>
+                <span style="font-size: 12px; color: #64748b;">บาท/ปี (ตามรอบสั่งซื้อที่เหมาะสม)</span>
+            </div>
+            <div style="background: #ffffff; padding: 18px; border-radius: 16px; border: 2px solid #7dd3fc; text-align: center;">
+                <span style="font-size: 13px; font-weight: 700; color: #0369a1;">3. ผลหลังปรับปรุง (ประหยัดได้)</span><br>
+                <span style="font-size: 26px; font-weight: 800; color: #0284c7;">22,194.12</span><br>
+                <span style="font-size: 13px; font-weight: 700; color: #16a34a;">ลดลง 43.49% อย่างเป็นรูปธรรม</span>
             </div>
         </div>
     </div>
